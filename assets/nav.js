@@ -93,7 +93,7 @@
         <div class="nav-section">Platform</div>
         ${link("home", "Home", "home", "index.html")}
         ${link("assistant", "AI Assistant", "bot")}
-        ${link("market", "Workflow Marketplace", "store")}
+        ${link("market", "Workflow Library", "store")}
         ${link("tasks", "My Tasks &amp; Approvals", "checkCircle", "workflow.html")}
         ${link("activity", "Activity &amp; Insights", "spark")}
         <div class="nav-section" style="margin-top:6px">Build &amp; Configure</div>
