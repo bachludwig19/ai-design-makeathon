@@ -29,15 +29,15 @@ window.Engine = {
     const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 1500);
     try {
       const r = await fetch(`${base}/api/tags`, { signal: ctl.signal });
-      if (!r.ok) return this.setLocal({ state: "down", reason: `Ollama answered HTTP ${r.status}.`, hint: "Restart it with: ollama serve" });
+      if (!r.ok) return this.setLocal({ state: "down", reason: `Ollama answered HTTP ${r.status}. Restart it with:`, hint: "ollama serve" });
       const j = await r.json(), want = s.ollamaModel.split(":")[0];
       const has = (j.models || []).some(m => (m.name || m.model || "").split(":")[0] === want);
-      if (!has) return this.setLocal({ state: "down", reason: `Ollama is running, but ${s.ollamaModel} isn't downloaded.`, hint: `Run: ollama pull ${s.ollamaModel}` });
+      if (!has) return this.setLocal({ state: "down", reason: `Ollama is running, but ${s.ollamaModel} isn't downloaded. Run:`, hint: `ollama pull ${s.ollamaModel}` });
       return this.setLocal({ state: "ok" });
     } catch {
       // Not installed, not started, or blocked by CORS: the browser can't tell these apart.
-      return this.setLocal({ state: "down", reason: "Ollama isn't answering at " + base.replace(/^https?:\/\//, "") + ".",
-        hint: `Install Ollama, then start it with: OLLAMA_ORIGINS=${origin} ollama serve` });
+      return this.setLocal({ state: "down", reason: "Ollama isn't answering at " + base.replace(/^https?:\/\//, "") + ". Install it, then start it with:",
+        hint: `OLLAMA_ORIGINS=${origin} ollama serve` });
     } finally { clearTimeout(t); }
   },
 
@@ -69,7 +69,7 @@ window.Engine = {
       const text = await this.call(s, system, prompt);
       return { text: text.trim(), live: true, label: this.label(s) };
     } catch (e) {
-      if (s.provider === "ollama") { this.setLocal({ state: "down", reason: "The local model stopped answering.", hint: "Check that ollama serve is still running." }); return { text: fallback, live: false, label: "Simulated agent", error: this._once(this.OFFLINE) }; }
+      if (s.provider === "ollama") { this.setLocal({ state: "down", reason: "The local model stopped answering. Check that it is still running:", hint: "ollama serve" }); return { text: fallback, live: false, label: "Simulated agent", error: this._once(this.OFFLINE) }; }
       return { text: fallback, live: false, label: "Simulated agent", error: this._once(`${this.label(s)} failed (${e.message}). Using the simulation.`) };
     }
   },
