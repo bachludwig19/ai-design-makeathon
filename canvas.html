@@ -1642,7 +1642,7 @@ function setLib(collapsed){ $('#lib').classList.toggle('collapsed', collapsed); 
 $('#libClose').onclick = ()=>setLib(true);
 $('#libOpen').onclick = $('#libOpen2').onclick = ()=>setLib(false);
 { const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
-if (window.MFSettings) try { window.MFSettings.chip(document.getElementById('engineChip')); } catch(e) {}
+document.getElementById('engineChip').innerHTML = '<span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>';
 requestAnimationFrame(initialView);
 let rzT = null;
 window.addEventListener('resize', ()=>{ clearTimeout(rzT); rzT = setTimeout(initialView, 150); });

@@ -45,14 +45,14 @@ window.Engine = {
   offline(s = this.get()) { return s.mode === "live" && s.provider === "ollama" && this.local().state === "down"; },
 
   label(s = this.get()) {
-    if (s.mode !== "live" || this.offline(s)) return "Simulated agent";
+    if (s.mode !== "live" || this.offline(s)) return "Demo flow";
     if (s.provider === "ollama") return `${s.ollamaModel} \u00b7 local`;
     if (s.provider === "anthropic") return `Claude \u00b7 ${s.anthropicModel}`;
     return `OpenAI \u00b7 ${s.openaiModel || "model?"}`;
   },
 
   _sim(fallback, error) {
-    return new Promise(r => setTimeout(() => r({ text: fallback, live: false, label: "Simulated agent", ...(error ? { error } : {}) }), 650 + Math.random() * 500));
+    return new Promise(r => setTimeout(() => r({ text: fallback, live: false, label: "Demo flow", ...(error ? { error } : {}) }), 650 + Math.random() * 500));
   },
   _warned: false, // say "Using the simulation" once per page, not on every reply
   _once(msg) { if (this._warned) return undefined; this._warned = true; return msg; },
@@ -69,8 +69,8 @@ window.Engine = {
       const text = await this.call(s, system, prompt);
       return { text: text.trim(), live: true, label: this.label(s) };
     } catch (e) {
-      if (s.provider === "ollama") { this.setLocal({ state: "down", reason: "The local model stopped answering. Check that it is still running:", hint: "ollama serve" }); return { text: fallback, live: false, label: "Simulated agent", error: this._once(this.OFFLINE) }; }
-      return { text: fallback, live: false, label: "Simulated agent", error: this._once(`${this.label(s)} failed (${e.message}). Using the simulation.`) };
+      if (s.provider === "ollama") { this.setLocal({ state: "down", reason: "The local model stopped answering. Check that it is still running:", hint: "ollama serve" }); return { text: fallback, live: false, label: "Demo flow", error: this._once(this.OFFLINE) }; }
+      return { text: fallback, live: false, label: "Demo flow", error: this._once(`${this.label(s)} failed (${e.message}). Using the simulation.`) };
     }
   },
 

@@ -306,7 +306,7 @@
   async function fetchWhy(id) {
     const it = ITEMS.find((i) => i.id === id), so = it.suggestedOwner;
     const fallback = `I suggest ${so.name}: ${so.evidence.join("; ")}. My confidence is ${pct(so.confidence)}, below your ${pct(THR)} auto-assign rule, so I'm asking you instead of assigning.`;
-    let r = { text: fallback, label: "Simulated agent" };
+    let r = { text: fallback, label: "Demo flow" };
     if (window.Engine) {
       r = await Engine.ask({
         system: "You are the MeetFlow Alpine operations agent. In at most 70 words, plain language, explain why you suggest this owner, why you did not assign automatically, and what risk remains. Use only the data given.",

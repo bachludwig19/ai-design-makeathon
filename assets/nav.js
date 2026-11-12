@@ -112,14 +112,9 @@
       top.innerHTML = `
         <span class="crumb"></span>
         <div class="top-search off" aria-disabled="true" title="Not available in this demo">${icon("search", "ic-sm")}Search nodes, runs…<span class="kbd">⌘K</span></div>
-        <span id="mf-engine-chip"></span>
-        <button class="icon-btn off" aria-label="Notifications" aria-disabled="true" title="Not available in this demo">${icon("bell")}</button>
-        <button class="icon-btn" id="mf-gear" aria-label="AI engine settings">${icon("gear")}</button>`;
-      const chipEl = top.querySelector("#mf-engine-chip");
-      if (window.MFSettings && window.Engine) MFSettings.chip(chipEl); else chipEl.remove();
-      top.querySelector("#mf-gear").addEventListener("click", () => {
-        if (window.MFSettings) MFSettings.open(); else toast("Settings are not part of this prototype", "gear");
-      });
+        <span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>`;
+      // No engine settings in the demo: always run the scripted flow.
+      try { const k = "mf.engine.v1", e = JSON.parse(localStorage.getItem(k) || "{}"); if (e.mode === "live") { e.mode = "sim"; localStorage.setItem(k, JSON.stringify(e)); } } catch (e) {}
     }
   }
 
