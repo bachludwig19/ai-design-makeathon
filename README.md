@@ -6,6 +6,12 @@ Goal with the Flow connects your team's goals to the AI agent workflows that kee
 
 Built for the AI Design Makeathon, Track 1: Agentic Workflow.
 
+## Demo video
+
+[![Goal with the Flow demo (23 s)](media/demo-poster.jpg)](media/demo.mp4)
+
+[Watch the 23-second demo (MP4)](media/demo.mp4). The footage is the real app running its guided tour with synthetic demo data. The soundtrack is original, generated in code for this video.
+
 ## The problem
 
 - **Goals slip quietly.** Commitments made in meetings ("someone should bump the rate limits before the load test") never get an owner, and nobody notices until a deadline passes.
