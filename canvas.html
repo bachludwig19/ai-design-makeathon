@@ -165,7 +165,8 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .node.dragging{cursor:grabbing;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:4}
 .node.flag{border-color:var(--risk)}
 .node.dim{opacity:.4}
-.node.s-next{border-color:var(--primary);animation:pulse 1s ease infinite}
+.node.s-next{border-color:var(--primary)}
+.node.s-next.anim{animation:pulse 1s ease infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(196,154,44,.22),var(--shadow)}}
 .node.s-warn{border-color:var(--risk)}
 .node.s-waiting{border-color:var(--primary)}
@@ -265,7 +266,8 @@ pre.json .k{color:#8a6a14}pre.json .s{color:var(--teal)}pre.json .n{color:#a3332
 .simrow{display:flex;align-items:center;gap:10px;padding:10px 16px}
 .status{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:500;white-space:nowrap}
 .status .d{width:9px;height:9px;border-radius:50%;background:var(--teal)}
-.status.running .d,.status.waiting .d{background:var(--primary);animation:blink 1s infinite}
+.status.running .d,.status.waiting .d{background:var(--primary)}
+.status.running.anim .d{animation:blink 1s infinite}
 .status.warn .d{background:var(--risk)}
 @keyframes blink{50%{opacity:.3}}
 .seg{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:3px}
@@ -778,6 +780,8 @@ function edgePath(a, b){
   return {d:`M${a.x},${a.y} C${a.x+dx},${a.y} ${b.x-dx},${b.y} ${b.x},${b.y}`,
           mid:{x:(a.x+3*(a.x+dx)+3*(b.x-dx)+b.x)/8, y:(a.y+3*a.y+3*b.y+b.y)/8}};
 }
+// Animate only while an auto run is actually moving; paused, stepped or finished runs are static.
+function animating(){ return !!(run && run.state==='running' && run.mode==='auto'); }
 function branchClass(fp){ return (fp==='yes'||fp==='replied') ? 'yes' : (fp==='no'||fp==='timeout') ? 'no' : ''; }
 
 function renderCanvas(){
@@ -818,12 +822,12 @@ function renderCanvas(){
     const bc = branchClass(e.fp);
     let cls = 'edge ' + bc, mk = bc ? 'ar-'+bc : 'ar', lcls = bc;
     if (runActive){
-      if (run.lastEdge===e.id && run.state!=='done'){ cls += ' hot'; mk='ar-hot'; lcls='walked'; }
+      if (run.lastEdge===e.id && animating()){ cls += ' hot'; mk='ar-hot'; lcls='walked'; }
       else if (run.edges.includes(e.id)){ cls += ' walked'; mk='ar-hot'; lcls='walked'; }
       else { cls += ' cold'; lcls += ' cold'; }
     }
     if (selEdge===e.id){ cls += ' sel'; mk='ar-sel'; }
-    svg += `<path class="${cls}" d="${d}" marker-end="url(#${mk})"/><path class="hit" data-edge="${e.id}" d="${d}"/>`;
+    svg += `<path class="${cls}" data-e="${e.id}" d="${d}" marker-end="url(#${mk})"/><path class="hit" data-edge="${e.id}" d="${d}"/>`;
     const op = cat(a).outs.find(p=>p.id===e.fp);
     let label;
     if (runActive) label = run.edges.includes(e.id) ? `${run.itemId}${op&&op.label?' · '+op.label:''}` : (op&&op.label) || '';
@@ -832,7 +836,7 @@ function renderCanvas(){
       const cnt = a.t==='transcript' ? 1 : n;
       label = op && op.label ? `${op.label}${cnt?' · '+cnt:''}` : (cnt ? `×${cnt}` : '');
     }
-    if (label) labels += `<div class="elabel ${lcls}" style="left:${mid.x}px;top:${mid.y}px" title="${esc(TYPES[op.type].l)}">${esc(label)}</div>`;
+    if (label) labels += `<div class="elabel ${lcls}" data-el="${e.id}" style="left:${mid.x}px;top:${mid.y}px" title="${esc(TYPES[op.type].l)}">${esc(label)}</div>`;
   });
   svg += `<path id="tempEdge" class="edge temp" d="" style="display:none"/></svg>`;
   html += svg + labels;
@@ -846,7 +850,7 @@ function renderCanvas(){
     if (n.id===sel) cls += ' sel';
     if (runActive){
       if (st) cls += ' s-'+st.status;
-      else if (run.cursor===n.id && run.state==='running') cls += ' s-next';
+      else if (run.cursor===n.id && run.state==='running') cls += ' s-next' + (animating()?' anim':'');
       else cls += ' dim';
     }
     if (n._flag) cls += ' flag';
@@ -1290,7 +1294,7 @@ function renderSim(){
   const cks = checks(), okN = cks.filter(c=>c.ok).length, allOk = okN===cks.length;
   let status = ['','Simulator ready'];
   if (run){
-    if (run.state==='running') status = ['running', `Running ${run.itemId} · step ${run.steps.length+1}`];
+    if (run.state==='running') status = [animating()?'running anim':'running', `${run.mode==='auto'?'Running':'Stepping'} ${run.itemId} · step ${run.steps.length+1}`];
     else if (run.state==='waiting') status = ['waiting', `Paused on ${title(node(run.cursor))}`];
     else status = run.warn ? ['warn', `${run.itemId} finished with a warning`] : ['', `${run.itemId} passed`];
   }
@@ -1364,7 +1368,7 @@ scroller.addEventListener('mousedown', e=>{
     return;
   }
   const hit = t.closest('.hit');
-  if (hit){ selEdge = hit.dataset.edge; renderCanvas(); toast('Connection selected · press Delete to remove'); return; }
+  if (hit){ selEdge = hit.dataset.edge; renderCanvas(); return; }
   const sh = t.closest('.stage-h');
   if (sh){ const s = STAGES[+sh.dataset.stage-1]; frameCols(s.cols[0], s.cols[1]); return; }
   if (selEdge){ selEdge = null; renderCanvas(); }
@@ -1383,8 +1387,7 @@ window.addEventListener('mousemove', e=>{
     if (!drag.moved){ drag.moved = true; drag.el.classList.add('dragging'); }
     const p = wpt(e);
     drag.n.x = Math.round((p.x-drag.dx)/4)*4; drag.n.y = Math.max(76, Math.round((p.y-drag.dy)/4)*4);
-    renderCanvas();
-    const el = world.querySelector(`.node[data-node="${drag.n.id}"]`); if (el) el.classList.add('dragging');
+    if (!drag.raf) drag.raf = requestAnimationFrame(()=>{ if (drag && drag.kind==='node'){ drag.raf = 0; moveNodeInPlace(drag.n, drag.el); } });
     return;
   }
   if (drag.kind==='connect') moveConnect(e);
@@ -1394,11 +1397,26 @@ window.addEventListener('mouseup', e=>{
   const d = drag; drag = null;
   scroller.classList.remove('panning');
   if (d.kind==='node'){
+    if (d.raf) cancelAnimationFrame(d.raf);
     if (!d.moved){ sel = d.n.id; selEdge = null; tab = (run && run.byNode[d.n.id]) ? tab : 'config'; renderAll(); renderSugg(); }
     else { $('#saveState').textContent = 'Draft saved · just now'; renderCanvas(); }
   }
   if (d.kind==='connect') endConnect(e, d);
 });
+
+/* Move one node and its edges without rebuilding the world (keeps drags cheap in embedded webviews). */
+function moveNodeInPlace(n, el){
+  el.style.left = n.x+'px'; el.style.top = n.y+'px';
+  edges.filter(e=>e.f===n.id || e.t===n.id).forEach(e=>{
+    const a = node(e.f), b = node(e.t); if (!a || !b) return;
+    const pa = portPos(a,'out',portIdx(a,'out',e.fp)), pb = portPos(b,'in',0);
+    const {d, mid} = edgePath(pa, {x:pb.x-4, y:pb.y});
+    world.querySelectorAll(`[data-e="${e.id}"],[data-edge="${e.id}"]`).forEach(p=>p.setAttribute('d', d));
+    const lb = world.querySelector(`[data-el="${e.id}"]`); if (lb){ lb.style.left = mid.x+'px'; lb.style.top = mid.y+'px'; }
+  });
+  const wb = world.querySelector('.waitbar');
+  if (wb && run && run.cursor===n.id){ wb.style.left = n.x+'px'; wb.style.top = (n.y+NH+12)+'px'; }
+}
 
 /* drag-to-connect with live type validation */
 function startConnect(portEl, e){
@@ -1464,6 +1482,9 @@ lib.addEventListener('dragstart', e=>{
   $('#pcard').classList.remove('on');
 });
 scroller.addEventListener('dragover', e=>{ e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+// Swallow drops anywhere else so an embedded webview never inserts text or navigates to the dropped data.
+document.addEventListener('dragover', e=>{ if (!e.target.closest || !e.target.closest('#scroller')){ e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'none'; } });
+document.addEventListener('drop', e=>{ e.preventDefault(); });
 scroller.addEventListener('drop', e=>{
   e.preventDefault();
   const key = e.dataTransfer.getData('text/plain'); if (!CAT[key]) return;
@@ -1492,7 +1513,6 @@ scroller.addEventListener('wheel', e=>{
 document.addEventListener('keydown', e=>{
   const tag = (e.target.tagName||'').toLowerCase();
   if (['input','textarea','select'].includes(tag)) return;
-  if (e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); deleteSelection(); }
   if (e.key==='Escape'){ $('#pop').classList.remove('on'); $('#modal').classList.remove('on'); if (selEdge){ selEdge=null; renderCanvas(); } }
 });
 document.addEventListener('click', e=>{ if (!e.target.closest('#pop') && !e.target.closest('#checksBtn') && !e.target.closest('#deployBtn')) $('#pop').classList.remove('on'); });
