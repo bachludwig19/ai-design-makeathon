@@ -191,7 +191,18 @@
 
   // Goal box: describe a goal; the agent creates it with its workflows (simulated).
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-  if (!created()) $("#ask-in").value = MF.goal.title;
+  // First visit: "type" the example goal into the box as if someone were typing it.
+  if (!created()) {
+    const inp = $("#ask-in"), text = MF.goal.title; let i = 0, stop = false;
+    const halt = () => { if (!stop) { stop = true; if (!inp.value) inp.value = text; } };
+    inp.addEventListener("focus", () => { stop = true; }, { once: true });
+    $("#ask").addEventListener("submit", halt, { capture: true, once: true });
+    setTimeout(function type() {
+      if (stop) return;
+      inp.value = text.slice(0, ++i);
+      if (i < text.length) setTimeout(type, 45 + Math.random() * 90 + (text[i - 1] === " " ? 60 : 0));
+    }, 900);
+  }
   $("#ask").addEventListener("submit", async (e) => {
     e.preventDefault();
     const goal = $("#ask-in").value.trim() || MF.goal.title;
