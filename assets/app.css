@@ -40,7 +40,7 @@ select,input{font:inherit;color:inherit}
 .kbd{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--primary);background:var(--primary-soft);border-radius:5px;padding:2px 6px}
 .icon-btn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--text);transition:background .18s}
 .icon-btn:hover{background:var(--surface)}
-.content{padding:36px 48px 72px;max-width:1240px;width:100%;animation:pageIn .5s cubic-bezier(.2,.7,.2,1) both}
+.content{padding:36px 48px 72px;max-width:1680px;width:100%;margin:0 auto;box-sizing:border-box;animation:pageIn .5s cubic-bezier(.2,.7,.2,1) both}
 @keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* ---------- Primitives ---------- */
@@ -197,7 +197,7 @@ a.wf:hover{border-color:#DCD8CF;background:#F0EFEA;transform:translateY(-1px)}
 .tab:hover{color:var(--text)}
 .tab.on{color:var(--primary);border-color:var(--primary);font-weight:500}
 .tab .pill{height:24px}
-.wf-body{display:grid;grid-template-columns:1fr 380px;gap:26px;margin-top:26px;align-items:start}
+.wf-body{display:grid;grid-template-columns:1fr 420px;gap:26px;margin-top:26px;align-items:start}
 .items-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
 .item{padding:22px 24px 18px;margin-bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;transition:border-color .4s,background .4s,box-shadow .3s}
 .item.focus{border-color:#E2CC8D;box-shadow:0 0 0 4px var(--primary-soft)}
