@@ -173,3 +173,6 @@ body[data-page="home"] .intro{margin:44px 0 6px}
 @media (prefers-reduced-motion: reduce){
   body[data-page="home"] .ask,.why-box::after,.decide::after{animation:none}
 }
+
+/* ---------- logo: hexagon cluster with flowing lines (user's mark, 2026-11-11), black on whatever is behind it ---------- */
+.brand-mark{background:url(img/logo-mark.svg) center/contain no-repeat;color:transparent;font-size:0;width:36px;height:36px;border-radius:0}
