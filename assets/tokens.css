@@ -1,11 +1,14 @@
-/* MeetFlow Alpine shared design tokens — from the user's mockups. All screens use these. */
+/* MeetFlow Alpine shared design tokens — "Maison · Vitrine" brand (chosen by the user in the brand picker, 2026-11-11).
+   Gallery-white, black lacquer, brass hairlines, verdure-teal agent; colour comes from imagery. All screens use these. */
 :root{
-  --bg:#F8F7F4; --surface:#F3F2EE; --card:#FFFFFF; --sidebar:#F1F0EC;
-  --line:#E6E3DC; --text:#1F1F1C; --text-2:#5C5A54; --text-3:#9A978F;
-  --primary:#C49A2C; --primary-hover:#B08A24; --primary-soft:#F6EDD3;
-  --teal:#2F7473; --teal-soft:#DCEFE9; --risk:#B9645E; --risk-soft:#F8E3E1;
-  --danger:#A3332B; --dark:#22302E;
-  --radius:14px; --radius-sm:10px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
-  --font:'Inter',system-ui,-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --bg:#FFFFFF; --surface:#F7F7F6; --card:#FFFFFF; --sidebar:#FFFFFF;
+  --line:#E6E6E4; --text:#111111; --text-2:#55534F; --text-3:#8E8C88;
+  --primary:#111111; --primary-hover:#2B2B2B; --primary-soft:#F3F1EC;
+  --teal:#1F5E5A; --teal-soft:#E3EEEC; --risk:#C99400; --risk-soft:#FAF1DA;
+  --danger:#C41E3A; --dark:#111111;
+  --gold:#A07B3A; --gold-rgb:160,123,58;
+  --radius:4px; --radius-sm:3px; --shadow:0 1px 2px rgba(17,17,17,.03),0 30px 56px -34px rgba(40,25,10,.32);
+  --font:'Manrope',system-ui,-apple-system,sans-serif; --display:'Archivo',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);}

@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeetFlow Alpine · Action Item Tracking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/brand.css">
+</head>
+<body data-page="workflow" data-crumb="Workspace / Autonomous Pipeline">
+<div class="app">
+  <aside id="mf-nav"></aside>
+  <div class="main">
+    <header id="mf-top"></header>
+    <main class="content" style="max-width:1320px">
+      <section class="wf-head">
+        <div>
+          <div class="bc"><a href="goal.html">Workflows</a><span id="bc-ic"></span><b>Action item tracking</b></div>
+          <div class="wf-title">Action Item Tracking · Workflow View <span class="pill dot attention" id="wf-status">Active · Needs attention</span></div>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost" id="test-btn"></button>
+        <a class="btn btn-ghost" href="canvas.html" id="edit-btn"></a>
+        <button class="btn btn-dark" id="export-btn"></button>
+      </section>
+
+      <div id="banner-slot"></div>
+
+      <section class="alert" id="alert"></section>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab on" data-tab="overview" role="tab"></button>
+        <a class="tab" href="canvas.html" id="tab-design"></a>
+        <button class="tab" data-tab="items" role="tab" id="tab-items"></button>
+        <button class="tab" data-tab="audit" role="tab" id="tab-audit"></button>
+      </nav>
+
+      <section id="pane-overview" class="wf-body">
+        <div>
+          <div class="items-head">
+            <div>
+              <h2 class="h-sec">Active run action items</h2>
+              <div class="muted" style="font-size:13.5px;margin-top:2px">Extracted from <a class="link-u" href="#" data-ctx>${MF.meeting.title}</a> <span id="mtg-when"></span>. Every decision below is logged.</div>
+            </div>
+          </div>
+          <div id="items"></div>
+          <div id="done-items"></div>
+        </div>
+        <aside class="side">
+          <div class="panel pipe">
+            <div class="pipe-head"><span id="pipe-ic"></span>Pipeline execution steps<span class="ver">v2.4 Live</span></div>
+            <div class="muted" style="font-size:13.5px;margin-top:10px" id="pipe-sub"></div>
+            <ol class="steps" id="steps"></ol>
+            <a class="btn btn-ghost" style="width:100%;margin-top:6px" href="canvas.html" id="cfg-btn"></a>
+          </div>
+          <div class="panel audit" id="audit-card">
+            <div class="pipe-head"><span id="audit-ic"></span>Activity &amp; audit trail<span class="spacer"></span><button class="link" style="font-size:13px" data-goto="audit">View all</button></div>
+            <ul class="audit-list" id="audit-mini"></ul>
+          </div>
+          <div class="panel metrics">
+            <div class="h-sec">Workflow health metrics</div>
+            <div class="m-grid" id="metrics"></div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="pane-audit" hidden style="margin-top:26px">
+        <div class="panel audit" style="max-width:860px">
+          <div class="pipe-head"><span id="audit-ic2"></span>Activity &amp; audit trail<span class="faint" style="font-weight:400;font-size:13px;margin-left:8px">Human decisions and agent actions, newest first</span></div>
+          <ul class="audit-list full" id="audit-full"></ul>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Meeting context">
+  <div class="drawer-head">
+    <div><div class="eyebrow">Meeting context</div><div class="h-sec" id="dr-title" style="margin-top:2px"></div></div>
+    <span class="spacer"></span><button class="icon-btn" id="dr-close" aria-label="Close"></button>
+  </div>
+  <div class="drawer-body" id="transcript"></div>
+</aside>
+
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/settings.js"></script>
+<script src="assets/nav.js"></script>
+<script src="assets/brand.js"></script>
+<script>
+(function () {
+  const { icon, esc, initials, toast, getState } = MFApp;
+  const $ = (s, el) => (el || document).querySelector(s);
+  const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+  const ITEMS = MF.actionItems, N = ITEMS.length, R = MF.resolution;
+  const THR = (MF.policy && MF.policy.autoAssignThreshold) || 0.9;
+  const ME = MF.user.name.split(" ")[0];
+  const first = (n) => n.split(" ")[0];
+  const pct = (x) => Math.round(x * 100) + "%";
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const clock = (iso) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  // ---------- State (shared through MFState in data.js) ----------
+  let mem = { owners: {}, log: [] };
+  const S = {
+    get: () => (window.MFState ? MFState.get() : mem),
+    set: (s) => (window.MFState ? MFState.set(s) : (mem = s))
+  };
+  function decide(id, name, how, text) {
+    const s = S.get(); s.owners[id] = name;
+    s.log.unshift({ t: new Date().toISOString(), id, name, how, text, by: "human" });
+    S.set(s);
+  }
+  function undo(id) {
+    const s = S.get(); const name = s.owners[id]; delete s.owners[id];
+    s.log.unshift({ t: new Date().toISOString(), id, name: null, how: "undo", text: `${ME} undid the assignment of ${name}. Item is open again.`, by: "human" });
+    S.set(s);
+  }
+  const owners = () => S.get().owners || {};
+  const decidedCount = () => ITEMS.filter((i) => owners()[i.id]).length;
+  const allDecided = () => decidedCount() === N;
+  const finished = () => !!S.get().pipelineDoneAt;
+
+  // UI-only state per item: open panel, waiting on Slack, cached agent reasoning.
+  const ui = {}; ITEMS.forEach((i) => (ui[i.id] = { open: false, waiting: null, why: null, pick: "" }));
+  let pipe = finished() ? "done" : "paused"; // paused | running | done
+  const stepState = MF.pipeline.map((_, k) => (k < 2 ? "completed" : k === 2 ? "attention" : k === 3 ? "pending" : "queued"));
+  const stepSub = MF.pipelineMeta.slice();
+  if (pipe === "done") stepState.fill("completed");
+
+  // ---------- Static chrome ----------
+  $("#bc-ic").innerHTML = icon("arrow", "ic-sm");
+  $("#test-btn").innerHTML = icon("play", "ic-sm") + "Test workflow";
+  $("#edit-btn").innerHTML = icon("pencil", "ic-sm") + "Edit design";
+  $("#export-btn").innerHTML = icon("download", "ic-sm") + "Export log";
+  $("#tab-design").innerHTML = icon("flow", "ic-sm") + `Workflow design <span class="pill grey">${MF.pipeline.length} steps</span>`;
+  $('[data-tab="overview"]').innerHTML = icon("grid", "ic-sm") + `Overview &amp; goal impact <span class="pill gold">Active</span>`;
+  $("#tab-audit").innerHTML = icon("history", "ic-sm") + "Activity &amp; audit trail";
+  $("#pipe-ic").innerHTML = icon("flow"); $("#audit-ic").innerHTML = icon("history"); $("#audit-ic2").innerHTML = icon("history");
+  $("#cfg-btn").innerHTML = icon("sliders", "ic-sm") + "Configure step parameters";
+  $("#mtg-when").textContent = MF.meeting.when;
+  $("[data-ctx]").textContent = MF.meeting.title;
+  $("#dr-title").textContent = MF.meeting.title;
+  $("#dr-close").innerHTML = icon("x");
+  $("#pipe-sub").textContent = `${MF.pipeline.length}-step sequential pipeline processing meeting outputs.`;
+
+  // ---------- Header status, alert, tabs ----------
+  function renderHeader() {
+    const left = N - decidedCount();
+    const st = $("#wf-status");
+    if (pipe === "done") { st.className = "pill dot healthy"; st.textContent = "Active · Healthy"; }
+    else if (pipe !== "paused") { st.className = "pill dot gold"; st.textContent = "Active · Resuming"; }
+    else { st.className = "pill dot attention"; st.textContent = "Active · Needs attention"; }
+    $("#tab-items").innerHTML = icon("checkCircle", "ic-sm") + "Action items " +
+      (left ? `<span class="pill attention">${left} attention</span>` : `<span class="pill healthy">All clear</span>`);
+    const a = $("#alert");
+    if (pipe !== "paused" && pipe !== "done") return;
+    if (pipe === "done") {
+      a.classList.add("ok");
+      a.innerHTML = `<span class="alert-ic">${icon("checkCircle", "ic-lg")}</span>
+        <div class="alert-txt"><span class="t">Pipeline running normally</span> <span class="faint">· updated just now</span><br>
+        All ${N} items from yesterday's ${esc(MF.meeting.title)} have confirmed owners and live Jira tickets. The agent will remind owners 24h before each due date.</div>
+        <a class="btn btn-white" href="goal.html">Back to delivery goal ${icon("arrow", "ic-sm")}</a>`;
+      return;
+    }
+    a.classList.remove("ok");
+    a.innerHTML = `<span class="alert-ic">${icon("alert", "ic-lg")}</span>
+      <div class="alert-txt"><span class="t">AI diagnostic alert</span> <span class="faint">· analyzed 12m ago</span><br>
+      ${left ? `${left} of ${N} action items` : `All ${N} action items`} from yesterday's <a class="link-u" style="color:var(--text)" href="#" data-ctx>${esc(MF.meeting.title)}</a> session
+      ${left ? "are stalled or unassigned. Jira sync is <b>paused</b> until you confirm owners; the agent won't assign below your " + pct(THR) + " confidence rule." : "are decided. Resuming the pipeline…"}</div>
+      <button class="btn btn-primary" id="a-assign" ${left ? "" : "disabled"}>${icon("userPlus", "ic-sm")}Assign suggested owner</button>
+      <button class="btn btn-white" id="a-confirm" ${owners()["ai-2"] ? "disabled" : ""}>${icon("file", "ic-sm")}Request confirmation</button>
+      <button class="btn btn-white" data-ctx>${icon("msg", "ic-sm")}View meeting context</button>`;
+    const aa = $("#a-assign"); if (aa) aa.onclick = () => {
+      const next = ITEMS.find((i) => i.suggestedOwner && !owners()[i.id]) || ITEMS.find((i) => !owners()[i.id]);
+      if (next) { if (next.suggestedOwner) openPanel(next.id, true); else focusItem(next.id); }
+    };
+    const ac = $("#a-confirm"); if (ac) ac.onclick = () => focusItem("ai-2");
+  }
+
+  // ---------- Items ----------
+  const STATE_TAGS = {
+    unassigned: [["Overdue", "risk"], ["Unassigned", "grey"]],
+    "awaiting-confirmation": [["Awaiting confirmation", "grey"]],
+    overdue: [["Overdue", "risk"], ["No owner", "grey"]]
+  };
+  function itemHTML(it) {
+    const o = owners()[it.id], u = ui[it.id], so = it.suggestedOwner;
+    const done = !!o;
+    const tone = done ? "ok" : it.state === "awaiting-confirmation" ? "wait" : "";
+    const tags = done
+      ? `<span class="pill healthy">Owner confirmed</span>`
+      : STATE_TAGS[it.state].map(([t, c]) => `<span class="pill ${c === "risk" ? "risk" : "grey"}" style="border-radius:7px">${t}</span>`).join("");
+    const src = `<span class="k">Source:</span> <b style="font-weight:600">${esc(MF.meeting.title)}</b> <span class="ts" data-ts="${it.ts}">${it.ts}</span>`;
+    const dueCls = !done && it.state !== "awaiting-confirmation" ? "due-risk" : "";
+    let foot;
+    if (done) {
+      const entry = S.get().log.find((l) => l.id === it.id && l.how !== "undo");
+      foot = `<span><span class="k">Owner:</span> <b>${esc(o)}</b></span>
+        <span class="k">Decided by you${entry ? " · " + clock(entry.t) : ""}</span>
+        <span class="actions">${pipe === "done" ? `<span class="jira" title="Synced to Jira">${icon("check", "ic-sm")}Synced · ${R.jiraKeys[it.id]}</span>`
+          : pipe === "paused" ? `<button class="undo" data-undo="${it.id}">Undo</button>` : `<span class="waiting"><span class="spin"></span>Syncing</span>`}</span>`;
+    } else if (u.waiting) {
+      foot = `${src}<span class="actions"><span class="waiting"><span class="spin"></span>${u.waiting}</span></span>`;
+    } else if (so) {
+      foot = `${src}<span><span class="k">Due:</span> <span class="${dueCls}">${esc(it.due)}</span></span>
+        <span class="actions"><button class="btn btn-primary btn-sm" data-open="${it.id}">${icon(u.open ? "x" : "userPlus", "ic-sm")}${u.open ? "Close" : "Assign suggested owner"}</button></span>`;
+    } else {
+      foot = `<span><span class="k">Owner:</span> <b>${esc(it.owner)}</b></span><span><span class="k">Due:</span> <b>${esc(it.due)}</b></span>
+        <span class="actions"><button class="btn btn-white btn-sm" data-remind="${it.id}">${icon("slack", "ic-sm")}Send reminder</button>
+        <button class="btn btn-dark btn-sm" data-approve="${it.id}">Approve &amp; sync to Jira</button></span>`;
+    }
+    return `<article class="item ${done ? "done" : ""}" id="item-${it.id}">
+      <div class="item-top"><span class="item-ic ${tone}">${icon(done ? "check" : tone === "wait" ? "hourglass" : "alertCircle", "ic-sm")}</span>
+        <span class="item-title">${esc(it.title)}</span>${tags}
+        <span class="spacer"></span><button class="icon-btn faint" data-ts="${it.ts}" title="Show in transcript">${icon("eye", "ic-sm")}</button></div>
+      <div class="quote ${tone}">“${esc(it.quote)}”${it.speaker ? ` — <b>${esc(it.speaker)}</b>` : ""}</div>
+      ${so && !done ? `<div class="decide-wrap ${u.open ? "open" : ""}"><div>${panelHTML(it)}</div></div>` : ""}
+      <div class="item-foot">${foot}</div>
+    </article>`;
+  }
+
+  function panelHTML(it) {
+    const so = it.suggestedOwner, u = ui[it.id];
+    const alts = it.alternatives || [];
+    const others = MF.team.filter((t) => t.name !== so.name && !alts.some((a) => a.name === t.name));
+    return `<div class="decide" role="region" aria-label="Owner decision">
+      <div class="decide-label">${icon("sparkles", "ic-sm")}Agent suggestion · needs your decision</div>
+      <div class="cand">
+        <span class="avatar gold">${initials(so.name)}</span>
+        <div><div class="nm">${esc(so.name)}</div><div class="rl">${esc(so.role || "")}</div></div>
+        <div class="conf" style="--thr:${THR * 100}%">
+          <div class="row"><span class="muted">Confidence</span><b>${pct(so.confidence)}</b></div>
+          <div class="bar"><i data-w="${so.confidence * 100}"></i></div>
+          <div class="thr">Auto-assign rule: ${pct(THR)} ▲</div>
+        </div>
+      </div>
+      <div class="why-box">
+        <span class="bot">${icon("bot")}</span>
+        <div><div class="hd">Why I'm asking you, not assigning <span class="eng" data-eng>${u.why ? esc(u.why.label) : "thinking…"}</span></div>
+          <div class="bd" data-why>${u.why ? esc(u.why.text) : `<span class="dots"><i></i><i></i><i></i></span>`}</div></div>
+      </div>
+      <div class="evid">
+        <div><h4>Evidence</h4><ul>${so.evidence.map((e) => `<li>${icon("check", "ic-sm")}<span>${esc(e)}</span></li>`).join("")}</ul></div>
+        <div><h4>From the meeting</h4>
+          <div class="src"><q>${esc(so.sourceQuote || it.quote)}</q>
+            <div class="by"><span class="avatar sm" style="width:22px;height:22px;font-size:9.5px">${initials(so.sourceSpeaker || so.name)}</span>${esc(so.sourceSpeaker || "")}
+            <span class="ts" data-ts="${so.sourceTs || it.ts}">▶ ${so.sourceTs || it.ts}</span></div></div></div>
+      </div>
+      ${alts.length ? `<div class="alts"><h4 class="muted" style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Also considered</h4>
+        ${alts.map((a) => `<div class="alt"><b>${esc(a.name)}</b><span class="c">${pct(a.confidence)}</span><span>${esc(a.why)}</span></div>`).join("")}</div>` : ""}
+      <div class="next">${icon("zap", "ic-sm")}<span>When you decide: the owner gets a Slack DM, a ticket is drafted in ENG-CORE, and the paused pipeline resumes once all ${N} items are decided. You can undo until then.</span></div>
+      <div class="choices">
+        <button class="btn btn-primary" data-accept="${it.id}">${icon("check", "ic-sm")}Assign ${esc(first(so.name))}</button>
+        <span class="pick"><select data-pick="${it.id}" aria-label="Pick someone else">
+          <option value="">Pick someone else…</option>
+          ${alts.map((a) => `<option value="${esc(a.name)}" ${u.pick === a.name ? "selected" : ""}>${esc(a.name)} · ${pct(a.confidence)} match</option>`).join("")}
+          ${others.map((t) => `<option value="${esc(t.name)}" ${u.pick === t.name ? "selected" : ""}>${esc(t.name)} · ${esc(t.role)} · ${esc(t.load)}</option>`).join("")}
+        </select>${u.pick ? `<button class="btn btn-dark" data-assign-other="${it.id}">Assign ${esc(first(u.pick))}</button>` : ""}</span>
+        <button class="btn btn-white" data-slack="${it.id}">${icon("slack", "ic-sm")}Ask in Slack first</button>
+      </div>
+    </div>`;
+  }
+
+  function renderItems() {
+    $("#items").innerHTML = ITEMS.map(itemHTML).join("");
+    $$(".decide-wrap.open .conf .bar>i").forEach((b) => (b.style.width = b.dataset.w + "%"));
+    $("#done-items").innerHTML = (MF.completedItems || []).map((c) => `<article class="item done">
+      <div class="item-top"><span class="item-ic ok">${icon("check", "ic-sm")}</span><span class="item-title strike">${esc(c.title)}</span><span class="pill healthy">Completed</span></div>
+      <div class="quote ok">“${esc(c.quote)}”</div>
+      <div class="item-foot"><span><span class="k">Owner:</span> <b>${esc(c.owner)}</b></span><span><span class="k">Completed:</span> <b>${esc(c.completed)}</b></span>
+      <span class="actions"><span class="jira">${icon("checkCircle", "ic-sm")}Synced to Jira (${esc(c.jira)})</span></span></div></article>`).join("");
+  }
+  function rerenderItem(id) {
+    const it = ITEMS.find((i) => i.id === id), el = $("#item-" + id);
+    const tmp = document.createElement("div"); tmp.innerHTML = itemHTML(it);
+    const fresh = tmp.firstElementChild;
+    el.replaceWith(fresh);
+    $$(".decide-wrap.open .conf .bar>i", fresh).forEach((b) => (b.style.width = b.dataset.w + "%"));
+    return fresh;
+  }
+
+  async function openPanel(id, scroll) {
+    const u = ui[id];
+    if (owners()[id]) return;
+    u.open = !u.open;
+    const el = rerenderItem(id);
+    const wrap = $(".decide-wrap", el);
+    // re-open from closed state so the height animates
+    if (u.open) {
+      wrap.classList.remove("open");
+      $$(".conf .bar>i", el).forEach((b) => (b.style.width = "0"));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        wrap.classList.add("open");
+        setTimeout(() => $$(".conf .bar>i", el).forEach((b) => (b.style.width = b.dataset.w + "%")), 250);
+      }));
+      if (scroll) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+      if (!u.why) fetchWhy(id);
+    }
+  }
+  async function fetchWhy(id) {
+    const it = ITEMS.find((i) => i.id === id), so = it.suggestedOwner;
+    const fallback = `I suggest ${so.name}: ${so.evidence.join("; ")}. My confidence is ${pct(so.confidence)}, below your ${pct(THR)} auto-assign rule, so I'm asking you instead of assigning.`;
+    let r = { text: fallback, label: "Simulated agent" };
+    if (window.Engine) {
+      r = await Engine.ask({
+        system: "You are the MeetFlow Alpine operations agent. In at most 70 words, plain language, explain why you suggest this owner, why you did not assign automatically, and what risk remains. Use only the data given.",
+        prompt: JSON.stringify({ item: it, policy: MF.policy, alternatives: it.alternatives }), fallback
+      });
+      if (r.error) toast(esc(r.error), "alert");
+    } else await sleep(900);
+    ui[id].why = r;
+    const el = $("#item-" + id); if (!el) return;
+    const bd = $("[data-why]", el), eng = $("[data-eng]", el);
+    if (bd) { bd.innerHTML = esc(r.text).replace(/(below your [^,.]*rule)/i, '<span class="rule">$1</span>'); bd.classList.add("fade-in"); }
+    if (eng) eng.textContent = r.label;
+  }
+  function focusItem(id) {
+    const el = $("#item-" + id); if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("focus"); setTimeout(() => el.classList.remove("focus"), 1800);
+  }
+
+  function afterDecision(id, msg) {
+    ui[id].open = false; ui[id].waiting = null;
+    const el = rerenderItem(id);
+    el.classList.add("fade-in");
+    toast(msg, "checkCircle");
+    refresh();
+    if (allDecided()) runPipeline();
+  }
+
+  // Item actions (event delegation)
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button, a, .ts"); if (!t) return;
+    const d = t.dataset;
+    if (d.ctx !== undefined) { e.preventDefault(); openDrawer(); return; }
+    if (d.ts) { e.preventDefault(); openDrawer(d.ts); return; }
+    if (d.goto) { setTab(d.goto); return; }
+    if (d.open) { openPanel(d.open); return; }
+    if (d.undo) { undo(d.undo); const el = rerenderItem(d.undo); el.classList.add("fade-in"); refresh(); toast("Undone. The item is open again.", "undo"); return; }
+    if (d.accept) {
+      const it = ITEMS.find((i) => i.id === d.accept), so = it.suggestedOwner;
+      decide(it.id, so.name, "approved-suggestion",
+        `${ME} approved suggested owner ${so.name} (${pct(so.confidence)}) for “${it.title}”. Evidence: ${so.evidence.join("; ")}.`);
+      afterDecision(it.id, `${so.name} assigned. Slack DM queued.`); return;
+    }
+    if (d.assignOther) {
+      const it = ITEMS.find((i) => i.id === d.assignOther), so = it.suggestedOwner, who = ui[it.id].pick;
+      decide(it.id, who, "override",
+        `${ME} overrode the suggestion (${so.name}, ${pct(so.confidence)}) and assigned ${who} to “${it.title}”.`);
+      afterDecision(it.id, `${who} assigned. The agent will learn from your override.`); return;
+    }
+    if (d.slack) {
+      const it = ITEMS.find((i) => i.id === d.slack), so = it.suggestedOwner;
+      ui[it.id].open = false; ui[it.id].waiting = `Asked ${first(so.name)} in Slack · waiting for a reply`;
+      rerenderItem(it.id); refresh();
+      toast(`Asked ${so.name} in Slack to confirm.`, "slack");
+      setTimeout(() => {
+        decide(it.id, so.name, "slack-confirmed",
+          `${ME} asked ${so.name} to confirm in Slack before assigning “${it.title}”. ${first(so.name)} confirmed (simulated reply).`);
+        afterDecision(it.id, `${first(so.name)} replied in Slack: “Yes, I've got it.”`);
+      }, 2400);
+      return;
+    }
+    if (d.remind) {
+      const it = ITEMS.find((i) => i.id === d.remind);
+      ui[it.id].waiting = `Reminder sent to ${first(it.owner)} · waiting for a reply`;
+      rerenderItem(it.id); refresh(); toast(`Reminder sent to ${it.owner} in Slack.`, "slack");
+      setTimeout(() => {
+        decide(it.id, it.owner, "reminder-confirmed",
+          `${ME} sent ${it.owner} a reminder in Slack; ${first(it.owner)} confirmed ownership of “${it.title}” (simulated reply).`);
+        afterDecision(it.id, `${first(it.owner)} confirmed: “On it, I'll check residency with security by noon.”`);
+      }, 2200);
+      return;
+    }
+    if (d.approve) {
+      const it = ITEMS.find((i) => i.id === d.approve);
+      decide(it.id, it.owner, "approved-owner",
+        `${ME} approved ${it.owner} as owner of “${it.title}” without waiting for confirmation, and approved the Jira sync.`);
+      afterDecision(it.id, `${it.owner} confirmed as owner. Queued for Jira.`); return;
+    }
+  });
+  document.addEventListener("change", (e) => {
+    const s = e.target.closest("[data-pick]"); if (!s) return;
+    ui[s.dataset.pick].pick = s.value;
+    const el = $("#item-" + s.dataset.pick);
+    const span = s.closest(".pick");
+    const old = $("[data-assign-other]", span); if (old) old.remove();
+    if (s.value) span.insertAdjacentHTML("beforeend", `<button class="btn btn-dark fade-in" data-assign-other="${s.dataset.pick}">Assign ${esc(first(s.value))}</button>`);
+  });
+
+  // ---------- Pipeline ----------
+  const LABEL = { completed: "Completed", attention: "Needs attention", pending: "Pending review", queued: "Queued", running: "Running" };
+  function renderSteps(justIdx) {
+    const left = N - decidedCount();
+    if (pipe === "paused") stepSub[2] = `Flagged ${N} items with missing ownership · ${N - left} of ${N} decided by you`;
+    if (pipe === "paused") stepSub[3] = "Waiting for step 3 approval";
+    if (pipe === "done") {
+      stepSub[2] = `All ${N} owners confirmed by ${ME}`;
+      stepSub[3] = `Created ${N} tickets in ENG-CORE`;
+      stepSub[4] = `${N} of ${N} owners acknowledged in Slack`;
+      stepSub[5] = "Monitoring · reminders 24h before each due date";
+    }
+    $("#steps").innerHTML = MF.pipeline.map((name, k) => {
+      const s = stepState[k];
+      const label = k === 5 && s === "completed" ? "Active" : LABEL[s];
+      const keys = k === 3 && s === "completed" ? `<div class="step-keys">${ITEMS.map((i) => `<span class="jira">${R.jiraKeys[i.id]}</span>`).join("")}</div>` : "";
+      return `<li class="step ${s} ${justIdx === k ? "just" : ""}">
+        <span class="num">${s === "completed" ? icon("check", "ic-sm") : k + 1}</span>
+        <div class="step-card"><div class="step-row"><span class="step-name">${esc(name)}</span><span class="step-st">${label}</span></div>
+        <div class="step-sub">${esc(stepSub[k])}</div>${keys}</div></li>`;
+    }).join("");
+  }
+
+  async function runPipeline() {
+    if (pipe !== "paused") return;
+    pipe = "running"; refresh();
+    const step = async (k, runningSub, doneSub, runMs) => {
+      stepState[k] = "running"; stepSub[k] = runningSub; renderSteps();
+      await sleep(runMs);
+      stepState[k] = "completed"; stepSub[k] = doneSub; renderSteps(k);
+    };
+    await sleep(500);
+    stepState[2] = "completed"; stepSub[2] = `All ${N} owners confirmed by ${ME}`; renderSteps(2);
+    await sleep(500);
+    await step(3, "Creating tickets in ENG-CORE…", `Created ${N} tickets in ENG-CORE`, 1300);
+    // Jira keys land on the item cards, one by one
+    pipe = "syncing";
+    for (const it of ITEMS) {
+      const a = $("#item-" + it.id + " .actions");
+      if (a) a.innerHTML = `<span class="jira">${icon("check", "ic-sm")}Synced · ${R.jiraKeys[it.id]}</span>`;
+      await sleep(220);
+    }
+    await sleep(250);
+    await step(4, "Owners confirming in Slack…", `${N} of ${N} owners acknowledged in Slack`, 1200);
+    await sleep(300);
+    await step(5, "Scheduling follow-ups…", "Monitoring · reminders 24h before each due date", 900);
+    const s = S.get(); s.pipelineDoneAt = new Date().toISOString(); S.set(s);
+    pipe = "done";
+    await sleep(300);
+    refresh(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ---------- Banner + metrics ----------
+  function renderBanner(animate) {
+    const slot = $("#banner-slot");
+    if (pipe !== "done") { slot.innerHTML = ""; return; }
+    if (slot.firstChild && !animate) return;
+    slot.innerHTML = `<div class="banner">
+      <span class="b-ic">${icon("trend", "ic-lg")}</span>
+      <div><div class="t">Delivery goal back on track: ${R.progressBefore}% → <span class="pct" id="bn-pct">${R.progressBefore}%</span></div>
+      <div class="s">${N} owners confirmed by you · ${N} Jira tickets created · follow-ups scheduled. Every decision is in the audit trail.</div></div>
+      <a class="btn btn-primary" href="goal.html">View goal ${icon("arrow", "ic-sm")}</a></div>`;
+    const el = $("#bn-pct"), t0 = performance.now();
+    if (!animate) { el.textContent = R.progressAfter + "%"; return; }
+    (function f(t) { const k = Math.min(1, (t - t0) / 1100); el.textContent = Math.round(R.progressBefore + (R.progressAfter - R.progressBefore) * (1 - Math.pow(1 - k, 3))) + "%"; if (k < 1) requestAnimationFrame(f); })(t0);
+  }
+  function renderMetrics() {
+    const done = pipe === "done", left = N - decidedCount();
+    const m = [
+      ["Extraction accuracy", "98.4%", "↑ 1.2% this week", "up"],
+      ["Avg resolution time", done ? "9.8h" : "14.2h", done ? "↑ 4.4h faster today" : "↓ 3h slower", done ? "up" : "down"],
+      ["Items without owner", String(left), left ? "Blocking Jira sync" : "All owners confirmed", left ? "down" : "up"],
+      ["Delivery goal", (done ? R.progressAfter : R.progressBefore) + "%", done ? "On track" : "At risk", done ? "up" : "down"]
+    ];
+    $("#metrics").innerHTML = m.map(([k, v, d, c]) => `<div class="card m"><div class="k">${k}</div><div class="v">${v}</div><div class="d ${c}">${d}</div></div>`).join("");
+  }
+
+  // ---------- Audit trail ----------
+  function auditEvents() {
+    const s = S.get();
+    const ev = [];
+    if (s.pipelineDoneAt) {
+      const t = s.pipelineDoneAt;
+      ev.push({ t, by: "agent", ok: true, text: `Goal “${MF.goal.title}” moved from At risk to On track (${R.progressBefore}% → ${R.progressAfter}%).` });
+      ev.push({ t, by: "agent", ok: true, text: `Follow-ups scheduled: reminders 24h before each due date.` });
+      ev.push({ t, by: "agent", ok: true, text: `Created ${ITEMS.map((i) => R.jiraKeys[i.id]).join(", ")} in ENG-CORE and synced owners.` });
+      ev.push({ t, by: "agent", text: `Pipeline resumed after all ${N} decisions were made by ${ME}.` });
+    }
+    (s.log || []).forEach((l) => ev.push({ t: l.t, by: "human", undo: l.how === "undo", text: l.text || `${ME} assigned ${l.name} (${l.how || "decision"}).` }));
+    ev.push({ t: null, ts: "12m ago", by: "agent", text: `Paused the pipeline at step 3: ${N} items lack a confirmed owner. Suggestions below ${pct(THR)} confidence need a human decision.` });
+    ev.push({ t: null, ts: "14m ago", by: "agent", text: `Extracted ${N + (MF.completedItems || []).length} action items from ${MF.meeting.title}.` });
+    return ev;
+  }
+  function renderAudit() {
+    const ev = auditEvents();
+    const row = (e) => `<li class="ev"><span class="ev-ic ${e.by === "agent" ? (e.ok ? "ok" : "sys") : ""}">${icon(e.by === "agent" ? "bot" : e.undo ? "undo" : "user", "ic-sm")}</span>
+      <div><time>${e.t ? clock(e.t) : e.ts}<span class="who-tag">${e.by === "agent" ? "Agent" : "You"}</span></time>${esc(e.text)}</div></li>`;
+    $("#audit-mini").innerHTML = ev.slice(0, 5).map(row).join("");
+    $("#audit-full").innerHTML = ev.map(row).join("");
+  }
+
+  // ---------- Tabs ----------
+  function setTab(name) {
+    $$(".tab[data-tab]").forEach((t) => t.classList.toggle("on", t.dataset.tab === name || (name === "items" && t.dataset.tab === "overview" && false)));
+    $("#pane-overview").hidden = name === "audit";
+    $("#pane-audit").hidden = name !== "audit";
+    if (name === "items") { $$(".tab[data-tab]").forEach((t) => t.classList.toggle("on", t.dataset.tab === "items")); $("#items").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    const pane = name === "audit" ? $("#pane-audit") : $("#pane-overview");
+    pane.classList.remove("fade-in"); void pane.offsetWidth; pane.classList.add("fade-in");
+    try { history.replaceState(null, "", name === "audit" ? "#audit" : "#"); } catch (e) {}
+  }
+  $$(".tab[data-tab]").forEach((t) => t.addEventListener("click", () => setTab(t.dataset.tab)));
+
+  // ---------- Meeting transcript drawer ----------
+  const lines = [];
+  ITEMS.forEach((i) => {
+    if (i.ts) lines.push({ ts: i.ts, sp: i.speaker || "Unknown", text: i.quote });
+    const so = i.suggestedOwner; if (so && so.sourceTs) lines.push({ ts: so.sourceTs, sp: so.sourceSpeaker, text: so.sourceQuote });
+  });
+  lines.push({ ts: "00:41:48", sp: "Marcus Vance (Product Lead)", text: "Okay, next up: SSO onboarding for the enterprise demo." });
+  lines.push({ ts: "00:47:02", sp: "Marcus Vance (Product Lead)", text: "Security next. The webhook can't go live until residency is cleared." });
+  lines.push({ ts: "00:50:05", sp: "Sam Ortiz (Engineering Manager)", text: "Last thing from me: partner API traffic before Thursday." });
+  lines.push({ ts: "00:52:20", sp: "Marcus Vance (Product Lead)", text: "Great. MeetFlow will pick up the action items, let's go." });
+  lines.sort((a, b) => a.ts.localeCompare(b.ts));
+  function openDrawer(ts) {
+    $("#transcript").innerHTML = `<p class="muted" style="font-size:13px;margin:4px 0 12px">Transcript excerpt · ${esc(MF.meeting.when)} · the lines the agent used as evidence are highlighted.</p>` +
+      lines.map((l) => `<div class="line ${l.ts === ts ? "hl" : ""}" data-line="${l.ts}"><span class="tsx">${l.ts}</span><div><div class="sp">${esc(l.sp)}</div>${esc(l.text)}</div></div>`).join("");
+    $("#scrim").classList.add("open"); $("#drawer").classList.add("open");
+    if (ts) setTimeout(() => { const el = $(`[data-line="${ts}"]`); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 350);
+  }
+  function closeDrawer() { $("#scrim").classList.remove("open"); $("#drawer").classList.remove("open"); }
+  $("#scrim").addEventListener("click", closeDrawer);
+  $("#dr-close").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+
+  // ---------- Header buttons ----------
+  $("#test-btn").addEventListener("click", () => toast("Test run: 4 sample items extracted, 0 errors (simulated).", "play"));
+  $("#export-btn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify({ workflow: "Action Item Tracking", exported: new Date().toISOString(), owners: owners(), audit: auditEvents() }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "meetflow-audit-log.json"; a.click();
+    toast("Audit log exported.", "download");
+  });
+
+  // ---------- Refresh ----------
+  function refresh(animateBanner) { renderHeader(); renderSteps(); renderMetrics(); renderAudit(); renderBanner(animateBanner); }
+  window.addEventListener("mf-reset", () => location.reload());
+
+  renderItems();
+  refresh(false);
+  if (location.hash === "#audit") setTab("audit");
+  // Decisions made elsewhere (or a reload mid-run): finish the run now.
+  if (pipe === "paused" && allDecided()) runPipeline();
+})();
+</script>
+</body>
+</html>

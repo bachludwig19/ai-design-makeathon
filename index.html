@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeetFlow Alpine · Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/brand.css">
+</head>
+<body data-page="home" data-crumb="Workspace / Autonomous Pipeline">
+<div class="app">
+  <aside id="mf-nav"></aside>
+  <div class="main">
+    <header id="mf-top"></header>
+    <main class="content">
+      <section class="ask">
+        <h1>What would you like to get done today?</h1>
+        <form class="ask-box" id="ask">
+          <span id="ask-ic"></span>
+          <input id="ask-in" placeholder="Describe a task, ask a question, or delegate work to AI…" autocomplete="off">
+          <button class="btn btn-primary" type="submit">Submit <span id="ask-arrow"></span></button>
+        </form>
+        <div id="ask-out"></div>
+        <div class="persona">
+          <span>Current persona:</span>
+          <span class="persona-chip" id="persona-chip"></span>
+          <a href="#" class="link-u" id="persona-btn" aria-haspopup="true" aria-expanded="false">Change persona</a>
+          <div class="persona-menu" id="persona-menu" role="menu"></div>
+        </div>
+      </section>
+
+      <div id="dash">
+        <div class="intro">
+          <p id="intro-1"></p>
+          <p class="muted">Here's what's progressing, what needs attention, and what your AI team has accomplished.</p>
+        </div>
+        <section class="panel health">
+          <div class="row">
+            <span id="health-ic" style="color:var(--primary)"></span>
+            <span class="h-sec">Goal health metrics</span>
+            <span class="spacer"></span>
+            <span class="pill teal" id="health-total"></span>
+          </div>
+          <div class="health-legend"><span id="h-on"></span><span id="h-risk"></span><span id="h-off"></span></div>
+          <div class="health-bar" id="health-bar">
+            <i style="background:var(--teal);flex-grow:0"></i><i style="background:var(--risk);flex-grow:0"></i><i style="background:var(--danger);flex-grow:0"></i>
+          </div>
+        </section>
+
+        <div class="sec-head"><h2 class="h-sec">Needs your attention</h2></div>
+        <section id="attention"></section>
+
+        <div class="sec-head"><h2 class="h-sec" id="goals-h"></h2><a class="link-u" href="#">View all →</a></div>
+        <section class="goals" id="goals"></section>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/settings.js"></script>
+<script src="assets/nav.js"></script>
+<script src="assets/brand.js"></script>
+<script>
+(function () {
+  const { icon, esc, toast, persona, setPersona, isResolved, goalNow } = MFApp;
+  const $ = (s) => document.querySelector(s);
+  $("#ask-ic").innerHTML = icon("sparkles", "ic-lg");
+  $("#ask-arrow").innerHTML = icon("arrow", "ic-sm");
+  $("#health-ic").innerHTML = icon("target");
+
+  // Persona-specific view. Product Manager is the wired path; its delivery goal reflects the workflow decisions.
+  function view(name) {
+    const p = JSON.parse(JSON.stringify(MF.personas[name]));
+    if (name === "Product Manager") {
+      const g = goalNow();
+      const d = p.goals.find((x) => x.id === "delivery");
+      d.status = g.status; d.progress = g.progress;
+      if (g.resolved) {
+        d.desc = "Owners confirmed for all " + MF.actionItems.length + " stalled items. Tickets synced to Jira.";
+        p.health.onTrack += 1; p.health.atRisk -= 1;
+        p.attention = p.attention.filter((a) => a.id !== "delivery");
+        p.cleared = true;
+      }
+    }
+    p.attention.forEach((a) => { a.desc = a.desc.replace("{n}", MF.actionItems.length); });
+    return p;
+  }
+  const label = { "on-track": "On track", "at-risk": "At risk", "off-track": "Off track" };
+  const barTone = { "on-track": "teal", "at-risk": "risk", "off-track": "off" };
+
+  function render(name, animate) {
+    const p = view(name);
+    $("#persona-chip").textContent = name;
+    $("#intro-1").textContent = `Your ${p.noun} goals at a glance.`;
+    $("#goals-h").textContent = `Your ${p.noun} goals`;
+    const h = p.health, total = h.onTrack + h.atRisk + h.offTrack;
+    $("#health-total").textContent = `${total} active goals`;
+    $("#h-on").textContent = `${h.onTrack} On track`;
+    $("#h-risk").textContent = `${h.atRisk} At risk`;
+    $("#h-off").textContent = `${h.offTrack} Off track`;
+    const bars = $("#health-bar").children;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      bars[0].style.flexGrow = h.onTrack; bars[1].style.flexGrow = h.atRisk; bars[2].style.flexGrow = h.offTrack;
+    }));
+
+    $("#attention").innerHTML =
+      (p.cleared ? `<div class="resolved-note fade-in">${icon("checkCircle")}Engineering delivery commitments: you confirmed ${MF.actionItems.length} owners, tickets are in Jira. <a class="link" style="margin-left:auto;color:var(--teal)" href="goal.html">View goal ${icon("arrow", "ic-sm")}</a></div>` : "") +
+      `<div class="stagger">` + p.attention.map((a, i) => `
+        <div class="attn">
+          <div>
+            <div class="attn-title"><span class="tag ${a.tone}">${esc(a.tag)}</span>${esc(a.title)}</div>
+            <div class="attn-desc">${esc(a.desc)}</div>
+          </div>
+          ${a.href
+            ? `<a class="btn btn-primary" href="${a.href}">${esc(a.cta)} ${icon("arrow", "ic-sm")}</a>`
+            : `<button class="btn ${a.secondary ? "btn-white" : "btn-primary"}" data-stub="${i}">${esc(a.cta)}${a.secondary ? "" : " " + icon("arrow", "ic-sm")}</button>`}
+        </div>`).join("") + `</div>`;
+    $("#attention").querySelectorAll("[data-stub]").forEach((b) => b.addEventListener("click", () =>
+      toast("This path isn't wired in the prototype. Try the delivery goal (Product Manager).", "sparkles")));
+
+    $("#goals").innerHTML = p.goals.map((g) => {
+      const tag = g.href ? "a" : "div";
+      return `<${tag} class="goal-card" ${g.href ? `href="${g.href}"` : ""}>
+        <div class="top"><span class="pill ${g.status}">${label[g.status]}</span><span>${g.progress}%</span></div>
+        <h3>${esc(g.title)}</h3><p>${esc(g.desc)}</p>
+        <div class="bar"><i class="${barTone[g.status]}" data-w="${g.progress}"></i></div>
+      </${tag}>`;
+    }).join("");
+    $("#goals").classList.remove("stagger"); void $("#goals").offsetWidth; $("#goals").classList.add("stagger");
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      document.querySelectorAll("#goals .bar>i").forEach((b) => (b.style.width = b.dataset.w + "%"))));
+  }
+
+  // Persona menu
+  const menu = $("#persona-menu"), btn = $("#persona-btn");
+  const opts = [
+    { n: "Product Manager", s: "Alex Mercer · delivery, discovery, adoption" },
+    { n: "Engineering Lead", s: "Incidents, migrations, CI health" },
+    { n: "Customer Success Lead", s: "Coming soon", disabled: true }
+  ];
+  function drawMenu() {
+    const cur = persona();
+    menu.innerHTML = opts.map((o) => `<button class="persona-opt ${o.n === cur ? "on" : ""}" role="menuitem" data-p="${o.n}" ${o.disabled ? "disabled" : ""}>
+      <span class="avatar sm ${o.n === "Engineering Lead" ? "ink" : o.disabled ? "gold" : ""}">${MFApp.initials(o.n)}</span>
+      <span><div class="t">${o.n}</div><div class="s">${o.s}</div></span>${icon("check", "ic-sm")}</button>`).join("");
+  }
+  function toggle(open) { menu.classList.toggle("open", open); btn.setAttribute("aria-expanded", open); }
+  btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); drawMenu(); toggle(!menu.classList.contains("open")); });
+  document.addEventListener("click", (e) => { if (!menu.contains(e.target)) toggle(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") toggle(false); });
+  menu.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-p]"); if (!b || b.disabled) return;
+    toggle(false);
+    if (b.dataset.p === persona()) return;
+    setPersona(b.dataset.p);
+    const dash = $("#dash");
+    dash.classList.add("swap-out");
+    setTimeout(() => { render(b.dataset.p); dash.classList.remove("swap-out"); toast(`Switched to ${b.dataset.p}. Same agents, different goals.`, "user"); }, 220);
+  });
+  $("#dash").style.transition = "opacity .25s, transform .25s";
+
+  // Ask box: the assistant answers with what matters most right now.
+  $("#ask").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const q = $("#ask-in").value.trim() || "What needs me today?";
+    const out = $("#ask-out");
+    out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div class="waiting"><span class="spin"></span>Checking your goals and workflows…</div></div>`;
+    const g = goalNow();
+    const fallback = persona() !== "Product Manager"
+      ? "Your most urgent item: the release agent is waiting on your approval for a hotfix during the deploy freeze."
+      : g.resolved
+        ? `All clear on delivery: "${MF.goal.title}" is on track at ${g.progress}%. Next: the customer insights report is waiting on your approval.`
+        : `"${MF.goal.title}" is at risk (${g.progress}%). ${MF.actionItems.length} action items from ${MF.meeting.title} have no confirmed owner, so the Jira sync is paused until you decide.`;
+    let r = { text: fallback, label: "Simulated agent" };
+    if (window.Engine) r = await Engine.ask({ system: "You are the MeetFlow Alpine assistant. Answer in at most 45 words, plain language, using only the data given.", prompt: JSON.stringify({ question: q, persona: persona(), goal: { ...MF.goal, ...g }, actionItems: MF.actionItems.map((i) => i.title) }), fallback });
+    else await new Promise((res) => setTimeout(res, 700));
+    const showLink = persona() === "Product Manager" && !g.resolved;
+    out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div><div>${esc(r.text)}</div>
+      <div class="row" style="margin-top:10px">${showLink ? `<a class="link" href="goal.html">Review delivery goal ${icon("arrow", "ic-sm")}</a>` : ""}
+      <span class="pill grey" style="margin-left:auto;height:22px;font-size:11.5px">${esc(r.label)}</span></div></div></div>`;
+  });
+
+  render(persona(), true);
+})();
+</script>
+</body>
+</html>

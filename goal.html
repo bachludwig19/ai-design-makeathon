@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeetFlow Alpine · Goal: Delivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/brand.css">
+</head>
+<body data-page="goal" data-crumb="Workspace / Goals / Delivery">
+<div class="app">
+  <aside id="mf-nav"></aside>
+  <div class="main">
+    <header id="mf-top"></header>
+    <main class="content">
+      <section class="g-head">
+        <div class="eyebrow"><a href="index.html" class="faint" style="color:inherit">Goal details</a> / Delivery <span class="pill" id="status-pill"></span></div>
+        <h1 class="g-title" id="g-title"></h1>
+        <p class="g-desc">Ensure roadmap commitments are delivered predictably through better visibility, coordination, and blocker resolution.</p>
+      </section>
+
+      <section class="g-top">
+        <div class="panel progress-card">
+          <div class="row" style="align-items:flex-start">
+            <div>
+              <div class="eyebrow">Aggregate progress</div>
+              <div class="row" style="margin-top:12px;align-items:baseline;gap:14px"><span class="big-num" id="pct"></span><span class="delta" id="delta"></span></div>
+            </div>
+            <span class="spacer"></span><span class="trend" id="trend-ic"></span>
+          </div>
+          <div class="bar" style="margin-top:28px;height:10px"><i class="gold" id="g-bar"></i></div>
+          <p class="muted" style="margin:14px 0 0;font-size:13.5px">Illustrative aggregate progress based on configured milestones.</p>
+          <div class="stats">
+            <div><div class="k">Milestones</div><div class="v" id="ms"></div></div>
+            <div><div class="k">Active sprints</div><div class="v" id="sp"></div></div>
+            <div><div class="k">Target date</div><div class="v" id="td"></div></div>
+          </div>
+        </div>
+        <aside class="blocker" id="blocker"></aside>
+      </section>
+
+      <div class="sec-head" style="margin-top:44px"><h2 class="h-sec">Supporting workflows</h2><a class="link" href="canvas.html" style="color:var(--teal)">Configure automation</a></div>
+      <section class="wf-grid stagger" id="wfs"></section>
+
+      <section class="panel recs">
+        <div class="row"><span id="rec-ic" style="color:var(--primary)"></span><h2 class="h-sec">AI recommendations</h2></div>
+        <div class="rec-grid stagger" id="recs"></div>
+      </section>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:36px">
+        <a class="btn btn-primary" style="height:48px;padding:0 28px" id="explore" href="workflow.html">Explore goal details <span id="ex-ic"></span></a>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/settings.js"></script>
+<script src="assets/nav.js"></script>
+<script src="assets/brand.js"></script>
+<script>
+(function () {
+  const { icon, esc, toast, goalNow, getState } = MFApp;
+  const $ = (s) => document.querySelector(s);
+  const G = MF.goal, g = goalNow(), n = MF.actionItems.length;
+  const R = MF.resolution;
+
+  $("#g-title").textContent = G.title;
+  $("#trend-ic").innerHTML = icon("trend");
+  $("#rec-ic").innerHTML = icon("bot");
+  $("#ex-ic").innerHTML = icon("arrow", "ic-sm");
+  $("#ms").textContent = `${G.milestones[0]} / ${G.milestones[1]}`;
+  $("#sp").textContent = G.sprints;
+  $("#td").textContent = G.target;
+
+  function setStatus(resolved) {
+    const p = $("#status-pill");
+    p.className = "pill " + (resolved ? "on-track" : "at-risk");
+    p.textContent = resolved ? "On track" : "At risk";
+  }
+  setStatus(false);
+
+  // Progress: count up. Arriving right after the workflow was resolved, replay 72 → 81 once so the change is visible.
+  let firstSeen = false;
+  try { firstSeen = g.resolved && !sessionStorage.getItem("mf.seen81"); if (g.resolved) sessionStorage.setItem("mf.seen81", "1"); } catch (e) {}
+  const pct = $("#pct"), bar = $("#g-bar");
+  function animateTo(from, to, ms) {
+    const t0 = performance.now();
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+      pct.textContent = Math.round(from + (to - from) * e) + "%";
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+    bar.style.width = to + "%";
+  }
+  if (firstSeen) {
+    pct.textContent = R.progressBefore + "%"; bar.style.transition = "none"; bar.style.width = R.progressBefore + "%";
+    $("#delta").textContent = "+4% this week";
+    setTimeout(() => { bar.style.transition = ""; animateTo(R.progressBefore, R.progressAfter, 1200); setStatus(true);
+      $("#delta").textContent = `+${R.progressAfter - R.progressBefore}% today, after your decisions`;
+      toast(`Delivery goal back on track: ${R.progressBefore}% → ${R.progressAfter}%`, "checkCircle"); }, 650);
+  } else {
+    setStatus(g.resolved);
+    $("#delta").textContent = g.resolved ? `+${R.progressAfter - R.progressBefore}% today, after your decisions` : "+4% this week";
+    requestAnimationFrame(() => requestAnimationFrame(() => animateTo(0, g.progress, 900)));
+  }
+
+  // Blocker panel
+  const b = $("#blocker");
+  if (!g.resolved) {
+    b.innerHTML = `
+      <h3>${icon("alert", "ic-lg")}<span>What's blocking this goal?</span></h3>
+      <p><b>${n} action items need an owner or confirmation.</b> They came out of ${esc(MF.meeting.title)} ${esc(MF.meeting.when)} and the Jira sync is paused until someone decides.</p>
+      <ul>${MF.actionItems.map((i) => `<li>${icon("alertCircle", "ic-sm")}<span>${esc(i.title)}</span></li>`).join("")}</ul>
+      <a class="btn btn-danger" href="workflow.html">Resolve blockers ${icon("arrow", "ic-sm")}</a>`;
+  } else {
+    const s = getState();
+    b.classList.add("ok");
+    b.innerHTML = `
+      <h3>${icon("checkCircle", "ic-lg")}<span>Blockers cleared</span></h3>
+      <p>You confirmed owners for all ${n} items. The agent created the tickets and is tracking follow-up.</p>
+      <ul>${MF.actionItems.map((i) => `<li>${icon("check", "ic-sm")}<span><b style="color:var(--text)">${esc(s.owners[i.id])}</b> · <span class="mono">${R.jiraKeys[i.id]}</span></span></li>`).join("")}</ul>
+      <a class="btn btn-teal" href="workflow.html#audit">View audit trail ${icon("arrow", "ic-sm")}</a>`;
+  }
+
+  // Supporting workflows
+  const wIcons = { "meeting-intel": "agents", "action-items": "checkCircle", sprint: "chart", deps: "nodes" };
+  $("#wfs").innerHTML = MF.supportingWorkflows.map((w) => {
+    const st = w.id === "action-items" && g.resolved ? "healthy" : w.status;
+    const tag = w.href ? "a" : "div";
+    return `<${tag} class="wf" ${w.href ? `href="${w.href}"` : ""}>
+      <span class="wf-ic ${st}">${icon(wIcons[w.id] || "flow")}</span>
+      <div><div class="n">${esc(w.name)}</div><div class="d">${esc(w.desc)}</div></div>
+      <span class="pill ${st}">${st === "healthy" ? "Healthy" : "Needs attention"}</span>
+    </${tag}>`;
+  }).join("");
+
+  // Recommendations
+  const rIcons = ["zap", "clock", "file"];
+  $("#recs").innerHTML = MF.recommendations.map((r, i) => {
+    const done = i === 0 && g.resolved;
+    return `<div class="card rec ${done ? "done" : ""}">
+      <div class="row"><span class="pill gold" style="border-radius:7px">Priority 0${i + 1}</span><span class="spacer"></span><span class="faint">${icon(rIcons[i])}</span></div>
+      <p>${esc(r.text)}</p>
+      ${done ? `<span class="link" style="color:var(--teal)">${icon("check", "ic-sm")} Done by you</span>`
+        : r.href ? `<a class="link" href="${r.href}">${esc(r.cta)} ${icon("arrow", "ic-sm")}</a>`
+        : `<a class="link" href="#" data-stub>${esc(r.cta)} ${icon("arrow", "ic-sm")}</a>`}
+    </div>`;
+  }).join("");
+  document.querySelectorAll("[data-stub]").forEach((a) => a.addEventListener("click", (e) => {
+    e.preventDefault(); toast("Not wired in this prototype. The first recommendation is.", "sparkles");
+  }));
+})();
+</script>
+</body>
+</html>
