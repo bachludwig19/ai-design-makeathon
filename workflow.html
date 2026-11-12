@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MeetFlow Alpine · Action Item Tracking</title>
+<title>Goal with the Flow · Action Item Tracking</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -309,7 +309,7 @@
     let r = { text: fallback, label: "Demo flow" };
     if (window.Engine) {
       r = await Engine.ask({
-        system: "You are the MeetFlow Alpine operations agent. In at most 70 words, plain language, explain why you suggest this owner, why you did not assign automatically, and what risk remains. Use only the data given.",
+        system: "You are the Goal with the Flow operations agent. In at most 70 words, plain language, explain why you suggest this owner, why you did not assign automatically, and what risk remains. Use only the data given.",
         prompt: JSON.stringify({ item: it, policy: MF.policy, alternatives: it.alternatives }), fallback
       });
       if (r.error) toast(esc(r.error), "alert");
@@ -529,7 +529,7 @@
   lines.push({ ts: "00:41:48", sp: "Marcus Vance (Product Lead)", text: "Okay, next up: SSO onboarding for the enterprise demo." });
   lines.push({ ts: "00:47:02", sp: "Marcus Vance (Product Lead)", text: "Security next. The webhook can't go live until residency is cleared." });
   lines.push({ ts: "00:50:05", sp: "Sam Ortiz (Engineering Manager)", text: "Last thing from me: partner API traffic before Thursday." });
-  lines.push({ ts: "00:52:20", sp: "Marcus Vance (Product Lead)", text: "Great. MeetFlow will pick up the action items, let's go." });
+  lines.push({ ts: "00:52:20", sp: "Marcus Vance (Product Lead)", text: "Great. Goal with the Flow will pick up the action items, let's go." });
   lines.sort((a, b) => a.ts.localeCompare(b.ts));
   function openDrawer(ts) {
     $("#transcript").innerHTML = `<p class="muted" style="font-size:13px;margin:4px 0 12px">Transcript excerpt · ${esc(MF.meeting.when)} · the lines the agent used as evidence are highlighted.</p>` +

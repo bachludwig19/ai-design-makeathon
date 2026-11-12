@@ -89,7 +89,7 @@
     };
     if (navEl) {
       navEl.innerHTML = `
-        <a class="brand" href="index.html"><span class="brand-mark">MF</span>MeetFlow Alpine</a>
+        <a class="brand" href="index.html"><span class="brand-mark">GF</span>Goal with the Flow</a>
         <div class="nav-section">Platform</div>
         ${link("home", "Home", "home", "index.html")}
         ${link("assistant", "AI Assistant", "bot")}

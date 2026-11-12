@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Create workflows · MeetFlow Alpine</title>
+<title>Create workflows · Goal with the Flow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -374,7 +374,7 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
 <body>
 
 <nav class="mf-nav collapsed" id="nav" aria-label="Main">
-  <a class="mf-logo" href="index.html"><span class="mf-mark">MF</span><span class="lbl">MeetFlow Alpine</span></a>
+  <a class="mf-logo" href="index.html"><span class="mf-mark" style="background:url(assets/img/logo-mark.svg) center/70% no-repeat #fff;color:transparent">GF</span><span class="lbl">Goal with the Flow</span></a>
   <div class="mf-sec">Platform</div>
   <a class="mf-link" href="index.html" title="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/><path d="M9 21v-6h6v6"/></svg><span class="lbl">Home</span></a>
   <a class="mf-link off" href="#" aria-disabled="true" title="AI Assistant · not in this demo"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M2 12v3M22 12v3"/></svg><span class="lbl">AI Assistant</span></a>
@@ -544,7 +544,7 @@ const CAT = {
     desc:'Creates (or dedupes) a Jira / Linear issue for the action item.', perm:'Creates issues in the selected project',
     syn:'ticket issue jira linear create task sync', ex:'ENG-1284 · High · Priya Shah'},
   slack:{name:'Slack DM Notifier', cat:'Integrations', kind:'INTEGRATION', icon:'msg', ins:IN('ActionItem'), outs:OUT('Message'),
-    desc:'Messages the suggested owner in Slack.', perm:'Posts as the MeetFlow bot',
+    desc:'Messages the suggested owner in Slack.', perm:'Posts as the Goal with the Flow bot',
     syn:'notify message ping ask remind slack dm chat request owner confirm', ex:'DM to @Priya Shah: “Can you take it?”'},
   email:{name:'Email Summary', cat:'Integrations', kind:'INTEGRATION', icon:'mail', ins:IN('ActionItem'), outs:OUT('Message'),
     desc:'Emails a summary of the item to the owner or a list.', perm:'Sends from meetflow@alpine', syn:'email notify send summary remind mail', ex:'Subject: Action item needs an owner'},
@@ -556,7 +556,7 @@ const CAT = {
     desc:'Pauses the run until a person approves. Nothing downstream happens without it.', perm:'Approver: Alex Mercer',
     syn:'approve review signoff human check gate confirm approval', ex:'Approved by Alex Mercer'},
   escalate:{name:'Escalate to Manager', cat:'Human steps', kind:'HUMAN STEP', icon:'up', ins:IN('ActionItem'), outs:OUT('Message'),
-    desc:'Tells the meeting lead that nobody picked the item up.', perm:'Posts as the MeetFlow bot · sends email',
+    desc:'Tells the meeting lead that nobody picked the item up.', perm:'Posts as the Goal with the Flow bot · sends email',
     syn:'escalate manager lead remind no reply boss', ex:'Escalated to Marcus Vance'},
   decide:{name:'You decide', cat:'Human steps', kind:'HUMAN STEP', icon:'ucheck', ins:IN('ActionItem'), outs:OUT('ActionItem'),
     desc:'Sends the item to you to pick the owner.', perm:'Approver: you', syn:'decide me manual owner pick human', ex:'You picked Priya Shah'},
@@ -1284,7 +1284,7 @@ function updateDerived(){
     });
   }
   const p = $('#d-prev');
-  if (p) p.innerHTML = `<div class="slackmsg"><span class="av">MF</span><div><div class="who"><b>MeetFlow</b> to ${esc(recipient(it))}</div><div class="txt">${esc(renderTpl(cfg.template, it))}</div></div></div>`;
+  if (p) p.innerHTML = `<div class="slackmsg"><span class="av">GF</span><div><div class="who"><b>Goal with the Flow</b> to ${esc(recipient(it))}</div><div class="txt">${esc(renderTpl(cfg.template, it))}</div></div></div>`;
   const pay = $('#d-pay'); if (pay) pay.innerHTML = json(payload(it));
   const to = $('#d-to'); if (to) to.textContent = cfg.timeoutH+'h';
   const thr = $('#d-thr'); if (thr) thr.textContent = pct(cfg.threshold);
