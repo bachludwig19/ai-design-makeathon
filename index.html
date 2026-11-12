@@ -122,7 +122,7 @@
     $("#hello-s").textContent = firstRun ? "Setting up your new goal…" : p.fresh ? "Describe a goal below and your agents will set up the work."
       : p.cleared ? "All your goals are moving. Your agents have it from here."
       : "1 goal needs a decision from you.";
-    $("#attn-sec").style.display = p.attention.some((a) => a.href) || p.cleared ? "" : "none";
+    $("#attn-sec").style.display = "none"; // removed per user: the goal card carries the status
     const h = p.health;
     $("#h-on").textContent = `${h.onTrack} On track`;
     $("#h-risk").textContent = `${h.atRisk} At risk`;
