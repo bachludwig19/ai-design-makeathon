@@ -127,6 +127,11 @@
       <p>You confirmed owners for all ${n} items. The agent created the tickets and is tracking follow-up.</p>
       <ul>${MF.actionItems.map((i) => `<li>${icon("check", "ic-sm")}<span><b style="color:var(--text)">${esc(s.owners[i.id])}</b> · <span class="mono">${R.jiraKeys[i.id]}</span></span></li>`).join("")}</ul>
       <a class="btn btn-teal" href="canvas.html">Open workflow ${icon("arrow", "ic-sm")}</a>`;
+    // Ephemeral: shown once right after the fix, then it fades and the progress card takes the full row.
+    const top = b.closest(".g-top");
+    const drop = () => { b.style.display = "none"; if (top) top.style.gridTemplateColumns = "1fr"; };
+    if (!firstSeen) drop();
+    else setTimeout(() => { b.style.transition = "opacity .6s, transform .6s"; b.style.opacity = "0"; b.style.transform = "translateY(-6px)"; setTimeout(drop, 650); }, 6000);
   }
 
   // Supporting workflows
