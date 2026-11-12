@@ -73,6 +73,20 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .libitem .soon{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
 .about.muted{color:var(--text-3)}
 .node.tour-target{position:absolute}
+.node.s-ok{border-color:var(--teal);box-shadow:0 0 0 3px rgba(var(--teal-rgb),.14),var(--shadow)}
+.node.s-fail{border-color:var(--danger);box-shadow:0 0 0 4px rgba(196,30,58,.16),var(--shadow)}
+.nb.fail{background:var(--danger);color:var(--on-dark)}
+.edge.ok{stroke:var(--teal);stroke-width:3}
+.cue{margin:16px;border:1px solid var(--hair-strong);border-radius:var(--radius);background:var(--card);padding:18px;box-shadow:var(--shadow)}
+.cue .ck{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:8px}
+.cue.bad .ck{color:var(--danger)}.cue.good .ck{color:var(--teal)}
+.cue h3{margin:8px 0 4px;font-size:18px;font-weight:700;line-height:1.25}
+.cue p{margin:0 0 14px;color:var(--text-2);font-size:14px}
+.cue .fixes{display:flex;flex-direction:column;gap:8px}
+.cue .fixes .btn{justify-content:flex-start;text-align:left;white-space:normal;height:auto;padding:12px 14px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:600}
+.cue .fixes .btn small{display:block;font-weight:400;color:inherit;opacity:.75;font-size:12.5px;margin-top:2px}
+.cue .fixes .btn .i{align-self:flex-start;margin-top:2px}
+.backcue{margin:12px 18px 0;font-size:12px;color:var(--text-2);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
 .tour-tip{bottom:128px !important}
 .btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:var(--radius);padding:7px 13px;font-size:13px;font-weight:500;white-space:nowrap}
 .btn:hover{border-color:var(--hair-strong)}
@@ -411,11 +425,7 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
           <button class="iconbtn" id="zIn" title="Zoom in"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5M8 11h6M11 8v6"/></svg></button>
           <span class="zl" id="zl">100%</span>
           <button class="iconbtn" id="zOut" title="Zoom out"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5M8 11h6"/></svg></button>
-          <span class="sep"></span>
-          <button class="iconbtn" id="zFit" title="Fit whole workflow"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/></svg></button>
-          <button class="iconbtn" id="zFocus" title="Frame step 3 (needs attention)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
-          <span class="sep"></span>
-          <button class="btn ghost sm" id="tidy" title="Auto-layout left to right"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="6" rx="1.5"/><rect x="15" y="4" width="6" height="6" rx="1.5"/><rect x="15" y="14" width="6" height="6" rx="1.5"/><path d="M9 7h6M12 7v10h3"/></svg>Tidy up</button>
+
         </div>
         <div class="banner" id="banner"></div>
       </div>
@@ -544,6 +554,8 @@ const CAT = {
   escalate:{name:'Escalate to Manager', cat:'Human steps', kind:'HUMAN STEP', icon:'up', ins:IN('ActionItem'), outs:OUT('Message'),
     desc:'Tells the meeting lead that nobody picked the item up.', perm:'Posts as the MeetFlow bot · sends email',
     syn:'escalate manager lead remind no reply boss', ex:'Escalated to Marcus Vance'},
+  decide:{name:'You decide', cat:'Human steps', kind:'HUMAN STEP', icon:'ucheck', ins:IN('ActionItem'), outs:OUT('ActionItem'),
+    desc:'Sends the item to you to pick the owner.', perm:'Approver: you', syn:'decide me manual owner pick human', ex:'You picked Priya Shah'},
   followup:{name:'Track & Follow-up', cat:'Tracking', kind:'TRACKING', icon:'repeat', ins:IN('Task'), outs:[],
     desc:'Watches the task and nudges the owner until it is done.', perm:'Reads Jira status', syn:'track follow up remind status monitor nudge', ex:'Daily 9:00 AM nudge'}
 };
@@ -569,7 +581,8 @@ const SUB = {
   n8:()=>'Slack + email',
   n9:()=>`Project ${cfg.jiraProject}`,
   n10:()=>'Approver: you',
-  n11:()=>'Daily nudge'
+  n11:()=>'Daily nudge',
+  n12:()=>'You pick the owner'
 };
 function defaultGraph(){
   return {
@@ -579,16 +592,12 @@ function defaultGraph(){
       {id:'n3', t:'matcher', title:'Owner Matching', c:2, l:0},
       {id:'n4', t:'ownerFound', c:3, l:0},
       {id:'n5', t:'deadline', c:4, l:0},
-      {id:'n6', t:'slack', title:'Slack DM: ask owner', c:4, l:1},
-      {id:'n7', t:'wait', title:'Wait for reply', c:5, l:1},
-      {id:'n8', t:'escalate', title:'Escalate to lead', c:6, l:1},
       {id:'n9', t:'jira', title:'Create Jira task', c:6, l:0},
       {id:'n10', t:'approval', title:'Your sign-off', c:7, l:0},
       {id:'n11', t:'followup', title:'Follow up', c:8, l:0}
     ].map(n=>({...n, x:colX(n.c), y:laneY(n.l)})),
     edges:[
-      ['n1','out','n2'],['n2','out','n3'],['n3','out','n4'],['n4','yes','n5'],['n4','no','n6'],
-      ['n6','out','n7'],['n7','replied','n9'],['n7','timeout','n8'],['n5','out','n9'],['n9','out','n10'],['n10','out','n11']
+      ['n1','out','n2'],['n2','out','n3'],['n3','out','n4'],['n4','yes','n5'],['n5','out','n9'],['n9','out','n10'],['n10','out','n11']
     ].map(([f,fp,t],i)=>({id:'e'+(i+1), f, fp, t}))
   };
 }
@@ -596,9 +605,13 @@ const STAGES = [[0,0],[1,1],[2,5],[6,6],[7,7],[8,8]].map((cols,i)=>({n:i+1, name
 const STATUS_LABEL = {completed:'Completed', attention:'Needs attention', pending:'Pending review', queued:'Queued', resumed:'Resumed'};
 
 const CFG0 = Object.assign({}, cfg);
+/* One-button test: run the stuck items through the workflow, light the path, stop red at the bottleneck. */
+let sim = {state:'idle'};      // idle | running | failed | fixed | passed
+let fix = null;                // 'ask' | 'me' once a fix is applied
+let simTimer = null;
 let {nodes, edges} = defaultGraph();
 let seq = 20, eseq = 50;
-let sel = 'n6', selEdge = null, tab = 'config';
+let sel = null, selEdge = null, tab = 'config';
 let testItem = ITEMS[0].id;
 let cfgVer = 1;
 let run = null;                // current/last test run
@@ -868,6 +881,10 @@ function renderCanvas(){
       else if (run.edges.includes(e.id)){ cls += ' walked'; mk='ar-hot'; lcls='walked'; }
       else if (run.state==='done') { cls += ' cold'; lcls += ' cold'; }
     }
+    if (sim.path && sim.state!=='idle' && sim.state!=='fixed'){
+      const k = sim.path.es.indexOf(e.id);
+      if (k > -1 && k < sim.shown-1){ cls += ' ok'; mk='ar-yes'; }
+    }
     if (selEdge===e.id){ cls += ' sel'; mk='ar-sel'; }
     svg += `<path class="${cls}" data-e="${e.id}" d="${d}" marker-end="url(#${mk})"/><path class="hit" data-edge="${e.id}" d="${d}"/>`;
     const op = cat(a).outs.find(p=>p.id===e.fp);
@@ -892,11 +909,18 @@ function renderCanvas(){
     }
     if (n._flag) cls += ' flag';
     let badge = '';
+    if (sim.path && sim.state!=='idle' && sim.state!=='fixed'){
+      const k = sim.path.seq.indexOf(n.id);
+      if (k > -1 && k < sim.shown){
+        if (sim.path.fail===n.id && sim.shown>=sim.path.seq.length && sim.state==='failed'){ cls += ' s-fail'; badge = `<span class="nb fail">${ic('alert')}Failed · ${FLAGGED.length}</span>`; }
+        else { cls += ' s-ok'; badge = `<span class="nb done">${ic('check')}Passed</span>`; }
+      } else if (k === sim.shown && sim.state==='running') cls += ' s-next anim';
+    }
     if (st){
       const map = {done:['done','check','Done'], skipped:['skipped','','Skipped'], warn:['warn','alert','Warning'], waiting:['waiting','hour','Waiting on you']};
       const [bc, bi, bt] = map[st.status]||map.done;
       badge = `<span class="nb ${bc}">${bi?ic(bi):''}${bt}</span>`;
-    } else if (uw.some(u=>u.n.id===n.id)){
+    } else if (!badge && uw.some(u=>u.n.id===n.id)){
       badge = `<span class="nb unwired">${ic('link')}Not wired</span>`;
     }
     let ports = '';
@@ -933,9 +957,7 @@ function renderBanner(){
   }
   b.className = 'banner';
   b.innerHTML = `<span class="bi">${ic('alert')}</span>
-    <span class="bt"><b>${flagged.length} action items are stuck at step 3.</b> Test the fix, then deploy.</span>
-    <button class="btn sm" id="showMe">${ic('target')}Show me</button>`;
-  $('#showMe').onclick = showProblem;
+    <span class="bt">${sim.state==='passed' ? `<b>All steps pass.</b> Deploy to unblock the ${flagged.length} items.` : `<b>${flagged.length} action items are stuck at step 3.</b> Run a test to find out why.`}</span>`;
 }
 function renderLegend(){
   $('#legend').innerHTML = ['Transcript','ActionItems','ActionItem','Message','Task'].map(t=>`<span class="tchip"><i style="background:${TYPES[t].c}"></i>${TYPES[t].l}</span>`).join('');
@@ -1093,9 +1115,9 @@ function json(o){
 function renderInspector(){
   const n = node(sel);
   if (sel==='n4') openedStuck = true;
-  if (!n){ insp.innerHTML = `<div class="empty">${ic('target')}<p>Click a step to edit it.</p></div>`; return; }
+  if (!n){ insp.innerHTML = cueHTML(); bindCue(); return; }
   const c = cat(n), st = run && run.byNode[n.id];
-  insp.innerHTML = `<div class="insp-head">
+  insp.innerHTML = `<button class="backcue" id="backCue">← Next step</button><div class="insp-head">
       <h3><span class="ni ${KCLASS[c.cat]}" style="background:none">${ic(c.icon)}</span>${esc(title(n))}</h3>
       <div class="tabs">
         <button class="tab ${tab==='config'?'on':''}" data-tab="config">Settings</button>
@@ -1103,7 +1125,64 @@ function renderInspector(){
       </div></div>
     <div class="insp-body" id="ib">${tab==='config' ? configHTML(n) : runHTML(n)}</div>`;
   insp.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; renderInspector(); });
+  $('#backCue').onclick = ()=>{ sel = null; renderAll(); };
   if (tab==='config') bindConfig(n); else bindRun(n);
+}
+function cueHTML(){
+  const N = FLAGGED.length;
+  const f = sim.path && sim.path.fail ? title(node(sim.path.fail)) : 'Owner Found?';
+  if (deployed) return `<div class="cue good"><div class="ck">${ic('check')}Live</div><h3>Your fix is live.</h3><p>The ${N} stuck items are moving again.</p><div class="fixes"><a class="btn" href="index.html">${ic('reply')}Back to Home</a></div></div>`;
+  switch(sim.state){
+    case 'running': return `<div class="cue"><div class="ck">${ic('play2')}Testing</div><h3>Running ${N} stuck items…</h3><p>Watch the path light up.</p></div>`;
+    case 'failed': return `<div class="cue bad"><div class="ck">${ic('alert')}Next step</div><h3>${esc(f)} failed on ${N} items</h3>
+      <p>No confirmed owner, and the matches are under your ${pct(cfg.threshold)} auto-assign rule. Nothing handles the <b>No</b> branch.</p>
+      <div class="fixes">
+        <button class="btn primary" data-fix="ask">${ic('msg')}<span>Ask the suggested owner in Slack<small>Wait ${cfg.timeoutH}h for a reply, then escalate</small></span></button>
+        <button class="btn" data-fix="me">${ic('ucheck')}<span>Send them to me to decide<small>You pick the owner</small></span></button>
+      </div></div>`;
+    case 'fixed': return `<div class="cue good"><div class="ck">${ic('check')}Fixed</div><h3>Fixed. Run test again.</h3><p>${fix==='ask' ? 'Added: Slack DM → wait for reply → escalate.' : 'Added: You decide.'}</p></div>`;
+    case 'passed': return `<div class="cue good"><div class="ck">${ic('check')}Next step</div><h3>All steps passed.</h3><p>Deploy when ready.</p></div>`;
+    default: return `<div class="cue"><div class="ck">${ic('spark')}Next step</div><h3>${N} items are stuck.</h3><p>Click <b>Run test</b> to find the step that blocks them.</p></div>`;
+  }
+}
+function bindCue(){ insp.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>applyFix(b.dataset.fix)); }
+function simPath(){
+  const seq = [], es = []; let cur = nodes.find(n=>n.t==='transcript'), guard = 0;
+  while (cur && guard++ < 40){
+    seq.push(cur.id);
+    const outs = cat(cur).outs; if (!outs.length) return {seq, es, fail:null};
+    const port = cur.t==='ownerFound' ? 'no' : cur.t==='wait' ? 'replied' : outs[0].id;   // the stuck items have no confirmed owner
+    const e = edges.find(x=>x.f===cur.id && x.fp===port);
+    if (!e) return {seq, es, fail: outs.length>1 ? cur.id : null};
+    es.push(e.id); cur = node(e.t);
+  }
+  return {seq, es, fail:null};
+}
+function runTest(){
+  clearTimeout(simTimer);
+  deployed = false; sel = null;
+  sim = {state:'running', path:simPath(), shown:0};
+  const step = ()=>{
+    sim.shown++;
+    if (sim.shown >= sim.path.seq.length){ sim.state = sim.path.fail ? 'failed' : 'passed'; renderAll(); renderBanner();
+      toast(sim.path.fail ? 'Found the bottleneck' : 'All steps passed', null, !!sim.path.fail); return; }
+    renderCanvas(); simTimer = setTimeout(step, 420);
+  };
+  renderAll(); simTimer = setTimeout(step, 300);
+}
+function applyFix(kind){
+  const on = (f,fp,t)=>edges.push({id:'e'+(++eseq), f, fp, t});
+  const add = (id,t,ttl,c,l)=>{ if (!node(id)) nodes.push({id, t, title:ttl, c, l, x:colX(c), y:laneY(l)}); };
+  edges = edges.filter(e=>!(e.f==='n4' && e.fp==='no'));
+  nodes = nodes.filter(n=>!['n6','n7','n8','n12'].includes(n.id)); edges = edges.filter(e=>node(e.f) && node(e.t));
+  if (kind==='ask'){
+    add('n6','slack','Slack DM: ask owner',4,1); add('n7','wait','Wait for reply',5,1); add('n8','escalate','Escalate to lead',6,1);
+    on('n4','no','n6'); on('n6','out','n7'); on('n7','replied','n9'); on('n7','timeout','n8');
+  } else {
+    add('n12','decide','You decide',4,1); on('n4','no','n12'); on('n12','out','n9');
+  }
+  fix = kind; sim = {state:'fixed'}; cfgVer++;
+  renderAll(); renderBanner();
 }
 function portsHTML(c){
   const tch = ps => ps.map(p=>`<span class="tchip"><i style="background:${TYPES[p.type].c}"></i>${p.label?esc(p.label)+': ':''}${TYPES[p.type].l}</span>`).join(' ');
@@ -1300,7 +1379,7 @@ function resetRun(){
   ({nodes, edges} = defaultGraph());
   Object.assign(cfg, CFG0);
   cfgVer++; cov.clear(); passVer = null; run = null; deployed = false;
-  sel = 'n6'; tab = 'config'; selEdge = null;
+  sel = null; tab = 'config'; selEdge = null; sim = {state:'idle'}; fix = null;
   renderAll(); renderBanner(); renderLib(); initialView();
 }
 function setTestItem(id){
@@ -1325,29 +1404,14 @@ function renderSim(){
     const last = tl.lastElementChild; if (last) last.scrollIntoView({block:'nearest', inline:'end'});
   } else { tl.className=''; tl.innerHTML=''; }
 
-  // controls
-  const cks = checks(), okN = cks.filter(c=>c.ok).length, allOk = okN===cks.length;
-  let status = ['','Ready to test'];
-  if (run){
-    if (run.state==='running') status = [animating()?'running anim':'running', 'Testing…'];
-    else if (run.state==='waiting') status = ['waiting', 'Your move'];
-    else status = run.warn ? ['warn', 'Problem found'] : ['', 'Test passed'];
-  }
-  const busy = run && run.state==='running' && run.mode==='auto';
+  const busy = sim.state==='running', ready = sim.state==='passed' && !deployed;
   $('#simrow').innerHTML = `
-    <span class="status ${status[0]}"><span class="d"></span>${esc(status[1])}</span>
-    <div class="seg" role="radiogroup" aria-label="Test item">${ITEMS.map(i=>`<button class="st-${i.state} ${i.id===testItem?'on':''}" data-item="${i.id}" title="${esc(i.title)}"><span class="sid">${esc(i.title.split(' ').slice(0,2).join(' '))}…</span><small>${stateLabel(i.state)}</small></button>`).join('')}</div>
-    <button class="btn dark" id="runBtn" ${busy?'disabled':''}>${ic('play2')}Run test</button>
-    <button class="btn ghost" id="resetBtn" title="Back to the starting workflow">${ic('reset')}Reset</button>
+    <button class="btn dark" id="runBtn" ${busy?'disabled':''}>${ic('play2')}${sim.state==='idle'?'Run test':'Run test again'}</button>
     <span class="spacer"></span>
-    <button class="checksbtn" id="checksBtn" aria-expanded="false"><span class="meter">${cks.map(c=>`<i class="${c.ok?'ok':''}"></i>`).join('')}</span>Tests ${okN}/${cks.length}</button>
-    <button class="btn primary deploy" id="deployBtn" ${allOk && !deployed?'':'aria-disabled="true" style="opacity:.5"'}>${ic('rocket')}${deployed?'Deployed':'Deploy'}</button>`;
-  $('#simrow').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>setTestItem(b.dataset.item));
-  $('#runBtn').onclick = ()=>startRun('auto');
-  if ($('#resetBtn')) $('#resetBtn').onclick = resetRun;
-  $('#checksBtn').onclick = e=>{ e.stopPropagation(); togglePop(); };
-  $('#deployBtn').onclick = e=>{ e.stopPropagation(); if (allOk && !deployed) doDeploy(); else togglePop(true); };
-  renderPop(); renderGuide();
+    <button class="btn primary deploy" id="deployBtn" ${ready?'':'aria-disabled="true" style="opacity:.45"'}>${ic('rocket')}${deployed?'Deployed':'Deploy'}</button>`;
+  $('#runBtn').onclick = runTest;
+  $('#deployBtn').onclick = e=>{ e.stopPropagation(); if (ready) doDeploy(); else toast(sim.state==='failed' ? 'Fix the red step first' : 'Run the test first'); };
+  renderGuide();
 }
 function renderPop(){
   const cks = checks();
@@ -1358,17 +1422,11 @@ function togglePop(force){ const p = $('#pop'); p.classList.toggle('on', force==
 function doDeploy(){
   deployed = true;
   const flagged = FLAGGED;
-  const desc = it => walk(it).nodes.map(id=>node(id)).filter(n=>!['transcript','extractor','matcher'].includes(n.t)).map(n=>{
-    if (n.t==='ownerFound') return routeOwner(it)==='yes' ? 'owner found' : 'no owner';
-    if (n.t==='slack') return 'DM '+recipient(it);
-    if (n.t==='wait') return `waits ${cfg.timeoutH}h`;
-    if (n.t==='approval') return it.state==='awaiting-confirmation' ? `waits for ${it.owner}` : 'your sign-off';
-    return title(n);
-  }).join(' → ');
-  $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Action Item Tracking v2.5 is live</h3>
-    <p>Step 3 resumed. Here is what happens next to the ${flagged.length} items that were stuck:</p>
-    ${flagged.map(it=>`<div class="route"><span class="rid">${it.id}</span><span class="rt"><b>${esc(it.title)}</b><small>${esc(desc(it))}</small></span><span class="pill ${routeOwner(it)}">${stateLabel(it.state)}</span></div>`).join('')}
-    <div class="acts"><button class="btn" id="mClose">Stay on canvas</button><a class="btn primary" href="workflow.html">Back to Action Item Tracking</a></div>`;
+  const what = it => { const c = cand(it); return fix==='ask' ? (c ? `Asking ${c.name} in Slack` : 'Asking in Slack') : 'Waiting for your pick'; };
+  $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Your fix is live</h3>
+    <p>The ${flagged.length} stuck items are moving again:</p>
+    ${flagged.map(it=>`<div class="route"><span class="rt"><b>${esc(it.title)}</b><small>${esc(what(it))}</small></span></div>`).join('')}
+    <div class="acts"><button class="btn primary" id="mClose">Done</button></div>`;
   $('#modal').classList.add('on');
   $('#mClose').onclick = ()=>$('#modal').classList.remove('on');
   renderAll(); renderBanner();
@@ -1530,14 +1588,6 @@ $('#q').addEventListener('input', renderLib);
 /* toolbar etc. */
 $('#zIn').onclick = ()=>setZoom(z*1.15);
 $('#zOut').onclick = ()=>setZoom(z/1.15);
-$('#zFit').onclick = fitAll;
-$('#zFocus').onclick = showProblem;
-$('#tidy').onclick = ()=>{
-  const d = defaultGraph(), extra = [];
-  nodes.forEach(n=>{ const dn = d.nodes.find(x=>x.id===n.id); if (dn){ n.x = dn.x; n.y = dn.y; } else extra.push(n); });
-  extra.forEach((n,i)=>{ n.x = colX(1 + (i%6)); n.y = laneY(3) + Math.floor(i/6)*LANEH; });
-  fitAll(); toast('Laid out left to right by pipeline step');
-};
 scroller.addEventListener('wheel', e=>{
   if (!e.ctrlKey && !e.metaKey) return;
   e.preventDefault();
@@ -1556,20 +1606,15 @@ $('#modal').addEventListener('click', e=>{ if (e.target.id==='modal') $('#modal'
 /* Read-only state for the guided tour (assets/tour.js, rules under "canvas"). */
 let openedStuck = false;
 window.MFCanvas = {
-  get opened(){ return openedStuck; },
-  get busy(){ return !!(run && run.state!=='done'); },
-  get testedNo(){ return checks()[0].ok; },
-  get testedYes(){ return checks()[1].ok; },
-  get ready(){ return checks().every(c=>c.ok) && !deployed; },
+  get state(){ return sim.state; },
   get deployed(){ return deployed; },
   get modalOpen(){ return $('#modal').classList.contains('on'); },
-  get testItem(){ return testItem; }
+  get panelOpen(){ return !sel; }
 };
 
 /* "How this works" guide in the top bar: shows where the user is. */
 function renderGuide(){
-  const cks = checks(), allOk = cks.every(c=>c.ok);
-  const cur = deployed ? 'deploy' : allOk ? 'deploy' : run ? 'test' : 'test';
+  const cur = (deployed || sim.state==='passed') ? 'deploy' : 'test';
   const order = ['add','connect','test','deploy'];
   document.querySelectorAll('.guide li').forEach(li=>{
     const g = li.dataset.g;

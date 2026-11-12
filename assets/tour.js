@@ -23,15 +23,12 @@
       { sel: '#banner-slot a.btn[href="goal.html"]', n: 5, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
     ],
     canvas: [
-      { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 5, text: "Your fix is live. Click <b>Stay on canvas</b>." },
+      { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 4, text: "Your fix is live. Click <b>Done</b>." },
       { when: () => window.MFCanvas && MFCanvas.deployed, sel: '#nav a.mf-link[href="index.html"]', n: 5, text: "Done. Head back <b>Home</b>." },
-      { when: () => window.MFCanvas && MFCanvas.testedNo, sel: ".waitbar .btn.primary", n: 3, text: "The test is waiting on a person. Click the highlighted button." },
-      { sel: ".waitbar .btn.primary", n: 2, text: "The test is waiting on a person. Click the highlighted button." },
-      { when: () => window.MFCanvas && MFCanvas.ready, sel: "#deployBtn", n: 4, text: "Both tests passed. Click <b>Deploy</b>." },
-      { when: () => window.MFCanvas && !MFCanvas.opened, sel: '.node[data-node="n4"]', n: 1, text: "This is your workflow. Click the stuck step, <b>Owner Found?</b>" },
-      { when: () => window.MFCanvas && !MFCanvas.busy && !MFCanvas.testedNo, sel: "#runBtn", n: 2, text: "Test it on a stuck item. Click <b>Run test</b>." },
-      { when: () => window.MFCanvas && !MFCanvas.busy && MFCanvas.testedNo && !MFCanvas.testedYes && MFCanvas.testItem !== "ai-2", sel: '[data-item="ai-2"]', n: 3, text: "Now an item that has an owner. Pick <b>Confirm API…</b>" },
-      { when: () => window.MFCanvas && !MFCanvas.busy && !MFCanvas.testedYes, sel: "#runBtn", n: 3, text: "Click <b>Run test</b> again." }
+      { when: () => window.MFCanvas && MFCanvas.state === "passed", sel: "#deployBtn", n: 4, text: "All green. Click <b>Deploy</b>." },
+      { when: () => window.MFCanvas && MFCanvas.state === "failed", sel: "#insp [data-fix]", n: 2, text: "A step failed. Pick a fix on the right." },
+      { when: () => window.MFCanvas && MFCanvas.state === "fixed", sel: "#runBtn", n: 3, text: "Click <b>Run test again</b>." },
+      { when: () => window.MFCanvas && MFCanvas.state === "idle", sel: "#runBtn", n: 1, text: "Click <b>Run test</b>." }
     ]
   }[page];
   if (!RULES) return;
