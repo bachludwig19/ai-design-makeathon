@@ -36,7 +36,7 @@
       <nav class="tabs" role="tablist">
         <button class="tab on" data-tab="overview" role="tab"></button>
         <a class="tab" href="canvas.html" id="tab-design"></a>
-        <button class="tab" data-tab="items" role="tab" id="tab-items"></button>
+        <button class="tab" data-tab="items" role="tab" id="tab-items" hidden style="display:none"></button>
         <button class="tab" data-tab="audit" role="tab" id="tab-audit"></button>
       </nav>
 
@@ -62,7 +62,7 @@
             <div class="pipe-head"><span id="audit-ic"></span>Activity &amp; audit trail<span class="spacer"></span><button class="link" style="font-size:13px" data-goto="audit">View all</button></div>
             <ul class="audit-list" id="audit-mini"></ul>
           </div>
-          <div class="panel metrics">
+          <div class="panel metrics" style="display:none">
             <div class="h-sec">Workflow health metrics</div>
             <div class="m-grid" id="metrics"></div>
           </div>
@@ -141,7 +141,6 @@
   $("#edit-btn").innerHTML = icon("pencil", "ic-sm") + "Edit design";
   $("#export-btn").innerHTML = icon("download", "ic-sm") + "Export log";
   $("#tab-design").innerHTML = icon("flow", "ic-sm") + `Workflow design <span class="pill grey">${MF.pipeline.length} steps</span>`;
-  $('[data-tab="overview"]').innerHTML = icon("grid", "ic-sm") + `Overview &amp; goal impact <span class="pill gold">Active</span>`;
   $("#tab-audit").innerHTML = icon("history", "ic-sm") + "Activity &amp; audit trail";
   $("#pipe-ic").innerHTML = icon("flow"); $("#audit-ic").innerHTML = icon("history"); $("#audit-ic2").innerHTML = icon("history");
   $("#cfg-btn").innerHTML = icon("sliders", "ic-sm") + "Configure step parameters";
@@ -158,8 +157,8 @@
     if (pipe === "done") { st.className = "pill dot healthy"; st.textContent = "Active · Healthy"; }
     else if (pipe !== "paused") { st.className = "pill dot gold"; st.textContent = "Active · Resuming"; }
     else { st.className = "pill dot attention"; st.textContent = "Active · Needs attention"; }
-    $("#tab-items").innerHTML = icon("checkCircle", "ic-sm") + "Action items " +
-      (left ? `<span class="pill attention">${left} attention</span>` : `<span class="pill healthy">All clear</span>`);
+    $('[data-tab="overview"]').innerHTML = icon("grid", "ic-sm") + "Overview &amp; action items to resolve " +
+      (left ? `<span class="pill attention">${left} to resolve</span>` : `<span class="pill healthy">All clear</span>`);
     const a = $("#alert");
     if (pipe !== "paused" && pipe !== "done") return;
     if (pipe === "done") {
