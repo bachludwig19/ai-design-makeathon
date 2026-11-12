@@ -1624,6 +1624,7 @@ function renderPop(){
 function togglePop(force){ const p = $('#pop'); p.classList.toggle('on', force===true ? true : !p.classList.contains('on')); }
 function doDeploy(){
   deployed = true;
+  try { if (window.MFState){ const st = MFState.get(); st.canvasFix = fix; MFState.set(st); } } catch(e){}
   const flagged = FLAGGED;
   const what = it => { const c = cand(it); return fix==='ask' ? (c ? `Asking ${c.name} in Slack` : 'Asking in Slack') : 'Waiting for your pick'; };
   $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Your fix is live</h3>
@@ -1849,6 +1850,8 @@ $('#libClose').onclick = ()=>setLib(true);
 $('#libOpen').onclick = $('#libOpen2').onclick = ()=>setLib(false);
 { const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
 document.getElementById('cvReset').onclick = () => { try { window.MFState && MFState.reset(); sessionStorage.clear(); localStorage.removeItem('mf.canvas.v1'); } catch (e) {} location.href = 'index.html'; };
+// Returning after Deploy: keep the deployed fix so the tour doesn't loop back into the test.
+try { const cf = window.MFState && MFState.get().canvasFix; if (cf && allResolved()){ applyFix(cf); sim = {state:'passed'}; deployed = true; renderAll(); } } catch(e){}
 requestAnimationFrame(initialView);
 let rzT = null;
 window.addEventListener('resize', ()=>{ clearTimeout(rzT); rzT = setTimeout(initialView, 150); });

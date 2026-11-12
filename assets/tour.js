@@ -15,7 +15,7 @@
     ],
     goal: [
       { when: () => !resolved(), sel: 'a.btn[href="canvas.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
-      { when: resolved, sel: '#mf-nav a.nav-link[href="index.html"]', n: 7, text: "Blockers cleared: 72% → 81%. Head back <b>Home</b>." }
+      { when: resolved, sel: '#mf-nav a.nav-link[href="index.html"]', n: 11, text: "Blockers cleared: 72% → 81%. Head back <b>Home</b>." }
     ],
     workflow: [
       { sel: "[data-accept]", n: 4, text: "Here is the agent's evidence and confidence. <b>Assign</b> its pick, or choose someone else." },
