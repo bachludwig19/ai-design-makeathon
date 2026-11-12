@@ -61,6 +61,7 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .spacer{flex:1}
 .ptitle{display:flex;flex-direction:column;line-height:1.15;white-space:nowrap}
 .ptitle .psub{font-size:12px;color:var(--text-3)}
+.ptitle .psub b{font-weight:600;color:var(--text-2)}
 .guide{display:flex;gap:4px;list-style:none;margin:0 0 0 12px;padding:0}
 .guide li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);padding:5px 10px 5px 6px;border-radius:2px;white-space:nowrap}
 .guide li i{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;border:1px solid var(--hair-strong);color:var(--text-2)}
@@ -175,8 +176,8 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .elabel.cold{opacity:.3}
 
 /* nodes */
-.node{position:absolute;width:216px;height:76px;display:flex;align-items:center;background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 14px;cursor:grab;user-select:none;transition:box-shadow .2s,border-color .2s,opacity .25s;z-index:2}
-.node.multi{padding-right:66px}
+.node{position:absolute;width:180px;height:84px;display:flex;align-items:center;background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 14px;cursor:grab;user-select:none;transition:box-shadow .2s,border-color .2s,opacity .25s;z-index:2}
+.node.multi{padding-right:58px}
 .node:hover{border-color:var(--hair-strong)}
 .node .nh{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.08em;color:var(--text-3);font-weight:600;white-space:nowrap}
 .ni{width:24px;height:24px;border-radius:var(--radius);display:grid;place-items:center;background:var(--surface);color:var(--text-2);flex:none}
@@ -187,7 +188,9 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .k-int .ni{background:var(--k-int-bg);color:var(--text-2)}
 .k-trig .ni{background:var(--k-trig-bg);color:var(--port-transcript)}
 .node .nrow{display:flex;align-items:center;gap:10px;min-width:0}
-.node .nt{font-weight:600;font-size:15px;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.node .nt{font-weight:600;font-size:17px;line-height:1.15;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.node .nsub{font-size:13px;color:var(--text-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .ntx{min-width:0}
 .node .ns{font-size:12.5px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node.sel{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft),var(--shadow)}
 .node.dragging{cursor:grabbing;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:4}
@@ -213,7 +216,7 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .world.connecting .port.in.ok{transform:scale(1.5);border-color:var(--teal);box-shadow:0 0 0 5px rgba(var(--teal-rgb),.22)}
 .world.connecting .port.in.no{opacity:.2}
 .world.connecting .node.tgt-no{opacity:.55}
-.waitbar{position:absolute;display:flex;flex-direction:column;gap:6px;width:216px;z-index:6}
+.waitbar{position:absolute;display:flex;flex-direction:column;gap:6px;width:180px;z-index:6}
 .waitbar .wl{font-size:11px;color:var(--text-2);text-align:center}
 .waitbar .btn{justify-content:center}
 
@@ -369,7 +372,7 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
 <div class="app">
   <header class="top">
     <button class="iconbtn" id="navToggle" title="Toggle navigation" aria-label="Toggle navigation"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></button>
-    <div class="ptitle"><span class="here">Workflow builder</span><span class="psub">Action Item Tracking</span></div>
+    <div class="ptitle"><span class="here">Your workflow · Action Item Tracking</span><span class="psub">Supports <b id="goalName">Keep product delivery on track</b> · built by you, 2 days ago</span></div>
     <ol class="guide" aria-label="How this works">
       <li data-g="add"><i>1</i>Add steps</li><li data-g="connect"><i>2</i>Connect</li><li data-g="test"><i>3</i>Test</li><li data-g="deploy"><i>4</i>Deploy</li>
     </ol>
@@ -447,7 +450,7 @@ const ITEMS = FLAGGED.concat((MF.completedItems||[]).map((c,i)=>Object.assign(
 const LEAD = 'Marcus Vance (Product Lead)';
 
 /* ---------------- geometry ---------------- */
-const NW = 216, NH = 76, COLW = 272, LANEH = 160, PADX = 40, TOP = 108;
+const NW = 180, NH = 84, COLW = 212, LANEH = 150, PADX = 24, TOP = 104;
 const OFFY = 62;                 // space above the world for the toolbar/banner overlay
 const colX = c => PADX + c * COLW;
 const laneY = l => TOP + l * LANEH;
@@ -554,17 +557,17 @@ const cfg = {
   jiraProject: 'ENG-CORE'
 };
 const SUB = {
-  n1:()=>'Zoom VTT · on meeting end',
-  n2:()=>'GPT-4o Alpine · conf ≥ 0.70',
-  n3:()=>'Speaker, tickets, capacity',
-  n4:()=>`≥ ${Math.round(cfg.threshold*100)}% or confirmed`,
-  n5:()=>'Flags overdue & at-risk',
-  n6:()=>cfg.recipient==='suggested' ? `To suggested owner · else ${cfg.channel}` : `Post to ${cfg.channel}`,
-  n7:()=>`Fallback after ${cfg.timeoutH}h`,
-  n8:()=>'Whoever raised it · Slack + email',
-  n9:()=>`Project: ${cfg.jiraProject}`,
-  n10:()=>'Approver: Alex Mercer',
-  n11:()=>'Daily nudge until done'
+  n1:()=>'When a meeting ends',
+  n2:()=>'GPT-4o Alpine',
+  n3:()=>'Speaker + ticket history',
+  n4:()=>`Yes if ≥ ${Math.round(cfg.threshold*100)}% match`,
+  n5:()=>'Flags overdue',
+  n6:()=>cfg.recipient==='suggested' ? 'DM the suggested owner' : `Post to ${cfg.channel}`,
+  n7:()=>`${cfg.timeoutH}h, then escalate`,
+  n8:()=>'Slack + email',
+  n9:()=>`Project ${cfg.jiraProject}`,
+  n10:()=>'Approver: you',
+  n11:()=>'Daily nudge'
 };
 function defaultGraph(){
   return {
@@ -576,10 +579,10 @@ function defaultGraph(){
       {id:'n5', t:'deadline', c:4, l:0},
       {id:'n6', t:'slack', title:'Slack DM: ask owner', c:4, l:1},
       {id:'n7', t:'wait', title:'Wait for reply', c:5, l:1},
-      {id:'n8', t:'escalate', title:'Escalate to meeting lead', c:6, l:2},
-      {id:'n9', t:'jira', c:7, l:0},
-      {id:'n10', t:'approval', c:8, l:0},
-      {id:'n11', t:'followup', c:9, l:0}
+      {id:'n8', t:'escalate', title:'Escalate to lead', c:6, l:1},
+      {id:'n9', t:'jira', title:'Create Jira task', c:6, l:0},
+      {id:'n10', t:'approval', title:'Your sign-off', c:7, l:0},
+      {id:'n11', t:'followup', title:'Follow up', c:8, l:0}
     ].map(n=>({...n, x:colX(n.c), y:laneY(n.l)})),
     edges:[
       ['n1','out','n2'],['n2','out','n3'],['n3','out','n4'],['n4','yes','n5'],['n4','no','n6'],
@@ -587,9 +590,10 @@ function defaultGraph(){
     ].map(([f,fp,t],i)=>({id:'e'+(i+1), f, fp, t}))
   };
 }
-const STAGES = [[0,0],[1,1],[2,6],[7,7],[8,8],[9,9]].map((cols,i)=>({n:i+1, name:MF.pipeline[i], cols, status:(MF.pipelineStatus||['completed','completed','attention','pending','queued','queued'])[i]||'queued'}));
+const STAGES = [[0,0],[1,1],[2,5],[6,6],[7,7],[8,8]].map((cols,i)=>({n:i+1, name:MF.pipeline[i], cols, status:(MF.pipelineStatus||['completed','completed','attention','pending','queued','queued'])[i]||'queued'}));
 const STATUS_LABEL = {completed:'Completed', attention:'Needs attention', pending:'Pending review', queued:'Queued', resumed:'Resumed'};
 
+const CFG0 = Object.assign({}, cfg);
 let {nodes, edges} = defaultGraph();
 let seq = 20, eseq = 50;
 let sel = 'n6', selEdge = null, tab = 'config';
@@ -800,8 +804,8 @@ function checks(){
 /* ---------------- canvas rendering ---------------- */
 const world = $('#world'), sizer = $('#sizer'), scroller = $('#scroller');
 function worldSize(){
-  const W = Math.max(colX(10)+PADX, ...nodes.map(n=>n.x+NW+PADX+40));
-  const H = Math.max(laneY(3)+20, ...nodes.map(n=>n.y+NH+80));
+  const W = Math.max(colX(8)+NW+PADX, ...nodes.map(n=>n.x+NW+PADX));
+  const H = Math.max(laneY(2)+10, ...nodes.map(n=>n.y+NH+80));
   return {W, H};
 }
 function portY(count, i){ return count===1 ? NH/2 : 22 + i*32; }
@@ -860,7 +864,7 @@ function renderCanvas(){
     if (runActive){
       if (run.lastEdge===e.id && animating()){ cls += ' hot'; mk='ar-hot'; lcls='walked'; }
       else if (run.edges.includes(e.id)){ cls += ' walked'; mk='ar-hot'; lcls='walked'; }
-      else { cls += ' cold'; lcls += ' cold'; }
+      else if (run.state==='done') { cls += ' cold'; lcls += ' cold'; }
     }
     if (selEdge===e.id){ cls += ' sel'; mk='ar-sel'; }
     svg += `<path class="${cls}" data-e="${e.id}" d="${d}" marker-end="url(#${mk})"/><path class="hit" data-edge="${e.id}" d="${d}"/>`;
@@ -882,7 +886,7 @@ function renderCanvas(){
     if (runActive){
       if (st) cls += ' s-'+st.status;
       else if (run.cursor===n.id && run.state==='running') cls += ' s-next' + (animating()?' anim':'');
-      else cls += ' dim';
+      else if (run.state==='done') cls += ' dim';
     }
     if (n._flag) cls += ' flag';
     let badge = '';
@@ -900,7 +904,7 @@ function renderCanvas(){
       const lc = branchClass(p.id)==='yes' ? 'var(--teal)' : branchClass(p.id)==='no' ? 'var(--danger)' : 'var(--text-2)';
       ports += `<span class="port out" data-node="${n.id}" data-port="${p.id}" data-type="${p.type}" style="top:${y}px;--pc:${TYPES[p.type].c}" title="out · ${TYPES[p.type].l} · drag to connect">${p.label?`<span class="pl" style="color:${lc}">${esc(p.label)}</span>`:''}</span>`; });
     html += `<div class="${cls}" data-node="${n.id}" style="left:${n.x}px;top:${n.y}px">${badge}
-      <div class="nrow"><span class="ni">${ic(c.icon)}</span><div class="nt" title="${esc(sub(n))}">${esc(title(n))}</div></div>${ports}</div>`;
+      <div class="nrow"><span class="ni">${ic(c.icon)}</span><div class="ntx"><div class="nt">${esc(title(n))}</div><div class="nsub">${esc(sub(n))}</div></div></div>${ports}</div>`;
   });
 
   // waiting actions on canvas
@@ -1287,7 +1291,15 @@ function finish(){
   const it = item(run.itemId);
   toast(run.warn ? 'Problem found. Check the red step.' : 'Test passed', null, run.warn);
 }
-function resetRun(){ clearTimeout(timer); run = null; renderAll(); }
+function resetRun(){
+  // Back to the starting workflow: original nodes, wiring and settings; no runs, nothing deployed.
+  clearTimeout(timer);
+  ({nodes, edges} = defaultGraph());
+  Object.assign(cfg, CFG0);
+  cfgVer++; cov.clear(); passVer = null; run = null; deployed = false;
+  sel = 'n6'; tab = 'config'; selEdge = null;
+  renderAll(); renderBanner(); renderLib(); initialView();
+}
 function setTestItem(id){
   testItem = id;
   if (run && run.state!=='done'){ clearTimeout(timer); run = null; }
@@ -1322,7 +1334,7 @@ function renderSim(){
     <span class="status ${status[0]}"><span class="d"></span>${esc(status[1])}</span>
     <div class="seg" role="radiogroup" aria-label="Test item">${ITEMS.map(i=>`<button class="st-${i.state} ${i.id===testItem?'on':''}" data-item="${i.id}" title="${esc(i.title)}"><span class="sid">${esc(i.title.split(' ').slice(0,2).join(' '))}…</span><small>${stateLabel(i.state)}</small></button>`).join('')}</div>
     <button class="btn dark" id="runBtn" ${busy?'disabled':''}>${ic('play2')}Run test</button>
-    ${run?`<button class="btn ghost" id="resetBtn">${ic('reset')}Reset</button>`:''}
+    <button class="btn ghost" id="resetBtn" title="Back to the starting workflow">${ic('reset')}Reset</button>
     <span class="spacer"></span>
     <button class="checksbtn" id="checksBtn" aria-expanded="false"><span class="meter">${cks.map(c=>`<i class="${c.ok?'ok':''}"></i>`).join('')}</span>Tests ${okN}/${cks.length}</button>
     <button class="btn primary deploy" id="deployBtn" ${allOk && !deployed?'':'aria-disabled="true" style="opacity:.5"'}>${ic('rocket')}${deployed?'Deployed':'Deploy'}</button>`;
@@ -1553,23 +1565,24 @@ document.querySelectorAll('.mf-link.off').forEach(a=>a.addEventListener('click',
 /* ---------------- boot ---------------- */
 $('#uname').textContent = MF.user.name; $('#utier').textContent = MF.user.tier;
 $('#avatar').textContent = MF.user.name.split(' ').map(s=>s[0]).join('');
+$('#goalName').textContent = MF.goal.title;
 renderBanner(); renderLib(); renderInspector(); renderSim();
 renderCanvas();
 /* Initial view: fit the whole flow if text stays legible (title >= 11px on screen); otherwise frame the step-3 decision area. */
 function initialView(){
   const {W, H} = worldSize(), r = scroller.getBoundingClientRect();
   const fitZ = Math.min((r.width-60)/W, (r.height-OFFY-30)/H);
-  if (fitZ*15 >= 11){ fitAll(); return; }
-  // Widest window of columns around step 3 that still renders titles at >= ~11.5px.
-  const ranges = [[1,8],[1,7],[2,6],[2,5]];
-  const usable = r.width - 60;
-  const pick = ranges.find(([c0,c1]) => usable/((colX(c1)+NW+24)-(colX(c0)-24)) * 15 >= 11.5) || [2,5];
+  if (fitZ*17 >= 9.5){ fitAll(); return; }   // whole workflow visible whenever titles stay readable
+  // Narrow screens: widest window of columns around step 3 that keeps titles readable.
+  const ranges = [[1,7],[1,6],[2,6],[2,5]];
+  const usable = r.width - 32;
+  const pick = ranges.find(([c0,c1]) => usable/((colX(c1)+NW+16)-(colX(c0)-16)) * 17 >= 10.5) || [2,5];
   frameCols(pick[0], pick[1]);
 }
 function setLib(collapsed){ $('#lib').classList.toggle('collapsed', collapsed); setTimeout(initialView, 230); }  // after the width transition
 $('#libClose').onclick = ()=>setLib(true);
 $('#libOpen').onclick = $('#libOpen2').onclick = ()=>setLib(false);
-if (window.innerWidth < 1600){ const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
+{ const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
 if (window.MFSettings) try { window.MFSettings.chip(document.getElementById('engineChip')); } catch(e) {}
 requestAnimationFrame(initialView);
 let rzT = null;
