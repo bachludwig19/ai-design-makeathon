@@ -141,13 +141,13 @@
   const menu = $("#persona-menu"), btn = $("#persona-btn");
   const opts = [
     { n: "Product Manager", s: "Alex Mercer · delivery, discovery, adoption" },
-    { n: "Engineering Lead", s: "Incidents, migrations, CI health" },
+    { n: "Engineering Lead", s: "Coming soon", disabled: true },
     { n: "Customer Success Lead", s: "Coming soon", disabled: true }
   ];
   function drawMenu() {
     const cur = persona();
     menu.innerHTML = opts.map((o) => `<button class="persona-opt ${o.n === cur ? "on" : ""}" role="menuitem" data-p="${o.n}" ${o.disabled ? "disabled" : ""}>
-      <span class="avatar sm ${o.n === "Engineering Lead" ? "ink" : o.disabled ? "gold" : ""}">${MFApp.initials(o.n)}</span>
+      <span class="avatar sm ${o.disabled ? "gold" : ""}">${MFApp.initials(o.n)}</span>
       <span><div class="t">${o.n}</div><div class="s">${o.s}</div></span>${icon("check", "ic-sm")}</button>`).join("");
   }
   function toggle(open) { menu.classList.toggle("open", open); btn.setAttribute("aria-expanded", open); }
@@ -186,6 +186,8 @@
       <span class="pill grey" style="margin-left:auto;height:22px;font-size:11.5px">${esc(r.label)}</span></div></div></div>`;
   });
 
+  // Only Product Manager is wired for the demo; fall back if a tab still holds another persona.
+  if (opts.some((o) => o.n === persona() && o.disabled)) setPersona("Product Manager");
   render(persona(), true);
 })();
 </script>
