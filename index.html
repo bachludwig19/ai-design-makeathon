@@ -142,7 +142,7 @@
     $("#goals").innerHTML = p.goals.map((g) => {
       const tag = g.href ? "a" : "div";
       return `<${tag} class="goal-card ${g.href ? "" : "inert"}" ${g.href ? `href="${g.href}"` : `title="Not available in this demo"`}>
-        <div class="top"><span class="pill ${g.status}">${label[g.status]}</span><span>${g.progress}%</span></div>
+        <div class="top">${g.status === "on-track" ? "<span></span>" : `<span class="pill ${g.status}">${label[g.status]}</span>`}<span>${g.progress}%</span></div>
         <h3>${esc(g.title)}</h3>
         <div class="bar"><i class="${barTone[g.status]}" data-w="${g.progress}"></i></div>
       </${tag}>`;
