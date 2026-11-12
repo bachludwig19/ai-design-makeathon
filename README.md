@@ -4,6 +4,8 @@ Describe the goal. The agent builds the flow.
 
 Goal with the Flow connects your team's goals to the AI agent workflows that keep them on track. You describe what good looks like in plain language, and the agent drafts the workflow for you, so you never start from a blank canvas. When a goal like *Keep product delivery on track* slips, its agents show you which meeting action items are stuck, suggest an owner for each with evidence from the conversation, and ask you before acting when they aren't sure. You resolve the items from one panel, then open the workflow on a visual canvas, run a test that highlights the failing step, and deploy a fix so the same problem doesn't happen again.
 
+**Try it live:** <https://goal-with-the-flow.netlify.app>. The guided tour starts on the home page.
+
 Built for the AI Design Makeathon, Track 1: Agentic Workflow.
 
 ## Demo video
