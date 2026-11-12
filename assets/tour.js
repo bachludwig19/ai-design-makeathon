@@ -25,6 +25,7 @@
     canvas: [
       { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 5, text: "Your fix is live. Click <b>Stay on canvas</b>." },
       { when: () => window.MFCanvas && MFCanvas.deployed, sel: '#nav a.mf-link[href="index.html"]', n: 5, text: "Done. Head back <b>Home</b>." },
+      { when: () => window.MFCanvas && MFCanvas.testedNo, sel: ".waitbar .btn.primary", n: 3, text: "The test is waiting on a person. Click the highlighted button." },
       { sel: ".waitbar .btn.primary", n: 2, text: "The test is waiting on a person. Click the highlighted button." },
       { when: () => window.MFCanvas && MFCanvas.ready, sel: "#deployBtn", n: 4, text: "Both tests passed. Click <b>Deploy</b>." },
       { when: () => window.MFCanvas && !MFCanvas.opened, sel: '.node[data-node="n4"]', n: 1, text: "This is your workflow. Click the stuck step, <b>Owner Found?</b>" },
