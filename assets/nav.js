@@ -97,7 +97,7 @@
         ${link("tasks", "My Tasks &amp; Approvals", "checkCircle")}
         ${link("activity", "Activity &amp; Insights", "spark")}
         <div class="nav-section" style="margin-top:6px">Build &amp; Configure</div>
-        ${link("agents", "Create workflows", "agents", "canvas.html")}
+        ${link("agents", "Create workflows", "agents")}
         ${link("integrations", "Integrations", "plug")}
         ${link("knowledge", "Knowledge &amp; Data", "db")}
         <div class="nav-foot">

@@ -207,13 +207,26 @@
     e.preventDefault();
     const goal = $("#ask-in").value.trim() || MF.goal.title;
     const out = $("#ask-out"), first = !created();
-    out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div class="waiting"><span class="spin"></span>Drafting workflows for “${esc(goal)}”…</div></div>`;
-    await sleep(1300);
-    const wfs = MF.supportingWorkflows;
-    const list = `<ul style="margin:10px 0 0;padding-left:18px;color:var(--text-2)">${wfs.map((w) => `<li><b style="color:var(--text)">${esc(w.name)}</b> · ${esc(w.desc)}</li>`).join("")}</ul>`;
+    // Let the tester see the agent set things up: a few readable stages, each workflow appearing in turn.
+    const wfs = MF.supportingWorkflows, sub = $("#ask button[type=submit]");
+    sub.disabled = true; // no double submits (and no hint on it) while the agent sets up
+    const stage = (lines, spin) => { out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div style="flex:1">${lines}
+      ${spin ? `<div class="waiting" style="margin-top:10px"><span class="spin"></span>${spin}</div>` : ""}</div></div>`; };
+    stage(`<div>Got it: <b>“${esc(goal)}”</b>.</div>`, "Reading your goal and recent meetings…");
+    await sleep(1600);
+    const done = [];
+    for (const w of wfs) {
+      stage(`<div>Setting up workflows for <b>“${esc(goal)}”</b></div><ul style="margin:10px 0 0;padding-left:18px;color:var(--text-2)">${done.join("")}</ul>`, `Drafting ${esc(w.name)}…`);
+      await sleep(1000);
+      done.push(`<li class="fade-in"><b style="color:var(--text)">${esc(w.name)}</b> · ${esc(w.desc)}</li>`);
+    }
+    stage(`<div>Setting up workflows for <b>“${esc(goal)}”</b></div><ul style="margin:10px 0 0;padding-left:18px;color:var(--text-2)">${done.join("")}</ul>`, "Connecting Slack, Jira and your meeting notes…");
+    await sleep(1400);
+    const list = `<ul style="margin:10px 0 0;padding-left:18px;color:var(--text-2)">${done.join("").replace(/ class="fade-in"/g, "")}</ul>`;
+    sub.disabled = false;
     if (!first) {
       out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div style="flex:1"><div>Drafted ${wfs.length} workflows for <b>“${esc(goal)}”</b>.</div>${list}
-        <div class="row" style="margin-top:12px"><a class="btn btn-primary" href="canvas.html">Open drafts ${icon("arrow", "ic-sm")}</a></div></div></div>`;
+</div></div>`;
       return;
     }
     setCreated(); $("#ask-in").value = "";
