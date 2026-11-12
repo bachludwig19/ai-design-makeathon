@@ -84,12 +84,12 @@
     const link = (id, label, ic, href) => {
       const on = id === page || (page === "goal" && id === "home") || (page === "workflow" && id === "tasks");
       return href
-        ? `<a class="nav-link ${on ? "active" : ""}" href="${href}">${icon(ic)}${label}</a>`
-        : `<a class="nav-link off" tabindex="-1" aria-disabled="true" title="Not available in this demo">${icon(ic)}${label}</a>`;
+        ? `<a class="nav-link ${on ? "active" : ""}" href="${href}" title="${label.replace(/&amp;/g, "&")}">${icon(ic)}<span class="lbl">${label}</span></a>`
+        : `<a class="nav-link off" tabindex="-1" aria-disabled="true" title="Not available in this demo">${icon(ic)}<span class="lbl">${label}</span></a>`;
     };
     if (navEl) {
       navEl.innerHTML = `
-        <a class="brand" href="index.html"><span class="brand-mark">GF</span>Goal with the Flow</a>
+        <a class="brand" href="index.html"><span class="brand-mark">GF</span><span class="lbl">Goal with the Flow</span></a>
         <div class="nav-section">Platform</div>
         ${link("home", "Home", "home", "index.html")}
         ${link("assistant", "AI Assistant", "bot")}
@@ -107,12 +107,26 @@
         </div>`;
       navEl.querySelector("#mf-reset").addEventListener("click", (e) => { e.preventDefault(); reset(); });
     }
+    // Collapsible left menu (icons only), remembered per browser.
+    const CK = "mf.nav.collapsed", app = document.querySelector(".app");
+    const css = document.createElement("style");
+    css.textContent = `.app{transition:grid-template-columns .25s ease}
+      .app.nav-collapsed{grid-template-columns:76px 1fr}
+      .app.nav-collapsed #mf-nav .lbl,.app.nav-collapsed #mf-nav .nav-section,.app.nav-collapsed #mf-nav .who>div,.app.nav-collapsed #mf-nav .reset-link{display:none}
+      .app.nav-collapsed #mf-nav .brand{justify-content:center;padding-left:0;padding-right:0}
+      .app.nav-collapsed #mf-nav .nav-link{justify-content:center;margin:2px 10px;padding:11px 0}
+      .app.nav-collapsed #mf-nav .who{justify-content:center}
+      #mf-nav{overflow:hidden}`;
+    document.head.appendChild(css);
+    const setC = (c) => { if (app) app.classList.toggle("nav-collapsed", c); try { localStorage.setItem(CK, c ? "1" : ""); } catch (e) {} };
+    try { if (localStorage.getItem(CK) === "1" && app) app.classList.add("nav-collapsed"); } catch (e) {}
     const top = document.getElementById("mf-top");
     if (top) {
       top.innerHTML = `
-        <span class="crumb"></span>
+        <button class="icon-btn" id="mf-collapse" aria-label="Collapse menu" title="Collapse menu">${icon("menu")}</button><span class="crumb"></span>
         <div class="top-search off" aria-disabled="true" title="Not available in this demo">${icon("search", "ic-sm")}Search nodes, runs…<span class="kbd">⌘K</span></div>
         <span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>`;
+      top.querySelector("#mf-collapse").addEventListener("click", () => setC(!(app && app.classList.contains("nav-collapsed"))));
       // No engine settings in the demo: always run the scripted flow.
       try { const k = "mf.engine.v1", e = JSON.parse(localStorage.getItem(k) || "{}"); if (e.mode === "live") { e.mode = "sim"; localStorage.setItem(k, JSON.stringify(e)); } } catch (e) {}
     }
