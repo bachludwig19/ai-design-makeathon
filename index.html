@@ -11,6 +11,17 @@
 <link rel="stylesheet" href="assets/app.css">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/brand.css">
+<style>
+  /* Home declutter (controller, 2026-11-11): one purpose line, one action, fewer words. */
+  .ask .purpose{font-family:var(--display);font-stretch:112%;font-weight:600;font-size:clamp(22px,3vw,32px);line-height:1.2;letter-spacing:.01em;margin:0 0 18px;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.45);max-width:720px}
+  .ask .hero-cta{display:flex;margin:0 0 16px}
+  .ask .hero-cta .btn{background:#111;color:#fff;border:1px solid rgba(var(--gold-rgb),.7)}
+  .goal-card{min-height:150px}
+  .goal-card h3{margin-bottom:14px}
+  .goal-card.inert,.more-inert{opacity:.45!important;filter:grayscale(1);cursor:not-allowed}
+  .goal-card.inert:hover{transform:none;box-shadow:none}
+  .more-inert{font-size:13px;color:var(--text-3);padding:10px 4px}
+</style>
 </head>
 <body data-page="home" data-crumb="Workspace / Autonomous Pipeline">
 <div class="app">
@@ -19,15 +30,15 @@
     <header id="mf-top"></header>
     <main class="content">
       <section class="ask">
-        <h1>What would you like to get done today?</h1>
+        <p class="purpose">Agents run the work your meetings create.<br>You step in when they stall.</p>
+        <div class="hero-cta"><a class="btn btn-primary" href="canvas.html">Build a workflow <span class="hero-arrow"></span></a></div>
         <form class="ask-box" id="ask">
           <span id="ask-ic"></span>
-          <input id="ask-in" placeholder="Describe a task, ask a question, or delegate work to AI…" autocomplete="off">
+          <input id="ask-in" placeholder="Ask what needs you today…" autocomplete="off">
           <button class="btn btn-primary" type="submit">Submit <span id="ask-arrow"></span></button>
         </form>
         <div id="ask-out"></div>
         <div class="persona">
-          <span>Current persona:</span>
           <span class="persona-chip" id="persona-chip"></span>
           <a href="#" class="link-u" id="persona-btn" aria-haspopup="true" aria-expanded="false">Change persona</a>
           <div class="persona-menu" id="persona-menu" role="menu"></div>
@@ -35,17 +46,7 @@
       </section>
 
       <div id="dash">
-        <div class="intro">
-          <p id="intro-1"></p>
-          <p class="muted">Here's what's progressing, what needs attention, and what your AI team has accomplished.</p>
-        </div>
         <section class="panel health">
-          <div class="row">
-            <span id="health-ic" style="color:var(--primary)"></span>
-            <span class="h-sec">Goal health metrics</span>
-            <span class="spacer"></span>
-            <span class="pill teal" id="health-total"></span>
-          </div>
           <div class="health-legend"><span id="h-on"></span><span id="h-risk"></span><span id="h-off"></span></div>
           <div class="health-bar" id="health-bar">
             <i style="background:var(--teal);flex-grow:0"></i><i style="background:var(--risk);flex-grow:0"></i><i style="background:var(--danger);flex-grow:0"></i>
@@ -55,7 +56,7 @@
         <div class="sec-head"><h2 class="h-sec">Needs your attention</h2></div>
         <section id="attention"></section>
 
-        <div class="sec-head"><h2 class="h-sec" id="goals-h"></h2><a class="link-u" href="#">View all →</a></div>
+        <div class="sec-head"><h2 class="h-sec" id="goals-h"></h2></div>
         <section class="goals" id="goals"></section>
       </div>
     </main>
@@ -72,7 +73,7 @@
   const $ = (s) => document.querySelector(s);
   $("#ask-ic").innerHTML = icon("sparkles", "ic-lg");
   $("#ask-arrow").innerHTML = icon("arrow", "ic-sm");
-  $("#health-ic").innerHTML = icon("target");
+  document.querySelectorAll(".hero-arrow").forEach((e) => (e.innerHTML = icon("arrow", "ic-sm")));
 
   // Persona-specific view. Product Manager is the wired path; its delivery goal reflects the workflow decisions.
   function view(name) {
@@ -97,10 +98,8 @@
   function render(name, animate) {
     const p = view(name);
     $("#persona-chip").textContent = name;
-    $("#intro-1").textContent = `Your ${p.noun} goals at a glance.`;
-    $("#goals-h").textContent = `Your ${p.noun} goals`;
-    const h = p.health, total = h.onTrack + h.atRisk + h.offTrack;
-    $("#health-total").textContent = `${total} active goals`;
+    $("#goals-h").textContent = "Your goals";
+    const h = p.health;
     $("#h-on").textContent = `${h.onTrack} On track`;
     $("#h-risk").textContent = `${h.atRisk} At risk`;
     $("#h-off").textContent = `${h.offTrack} Off track`;
@@ -111,7 +110,7 @@
 
     $("#attention").innerHTML =
       (p.cleared ? `<div class="resolved-note fade-in">${icon("checkCircle")}Engineering delivery commitments: you confirmed ${MF.actionItems.length} owners, tickets are in Jira. <a class="link" style="margin-left:auto;color:var(--teal)" href="goal.html">View goal ${icon("arrow", "ic-sm")}</a></div>` : "") +
-      `<div class="stagger">` + p.attention.map((a, i) => `
+      `<div class="stagger">` + p.attention.filter((a) => a.href).map((a, i) => `
         <div class="attn">
           <div>
             <div class="attn-title"><span class="tag ${a.tone}">${esc(a.tag)}</span>${esc(a.title)}</div>
@@ -120,15 +119,16 @@
           ${a.href
             ? `<a class="btn btn-primary" href="${a.href}">${esc(a.cta)} ${icon("arrow", "ic-sm")}</a>`
             : `<button class="btn ${a.secondary ? "btn-white" : "btn-primary"}" data-stub="${i}">${esc(a.cta)}${a.secondary ? "" : " " + icon("arrow", "ic-sm")}</button>`}
-        </div>`).join("") + `</div>`;
+        </div>`).join("") +
+      (p.attention.some((a) => !a.href) ? `<div class="more-inert" title="Not available in this demo">+${p.attention.filter((a) => !a.href).length} more · not in this demo</div>` : "") + `</div>`;
     $("#attention").querySelectorAll("[data-stub]").forEach((b) => b.addEventListener("click", () =>
       toast("This path isn't wired in the prototype. Try the delivery goal (Product Manager).", "sparkles")));
 
     $("#goals").innerHTML = p.goals.map((g) => {
       const tag = g.href ? "a" : "div";
-      return `<${tag} class="goal-card" ${g.href ? `href="${g.href}"` : ""}>
+      return `<${tag} class="goal-card ${g.href ? "" : "inert"}" ${g.href ? `href="${g.href}"` : `title="Not available in this demo"`}>
         <div class="top"><span class="pill ${g.status}">${label[g.status]}</span><span>${g.progress}%</span></div>
-        <h3>${esc(g.title)}</h3><p>${esc(g.desc)}</p>
+        <h3>${esc(g.title)}</h3>
         <div class="bar"><i class="${barTone[g.status]}" data-w="${g.progress}"></i></div>
       </${tag}>`;
     }).join("");
