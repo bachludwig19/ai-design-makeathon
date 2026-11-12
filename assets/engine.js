@@ -1,6 +1,7 @@
 // AI engine: Simulated (default, scripted dummy replies) or a live model.
 // Live = local Gemma via Ollama by default; Claude or OpenAI with the user's own API key as alternatives.
-// Settings and keys live only in this browser (localStorage). Any live failure falls back to the simulated reply.
+// Settings live in this browser (localStorage). API keys are NEVER stored: they are held in memory for the
+// current page only and are gone on reload. Any live failure falls back to the simulated reply.
 window.Engine = {
   key: "mf.engine.v1",
   defaults: {
@@ -10,10 +11,21 @@ window.Engine = {
     anthropicKey: "", anthropicModel: "claude-opus-5-5",
     openaiKey: "", openaiModel: ""
   },
-  get() { try { return { ...this.defaults, ...(JSON.parse(localStorage.getItem(this.key)) || {}) }; } catch { return { ...this.defaults }; } },
+  SECRETS: ["anthropicKey", "openaiKey"],
+  _mem: {}, // API keys for this page only; never written to localStorage, sessionStorage or cookies
+  _saved() {
+    let o = {}; try { o = JSON.parse(localStorage.getItem(this.key)) || {}; } catch {}
+    // Remove any key an older version saved to disk.
+    if (this.SECRETS.some(k => k in o)) { this.SECRETS.forEach(k => delete o[k]); try { localStorage.setItem(this.key, JSON.stringify(o)); } catch {} }
+    return o;
+  },
+  get() { return { ...this.defaults, ...this._saved(), ...this._mem }; },
   set(patch) {
     if ("ollamaUrl" in patch || "ollamaModel" in patch) { try { localStorage.removeItem(this.statusKey); } catch {} }
-    const s = { ...this.get(), ...patch }; try { localStorage.setItem(this.key, JSON.stringify(s)); } catch {} window.dispatchEvent(new Event("engine-change")); return s; },
+    const disk = { ...this._saved() };
+    for (const [k, v] of Object.entries(patch)) { if (this.SECRETS.includes(k)) this._mem[k] = v; else disk[k] = v; }
+    try { localStorage.setItem(this.key, JSON.stringify(disk)); } catch {}
+    window.dispatchEvent(new Event("engine-change")); return this.get(); },
 
   // Local model reachability. Cached in localStorage so pages don't re-probe (and log a refused
   // connection) on every load; re-checked when the settings modal opens or on "Check again".

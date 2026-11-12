@@ -93,7 +93,7 @@
             <div style="flex:1"><b>OpenAI</b><div class="mfs-row">
               <label class="mfs-f"><span>API key</span><input type="password" data-k="openaiKey" value="${esc(s.openaiKey)}" placeholder="sk-..." autocomplete="off"></label>
               <label class="mfs-f"><span>Model</span><input data-k="openaiModel" value="${esc(s.openaiModel)}" placeholder="model id"></label></div></div></label>
-          <p class="mfs-note" style="margin-top:8px">A Claude or ChatGPT chat subscription can't be connected here: those plans don't include API access for other apps. Keys are stored only in this browser.</p>
+          <p class="mfs-note" style="margin-top:8px">A Claude or ChatGPT chat subscription can't be connected here: those plans don't include API access for other apps. Your key is never saved: it is kept in memory for this page only, so you re-enter it after a reload.</p>
         </details>
         <div class="mfs-test"><button class="mfs-btn" data-test>Test connection</button><span data-out class="mfs-note"></span></div>
       </div>` : ""}
