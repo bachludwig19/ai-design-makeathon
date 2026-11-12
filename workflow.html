@@ -179,7 +179,8 @@
       <button class="btn btn-white" id="a-confirm" ${owners()["ai-2"] ? "disabled" : ""}>${icon("file", "ic-sm")}Request confirmation</button>
       <button class="btn btn-white" data-ctx>${icon("msg", "ic-sm")}View meeting context</button>`;
     const aa = $("#a-assign"); if (aa) aa.onclick = () => {
-      const next = ITEMS.find((i) => i.suggestedOwner && !owners()[i.id]) || ITEMS.find((i) => !owners()[i.id]);
+      const open = (i) => !owners()[i.id] && !ui[i.id].waiting;
+      const next = ITEMS.find((i) => i.suggestedOwner && open(i)) || ITEMS.find(open);
       if (next) { if (next.suggestedOwner) openPanel(next.id, true); else focusItem(next.id); }
     };
     const ac = $("#a-confirm"); if (ac) ac.onclick = () => focusItem("ai-2");
@@ -254,9 +255,7 @@
             <div class="by"><span class="avatar sm" style="width:22px;height:22px;font-size:9.5px">${initials(so.sourceSpeaker || so.name)}</span>${esc(so.sourceSpeaker || "")}
             <span class="ts" data-ts="${so.sourceTs || it.ts}">▶ ${so.sourceTs || it.ts}</span></div></div></div>
       </div>
-      ${alts.length ? `<div class="alts"><h4 class="muted" style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Also considered</h4>
-        ${alts.map((a) => `<div class="alt"><b>${esc(a.name)}</b><span class="c">${pct(a.confidence)}</span><span>${esc(a.why)}</span></div>`).join("")}</div>` : ""}
-      <div class="next">${icon("zap", "ic-sm")}<span>When you decide: the owner gets a Slack DM, a ticket is drafted in ENG-CORE, and the paused pipeline resumes once all ${N} items are decided. You can undo until then.</span></div>
+      <div class="next">${icon("zap", "ic-sm")}<span>When you assign, the agent DMs them in Slack and watches for the reply. Once all ${N} owners confirm, tickets sync to ENG-CORE and the pipeline resumes.</span></div>
       <div class="choices">
         <button class="btn btn-primary" data-accept="${it.id}">${icon("check", "ic-sm")}Assign ${esc(first(so.name))}</button>
         <span class="pick"><select data-pick="${it.id}" aria-label="Pick someone else">
@@ -264,7 +263,6 @@
           ${alts.map((a) => `<option value="${esc(a.name)}" ${u.pick === a.name ? "selected" : ""}>${esc(a.name)} · ${pct(a.confidence)} match</option>`).join("")}
           ${others.map((t) => `<option value="${esc(t.name)}" ${u.pick === t.name ? "selected" : ""}>${esc(t.name)} · ${esc(t.role)} · ${esc(t.load)}</option>`).join("")}
         </select>${u.pick ? `<button class="btn btn-dark" data-assign-other="${it.id}">Assign ${esc(first(u.pick))}</button>` : ""}</span>
-        <button class="btn btn-white" data-slack="${it.id}">${icon("slack", "ic-sm")}Ask in Slack first</button>
       </div>
     </div>`;
   }
@@ -328,6 +326,17 @@
     el.classList.add("focus"); setTimeout(() => el.classList.remove("focus"), 1800);
   }
 
+  // Assigning DMs the person in Slack; the agent watches for the reply, then records the decision.
+  function assignViaSlack(it, who, how, logMsg, extra) {
+    const u = ui[it.id];
+    u.open = false; u.waiting = `Pending ${first(who)}'s reply in Slack · the agent is watching`;
+    rerenderItem(it.id); refresh();
+    toast(`Slack DM sent to ${who}.`, "slack");
+    setTimeout(() => {
+      decide(it.id, who, how, logMsg);
+      afterDecision(it.id, `${first(who)} replied in Slack: “Yes, I've got it.”${extra || ""}`);
+    }, 2400);
+  }
   function afterDecision(id, msg) {
     ui[id].open = false; ui[id].waiting = null;
     const el = rerenderItem(id);
@@ -348,15 +357,15 @@
     if (d.undo) { undo(d.undo); const el = rerenderItem(d.undo); el.classList.add("fade-in"); refresh(); toast("Undone. The item is open again.", "undo"); return; }
     if (d.accept) {
       const it = ITEMS.find((i) => i.id === d.accept), so = it.suggestedOwner;
-      decide(it.id, so.name, "approved-suggestion",
-        `${ME} approved suggested owner ${so.name} (${pct(so.confidence)}) for “${it.title}”. Evidence: ${so.evidence.join("; ")}.`);
-      afterDecision(it.id, `${so.name} assigned. Slack DM queued.`); return;
+      assignViaSlack(it, so.name, "approved-suggestion",
+        `${ME} assigned suggested owner ${so.name} (${pct(so.confidence)}) to “${it.title}”. Evidence: ${so.evidence.join("; ")}. ${first(so.name)} confirmed in Slack (simulated reply).`);
+      return;
     }
     if (d.assignOther) {
       const it = ITEMS.find((i) => i.id === d.assignOther), so = it.suggestedOwner, who = ui[it.id].pick;
-      decide(it.id, who, "override",
-        `${ME} overrode the suggestion (${so.name}, ${pct(so.confidence)}) and assigned ${who} to “${it.title}”.`);
-      afterDecision(it.id, `${who} assigned. The agent will learn from your override.`); return;
+      assignViaSlack(it, who, "override",
+        `${ME} overrode the suggestion (${so.name}, ${pct(so.confidence)}) and assigned ${who} to “${it.title}”. ${first(who)} confirmed in Slack (simulated reply).`, " The agent will learn from your override.");
+      return;
     }
     if (d.slack) {
       const it = ITEMS.find((i) => i.id === d.slack), so = it.suggestedOwner;
