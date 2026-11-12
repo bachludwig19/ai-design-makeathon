@@ -72,6 +72,10 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .libitem.off:hover{border-color:var(--line)}
 .libitem .soon{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
 .about.muted{color:var(--text-3)}
+.slackmsg{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.slackmsg .av{width:32px;height:32px;flex:none;border-radius:4px;background:var(--primary);color:var(--on-dark);display:grid;place-items:center;font-size:11px;font-weight:700}
+.slackmsg .who{font-size:12.5px;color:var(--text-3);margin-bottom:2px}.slackmsg .who b{color:var(--text)}
+.slackmsg .txt{font-size:14px;line-height:1.45}
 .node.tour-target{position:absolute}
 .node.s-ok{border-color:var(--teal);box-shadow:0 0 0 3px rgba(var(--teal-rgb),.14),var(--shadow)}
 .node.s-fail{border-color:var(--danger);box-shadow:0 0 0 4px rgba(196,30,58,.16),var(--shadow)}
@@ -540,7 +544,7 @@ const CAT = {
     desc:'Creates (or dedupes) a Jira / Linear issue for the action item.', perm:'Creates issues in the selected project',
     syn:'ticket issue jira linear create task sync', ex:'ENG-1284 · High · Priya Shah'},
   slack:{name:'Slack DM Notifier', cat:'Integrations', kind:'INTEGRATION', icon:'msg', ins:IN('ActionItem'), outs:OUT('Message'),
-    desc:'Sends a Slack DM (or channel post) from a template filled with upstream data.', perm:'Posts as the MeetFlow bot',
+    desc:'Messages the suggested owner in Slack.', perm:'Posts as the MeetFlow bot',
     syn:'notify message ping ask remind slack dm chat request owner confirm', ex:'DM to @Priya Shah: “Can you take it?”'},
   email:{name:'Email Summary', cat:'Integrations', kind:'INTEGRATION', icon:'mail', ins:IN('ActionItem'), outs:OUT('Message'),
     desc:'Emails a summary of the item to the owner or a list.', perm:'Sends from meetflow@alpine', syn:'email notify send summary remind mail', ex:'Subject: Action item needs an owner'},
@@ -1119,14 +1123,11 @@ function renderInspector(){
   const c = cat(n), st = run && run.byNode[n.id];
   insp.innerHTML = `<button class="backcue" id="backCue">← Next step</button><div class="insp-head">
       <h3><span class="ni ${KCLASS[c.cat]}" style="background:none">${ic(c.icon)}</span>${esc(title(n))}</h3>
-      <div class="tabs">
-        <button class="tab ${tab==='config'?'on':''}" data-tab="config">Settings</button>
-        <button class="tab ${tab==='run'?'on':''}" data-tab="run">Result ${st?'<span class="dot"></span>':''}</button>
-      </div></div>
-    <div class="insp-body" id="ib">${tab==='config' ? configHTML(n) : runHTML(n)}</div>`;
+      </div>
+    <div class="insp-body" id="ib">${configHTML(n)}</div>`;
   insp.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; renderInspector(); });
   $('#backCue').onclick = ()=>{ sel = null; renderAll(); };
-  if (tab==='config') bindConfig(n); else bindRun(n);
+  bindConfig(n);
 }
 function cueHTML(){
   const N = FLAGGED.length;
@@ -1216,11 +1217,7 @@ function configHTML(n){
   let h = `<p class="about">${esc(c.desc)}</p>`;
   switch(n.t){
     case 'slack':
-      h += `<div class="field"><div class="flabel">Message</div>
-          <textarea class="inp" id="f-tpl" rows="4" spellcheck="false">${esc(cfg.template)}</textarea>
-          <div id="d-warn"></div>${availHTML(n)}</div>
-        <div class="field"><div class="flabel">Preview</div><div id="d-prev"></div></div>
-        <div class="field"><label>Wait for reply <span class="rangev" id="d-to">${cfg.timeoutH}h</span></label><input type="range" id="f-to" min="1" max="72" value="${cfg.timeoutH}"></div>`;
+      h += `<div class="field"><div id="d-prev"></div></div>`;
       break;
     case 'ownerFound':
       h += `<div class="field"><label>Assign without asking above <span class="rangev" id="d-thr">${pct(cfg.threshold)}</span></label>
@@ -1287,7 +1284,7 @@ function updateDerived(){
     });
   }
   const p = $('#d-prev');
-  if (p) p.innerHTML = `<div class="bubble"><div class="who"><span>To ${esc(recipient(it))}</span></div>${renderTpl(esc(cfg.template).replace(/&quot;/g,'"'), it, true)}</div>`;
+  if (p) p.innerHTML = `<div class="slackmsg"><span class="av">MF</span><div><div class="who"><b>MeetFlow</b> to ${esc(recipient(it))}</div><div class="txt">${esc(renderTpl(cfg.template, it))}</div></div></div>`;
   const pay = $('#d-pay'); if (pay) pay.innerHTML = json(payload(it));
   const to = $('#d-to'); if (to) to.textContent = cfg.timeoutH+'h';
   const thr = $('#d-thr'); if (thr) thr.textContent = pct(cfg.threshold);
