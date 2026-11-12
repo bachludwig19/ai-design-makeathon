@@ -53,7 +53,7 @@
       </section>
 
       <div style="display:flex;justify-content:flex-end;margin-top:36px">
-        <a class="btn btn-primary" style="height:48px;padding:0 28px" id="explore" href="workflow.html">Explore goal details <span id="ex-ic"></span></a>
+        <a class="btn btn-primary" style="height:48px;padding:0 28px" id="explore" href="canvas.html">Explore goal details <span id="ex-ic"></span></a>
       </div>
     </main>
   </div>
@@ -118,7 +118,7 @@
       <h3>${icon("alert", "ic-lg")}<span>What's blocking this goal?</span></h3>
       <p><b>${n} action items need an owner or confirmation.</b> They came out of ${esc(MF.meeting.title)} ${esc(MF.meeting.when)} and the Jira sync is paused until someone decides.</p>
       <ul>${MF.actionItems.map((i) => `<li>${icon("alertCircle", "ic-sm")}<span>${esc(i.title)}</span></li>`).join("")}</ul>
-      <a class="btn btn-danger" href="workflow.html">Resolve blockers ${icon("arrow", "ic-sm")}</a>`;
+      <a class="btn btn-danger" href="canvas.html">Resolve blockers ${icon("arrow", "ic-sm")}</a>`;
   } else {
     const s = getState();
     b.classList.add("ok");
@@ -126,7 +126,7 @@
       <h3>${icon("checkCircle", "ic-lg")}<span>Blockers cleared</span></h3>
       <p>You confirmed owners for all ${n} items. The agent created the tickets and is tracking follow-up.</p>
       <ul>${MF.actionItems.map((i) => `<li>${icon("check", "ic-sm")}<span><b style="color:var(--text)">${esc(s.owners[i.id])}</b> · <span class="mono">${R.jiraKeys[i.id]}</span></span></li>`).join("")}</ul>
-      <a class="btn btn-teal" href="workflow.html#audit">View audit trail ${icon("arrow", "ic-sm")}</a>`;
+      <a class="btn btn-teal" href="canvas.html">Open workflow ${icon("arrow", "ic-sm")}</a>`;
   }
 
   // Supporting workflows

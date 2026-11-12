@@ -94,7 +94,7 @@
         ${link("home", "Home", "home", "index.html")}
         ${link("assistant", "AI Assistant", "bot")}
         ${link("market", "Workflow Library", "store")}
-        ${link("tasks", "My Tasks &amp; Approvals", "checkCircle", "workflow.html")}
+        ${link("tasks", "My Tasks &amp; Approvals", "checkCircle", "canvas.html")}
         ${link("activity", "Activity &amp; Insights", "spark")}
         <div class="nav-section" style="margin-top:6px">Build &amp; Configure</div>
         ${link("agents", "Create workflows", "agents", "canvas.html")}

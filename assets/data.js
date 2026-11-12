@@ -47,12 +47,12 @@ window.MF = {
     jiraKeys: { "ai-1": "ENG-CORE-412", "ai-2": "ENG-CORE-413", "ai-3": "ENG-CORE-414" } };
   MF.supportingWorkflows = [
     { id: "meeting-intel", name: "Meeting Intelligence", desc: "Auto-extracts commitments from syncs", status: "healthy" },
-    { id: "action-items", name: "Action Item Tracking", desc: "Monitors ownership & deadlines", status: "attention", href: "workflow.html" },
+    { id: "action-items", name: "Action Item Tracking", desc: "Monitors ownership & deadlines", status: "attention", href: "canvas.html" },
     { id: "sprint", name: "Sprint Monitoring", desc: "Tracks velocity and scope creep", status: "healthy" },
     { id: "deps", name: "Dependency Monitoring", desc: "Cross-team blocker detection", status: "healthy" }
   ];
   MF.recommendations = [
-    { text: "Follow up on unassigned tasks to restore delivery confidence.", cta: "Execute action", href: "workflow.html" },
+    { text: "Follow up on unassigned tasks to restore delivery confidence.", cta: "Execute action", href: "canvas.html" },
     { text: "Identify overdue delivery commitments across backend squads.", cta: "Review backlog" },
     { text: "Generate an updated delivery risk report for stakeholders.", cta: "Generate report" }
   ];
