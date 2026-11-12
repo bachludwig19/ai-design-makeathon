@@ -9,7 +9,8 @@
 
   const RULES = {
     home: [
-      { when: () => !(window.MFState && MFState.get().created), sel: '#ask button[type="submit"]', n: 1, text: "Start here: describe your goal, then click <b>Create goal</b>." },
+      { when: () => !(window.MFState && MFState.get().created) && (window.MFTyping || !(document.querySelector("#ask-in") || {}).value), sel: "#ask-in", n: 1, text: "Start here: <b>describe your goal</b> in this box." },
+      { when: () => !(window.MFState && MFState.get().created), sel: '#ask button[type="submit"]:not([disabled])', n: 1, text: "Now click <b>Create goal</b>. Your agents will set up the workflows." },
       { when: () => !resolved(), sel: '#goals a.goal-card[href="goal.html"]', n: 2, text: "Your new goal is <b>at risk</b>. Open it to see why." },
       // Tour ends here once the goal is back on track: no hint sends the tester round again.
     ],
@@ -141,6 +142,8 @@
   const schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; update(); }); };
   new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "class"] });
   addEventListener("resize", schedule);
+  addEventListener("input", schedule, true);       // typed text changes which step is next
+  addEventListener("mf-tour", schedule);            // pages can nudge the tour
   addEventListener("scroll", () => requestAnimationFrame(place), { passive: true, capture: true });
   setInterval(place, 400); // follow targets that move during animations
   setTimeout(update, 600); // let the page's entry animation settle first
