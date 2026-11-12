@@ -1314,7 +1314,8 @@ function renderAll(){ renderCanvas(); renderSim(); renderInspector(); }
 function renderSim(){
   // timeline
   const tl = $('#timeline');
-  if (run && run.steps.length){
+  // Step strip removed: it repeated the node path already lit on the canvas (user, 2026-11-11).
+  if (false && run && run.steps.length){
     tl.className = 'timeline';
     tl.innerHTML = run.steps.map((id,i)=>{
       const n = node(id), st = run.byNode[id]; if(!n||!st) return '';
