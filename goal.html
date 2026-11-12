@@ -133,7 +133,7 @@
   $("#wfs").innerHTML = MF.supportingWorkflows.map((w) => {
     const st = w.id === "action-items" && g.resolved ? "healthy" : w.status;
     const tag = w.href ? "a" : "div";
-    return `<${tag} class="wf" ${w.href ? `href="${w.href}"` : ""}>
+    return `<${tag} class="wf ${w.href ? "" : "off"}" ${w.href ? `href="${w.href}"` : 'aria-disabled="true" title="Not available in this demo"'}>
       <span class="wf-ic ${st}">${icon(wIcons[w.id] || "flow")}</span>
       <div><div class="n">${esc(w.name)}</div><div class="d">${esc(w.desc)}</div></div>
       <span class="pill ${st}">${st === "healthy" ? "Healthy" : "Needs attention"}</span>
@@ -149,12 +149,9 @@
       <p>${esc(r.text)}</p>
       ${done ? `<span class="link" style="color:var(--teal)">${icon("check", "ic-sm")} Done by you</span>`
         : r.href ? `<a class="link" href="${r.href}">${esc(r.cta)} ${icon("arrow", "ic-sm")}</a>`
-        : `<a class="link" href="#" data-stub>${esc(r.cta)} ${icon("arrow", "ic-sm")}</a>`}
+        : `<span class="link off" aria-disabled="true" title="Not available in this demo">${esc(r.cta)}</span>`}
     </div>`;
   }).join("");
-  document.querySelectorAll("[data-stub]").forEach((a) => a.addEventListener("click", (e) => {
-    e.preventDefault(); toast("Not wired in this prototype. The first recommendation is.", "sparkles");
-  }));
 })();
 </script>
 </body>

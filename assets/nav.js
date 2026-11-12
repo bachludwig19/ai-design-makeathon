@@ -85,7 +85,7 @@
       const on = id === page || (page === "goal" && id === "home") || (page === "workflow" && id === "tasks");
       return href
         ? `<a class="nav-link ${on ? "active" : ""}" href="${href}">${icon(ic)}${label}</a>`
-        : `<a class="nav-link inert ${on ? "active" : ""}" tabindex="-1" title="Not part of this prototype">${icon(ic)}${label}</a>`;
+        : `<a class="nav-link off" tabindex="-1" aria-disabled="true" title="Not available in this demo">${icon(ic)}${label}</a>`;
     };
     if (navEl) {
       navEl.innerHTML = `
@@ -111,9 +111,9 @@
     if (top) {
       top.innerHTML = `
         <span class="crumb">${icon("menu")}${esc(document.body.dataset.crumb || "Workspace / Autonomous Pipeline")}</span>
-        <div class="top-search">${icon("search", "ic-sm")}Search nodes, runs…<span class="kbd">⌘K</span></div>
+        <div class="top-search off" aria-disabled="true" title="Not available in this demo">${icon("search", "ic-sm")}Search nodes, runs…<span class="kbd">⌘K</span></div>
         <span id="mf-engine-chip"></span>
-        <button class="icon-btn" aria-label="Notifications">${icon("bell")}</button>
+        <button class="icon-btn off" aria-label="Notifications" aria-disabled="true" title="Not available in this demo">${icon("bell")}</button>
         <button class="icon-btn" id="mf-gear" aria-label="AI engine settings">${icon("gear")}</button>`;
       const chipEl = top.querySelector("#mf-engine-chip");
       if (window.MFSettings && window.Engine) MFSettings.chip(chipEl); else chipEl.remove();
@@ -122,6 +122,14 @@
       });
     }
   }
+
+  // Anything marked .off is not wired in the demo: block it and say so briefly.
+  document.addEventListener("click", (e) => {
+    const off = e.target.closest(".off");
+    if (!off) return;
+    e.preventDefault(); e.stopPropagation();
+    toast("Not available in this demo", "clock");
+  }, true);
 
   window.MFApp = { icon, esc, initials, toast, getState, isResolved, goalNow, persona, setPersona, reset };
   shell();
