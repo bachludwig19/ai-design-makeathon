@@ -80,6 +80,15 @@
 <script src="assets/tour.js"></script>
 <script>
 (function () {
+  // A fresh browser session always starts the demo from the top with the guide on,
+  // even if this browser ran (or skipped) the tour before. Reset demo does the same mid-session.
+  try {
+    if (!sessionStorage.getItem("mf.session")) {
+      if (window.MFState) MFState.reset();
+      sessionStorage.removeItem("mf.tour.off");
+      sessionStorage.setItem("mf.session", "1");
+    }
+  } catch (e) {}
   const { icon, esc, toast, persona, setPersona, isResolved, goalNow } = MFApp;
   const $ = (s) => document.querySelector(s);
   $("#ask-ic").innerHTML = icon("sparkles", "ic-lg");
