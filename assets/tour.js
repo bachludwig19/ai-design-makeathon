@@ -37,13 +37,18 @@
   css.textContent = `
   .tour-target{position:relative;z-index:5;outline:2px solid var(--gold,#A07B3A)!important;outline-offset:4px;animation:tourPulse 1.6s ease-in-out infinite}
   @keyframes tourPulse{0%,100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb,160,123,58),.55)}50%{box-shadow:0 0 0 10px rgba(var(--gold-rgb,160,123,58),0)}}
-  .tour-tip{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:14px;
-    max-width:min(640px,calc(100vw - 32px));padding:14px 18px;background:#111;color:#fff;font:14px/1.45 var(--font,system-ui);
+  .tour-tip{position:fixed;left:0;top:0;z-index:9999;display:flex;align-items:center;gap:14px;
+    width:max-content;max-width:min(420px,calc(100vw - 24px));padding:14px 18px;background:#111;color:#fff;font:14px/1.45 var(--font,system-ui);
     border:1px solid rgba(var(--gold-rgb,160,123,58),.7);border-radius:var(--radius,4px);box-shadow:0 24px 48px -20px rgba(0,0,0,.6);animation:tourIn .35s ease both}
   .tour-tip .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--gold,#A07B3A);color:#111;font-weight:700;font-size:12px}
   .tour-tip b{color:#E9C98A;font-weight:600}
   .tour-tip button{flex:none;margin-left:6px;background:none;border:0;color:rgba(255,255,255,.6);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
-  @keyframes tourIn{from{opacity:0;transform:translate(-50%,10px)}}
+  @keyframes tourIn{from{opacity:0}}
+  .tour-tip::before{content:"";position:absolute;left:var(--ax,50%);width:12px;height:12px;margin-left:-6px;background:#111;transform:rotate(45deg);
+    border:1px solid rgba(var(--gold-rgb,160,123,58),.7)}
+  .tour-tip.below::before{top:-7px;border-right:0;border-bottom:0}
+  .tour-tip.above::before{bottom:-7px;border-left:0;border-top:0}
+  .tour-tip.left::before{left:auto;right:-7px;top:var(--ay,50%);margin:-6px 0 0;border-left:0;border-bottom:0}
   @media (prefers-reduced-motion:reduce){.tour-target,.tour-tip{animation:none}}`;
   document.head.appendChild(css);
 
@@ -84,6 +89,34 @@
     const html = `<span class="n">${rule.n}</span><span>${rule.text}</span><button type="button" data-tour-skip>Skip tour</button>`;
     if (html !== curText) { tip.innerHTML = html; curText = html; }
     if (!tip.isConnected) document.body.appendChild(tip);
+    place();
+  }
+  // Pin the hint next to its target: below it if there's room, else above; arrow points at the target.
+  function place() {
+    if (!cur || !tip.isConnected) return;
+    const r = cur.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, gap = 14, m = 12;
+    // Targets in a right-hand side panel: sit to their left so the hint doesn't cover the other options.
+    if (r.left > innerWidth * 0.7 && r.left - gap - w >= m) {
+      const t = Math.max(m, Math.min(r.top + r.height / 2 - h / 2, innerHeight - h - m));
+      tip.classList.remove("below", "above"); tip.classList.add("left");
+      tip.style.setProperty("top", t + "px", "important");
+      tip.style.setProperty("left", (r.left - gap - w) + "px", "important");
+      tip.style.setProperty("bottom", "auto", "important");
+      tip.style.setProperty("transform", "none", "important");
+      tip.style.setProperty("--ay", (r.top + r.height / 2 - t) + "px");
+      return;
+    }
+    tip.classList.remove("left");
+    const below = r.bottom + gap + h <= innerHeight - m || r.top - gap - h < m;
+    const top = below ? r.bottom + gap : r.top - gap - h;
+    const cx = r.left + r.width / 2;
+    const left = Math.max(m, Math.min(cx - w / 2, innerWidth - w - m));
+    tip.classList.toggle("below", below); tip.classList.toggle("above", !below);
+    tip.style.setProperty("top", Math.max(m, Math.min(top, innerHeight - h - m)) + "px", "important");
+    tip.style.setProperty("left", left + "px", "important");
+    tip.style.setProperty("bottom", "auto", "important");
+    tip.style.setProperty("transform", "none", "important");
+    tip.style.setProperty("--ax", Math.max(16, Math.min(cx - left, w - 16)) + "px");
   }
   function clear() { if (cur) cur.classList.remove("tour-target"); cur = null; tip.remove(); curText = ""; }
 
@@ -96,5 +129,7 @@
   const schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; update(); }); };
   new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "class"] });
   addEventListener("resize", schedule);
+  addEventListener("scroll", () => requestAnimationFrame(place), { passive: true, capture: true });
+  setInterval(place, 400); // follow targets that move during animations
   setTimeout(update, 600); // let the page's entry animation settle first
 })();
