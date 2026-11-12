@@ -503,6 +503,51 @@ body{background:#F4F2FB}
 .libitem{border-radius:10px;background:rgba(255,255,255,.75)}
 .spin{border-top-color:var(--av)}
 @media (prefers-reduced-motion:reduce){.canvas,.node.s-next.anim,.node.flagged,.world.running .edge.ok{animation:none}}
+
+/* ===== Aurora, richer palette (overrides the pastel pass) ===== */
+:root{--av:#5B3DF5;--av2:#D63CF0;--at:#00B3A4;--ac:#FF7A45;--ar:#E5484D;--av-soft:rgba(91,61,245,.12);
+  --glass:rgba(255,255,255,.60);--glass-line:rgba(255,255,255,.55);--glass-shadow:0 12px 32px -12px rgba(50,20,160,.45)}
+body{background:#2A1F6E}
+.canvas{background:
+  radial-gradient(45% 55% at 12% 18%,rgba(91,61,245,.75),transparent 70%),
+  radial-gradient(40% 50% at 85% 12%,rgba(0,179,164,.65),transparent 70%),
+  radial-gradient(45% 55% at 65% 90%,rgba(255,122,69,.65),transparent 70%),
+  radial-gradient(35% 45% at 40% 55%,rgba(214,60,240,.40),transparent 70%),
+  linear-gradient(135deg,#7A63FF,#3FC9BE 50%,#FF9A6E);background-size:180% 180%}
+.world{background-image:radial-gradient(rgba(255,255,255,.22) 1px,transparent 1px)}
+.insp{background:rgba(255,255,255,.62)}
+.lib,.sim{background:rgba(255,255,255,.66)}
+.top{background:rgba(255,255,255,.72)}
+.node{background:rgba(255,255,255,.78)}
+.node .ni{color:#fff}
+.node.k-trig .ni{background:var(--ac);color:#fff}
+.node.k-ai .ni{background:var(--av);color:#fff}
+.node.k-cond .ni{background:#F2A900;color:#1E1B3A}
+.node.k-int .ni{background:var(--at);color:#fff}
+.node.k-human .ni{background:var(--av2);color:#fff}
+.node.sel{border-color:var(--av);box-shadow:0 0 0 3px rgba(91,61,245,.35),var(--glass-shadow)}
+.node.s-ok{border-color:var(--at);box-shadow:0 0 0 3px rgba(0,179,164,.45),0 12px 30px -10px rgba(0,179,164,.6)}
+.node.s-fail{border-color:var(--ar);box-shadow:0 0 0 4px rgba(229,72,77,.45),0 12px 30px -10px rgba(255,122,69,.7)}
+.nb.done{background:#00897E}.nb.fail{background:var(--ar)}
+@keyframes glow{50%{box-shadow:0 0 0 6px rgba(214,60,240,.28),0 0 32px rgba(91,61,245,.55)}}
+.node.flagged{border-color:var(--ac)}.node.flagged .nb.warn{background:#FFE1D3;color:#A3360F}
+.edge{stroke:rgba(30,20,90,.55)}
+.edge.yes,.edge.ok{stroke:var(--at);stroke-width:3}
+.edge.no{stroke:var(--ac);stroke-width:2.5}
+.elabel{background:rgba(255,255,255,.85)}
+.stage.attn{background:rgba(255,122,69,.22);border-color:rgba(255,122,69,.6)}
+.stage-h{background:rgba(255,255,255,.75)}
+.stage-h.attention .sn{background:var(--ac)}.stage-h.attention .ss{color:#A3360F}
+.stage-h.completed .sn{background:#00897E}.stage-h.completed .ss{color:#00756C}
+.btn.primary{background:linear-gradient(135deg,var(--av),var(--av2));box-shadow:0 10px 24px -10px rgba(91,61,245,.8)}
+.btn.primary:hover{background:linear-gradient(135deg,#4A2DE0,#C22BDC)}
+.cue.wf{background:linear-gradient(135deg,rgba(91,61,245,.18),rgba(214,60,240,.10));border-color:rgba(91,61,245,.4);border-left:3px solid var(--av)}
+.cue.wf .ck{color:var(--av)}.cue.good .ck{color:#00756C}
+.item.done{background:rgba(230,250,247,.82);border-color:rgba(0,179,164,.4)}
+.deck .quote{border-left-color:var(--ac)}.deck .quote.ok{border-left-color:var(--at)}
+.deck .pill.healthy{background:rgba(0,179,164,.14);color:#00756C}
+.dh .cnt{background:var(--av)}
+.ghost{border-color:#fff;color:#fff;background:rgba(91,61,245,.35)}
 </style>
 </head>
 <body>
