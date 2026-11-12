@@ -1,3 +1,3 @@
-# hackathon-2026-11
+# ai-design-makeathon
 
-Hackathon project. Name TBD.
+Hackathon project. AI Design Makeathon, Agent Track (Track 1).
