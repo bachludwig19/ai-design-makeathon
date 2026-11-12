@@ -92,6 +92,14 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .cue .fixes .btn .i{align-self:flex-start;margin-top:2px}
 .deck{flex:1;overflow:auto;padding:14px 16px 20px}
 .deck .cue{margin:0 0 14px}
+.cue.wf{background:var(--teal-soft);border-color:var(--teal-line,rgba(var(--teal-rgb),.35));border-left:3px solid var(--teal)}
+.cue.wf .ck{color:var(--teal)}
+.cue.wf .fixes .btn:not(.primary){background:var(--card)}
+.ghost{position:absolute;width:180px;height:84px;border:2px dashed var(--teal);border-radius:var(--radius);background:rgba(var(--teal-rgb),.06);display:flex;align-items:center;padding:10px 14px;font-size:13px;font-weight:600;color:var(--teal);z-index:1;pointer-events:none;animation:ghostIn .25s ease both}
+@keyframes ghostIn{from{opacity:0}}
+.card-slot.slidein{animation:slideIn .4s cubic-bezier(.2,.7,.2,1) both}
+@keyframes slideIn{from{opacity:0;transform:translateY(-14px)}}
+@media (prefers-reduced-motion:reduce){.card-slot.slidein{animation:none}}
 .dh{font-family:var(--display);font-stretch:125%;text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;font-weight:700;color:var(--text-2);margin:4px 2px 10px;display:flex;align-items:center;gap:8px}
 .dh .cnt{background:var(--text);color:var(--on-dark);border-radius:999px;padding:1px 8px;font-size:11px;letter-spacing:0}
 .deck .pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:7px;font-size:12px;font-weight:500;white-space:nowrap}
@@ -552,6 +560,7 @@ const ICON = {
   shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   ff:'<path d="M4 5l8 7-8 7zM12 5l8 7-8 7z"/>',
   reply:'<path d="M9 14l-5-5 5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/>',
+  flow:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><path d="M10 6.5h4a3 3 0 0 1 3 3V14"/>',
   link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
   target:'<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/>'
@@ -955,6 +964,11 @@ function renderCanvas(){
   svg += `<path id="tempEdge" class="edge temp" d="" style="display:none"/></svg>`;
   html += svg + labels;
 
+  // ghost preview of the nodes a fix would add
+  if (preview && sim.state==='failed'){
+    const G = preview==='me' ? [[4,'You decide']] : [[4,'Slack DM: ask owner'],[5,'Wait for reply'],[6,'Escalate to lead']];
+    G.forEach(([c,t])=>{ html += `<div class="ghost" style="left:${colX(c)}px;top:${laneY(1)}px">+ ${esc(t)}</div>`; });
+  }
   // nodes
   const uw = unwired();
   nodes.forEach(n=>{
@@ -1182,8 +1196,9 @@ function renderInspector(){
   if (sel==='n4') openedStuck = true;
   if (!n){
     const prev = insp.querySelector('.deck'), top = prev ? prev.scrollTop : 0, wasOpen = insp.dataset.open;
-    insp.innerHTML = panelHTML(); insp.dataset.open = openItems().length;
-    const d = insp.querySelector('.deck'); d.scrollTop = (wasOpen && +wasOpen && !openItems().length) ? 0 : top;
+    const html = panelHTML(), newTop = (html.match(/data-key="([^"]+)"/)||[])[1] || '', changed = newTop.split('-w')[0] !== (insp.dataset.top||'').split('-w')[0];
+    insp.innerHTML = html; insp.dataset.open = openItems().length; insp.dataset.top = newTop;
+    const d = insp.querySelector('.deck'); d.scrollTop = changed ? 0 : top;
     // keep the next decision button on screen so the guide can point at it
     const t = d.querySelector('[data-accept],[data-approve]');
     if (t){ const r = t.getBoundingClientRect(), q = d.getBoundingClientRect();
@@ -1209,7 +1224,7 @@ const waiting = {};   // id -> {text, ok}
 function owners(){ try { return (window.MFState ? MFState.get().owners : {}) || {}; } catch(e){ return {}; } }
 function openItems(){ const o = owners(); return FLAGGED.filter(i=>!o[i.id]); }
 function allResolved(){ return openItems().length===0; }
-const DECK = FLAGGED.filter(i=>i.suggestedOwner).concat(FLAGGED.filter(i=>!i.suggestedOwner));
+const DECK = FLAGGED.slice();   // data order: Priya, David, Jordan
 function record(id, name, how, text){
   if (!window.MFState) return;
   MFState.assign(id, name, how);
@@ -1227,6 +1242,7 @@ function decideHTML(it){
       <h4>From the meeting</h4><div class="src"><q>${esc(so.sourceQuote||it.quote)}</q>
         <div class="by"><span class="avatar">${esc(inits(so.sourceSpeaker||so.name))}</span>${esc(so.sourceSpeaker||'')}<span class="ts">▶ ${esc(so.sourceTs||it.ts)}</span></div></div></div>
     <div class="choices"><button class="btn primary assign" data-accept="${it.id}">${ic('check')}<span>Assign ${esc(firstName(so.name))}${so.role?' · '+esc(so.role):''}</span></button>
+      ${it.state==='overdue' ? `<button class="btn" data-remind="${it.id}">${ic('msg')}Send reminder</button>` : ''}
       <select data-pick="${it.id}" aria-label="Pick someone else"><option value="">Pick someone else…</option>
         ${alts.map(a=>`<option value="${esc(a.name)}">${esc(a.name)} · ${pct(a.confidence)} match</option>`).join('')}
         ${others.map(t=>`<option value="${esc(t.name)}">${esc(t.name)} · ${esc(t.role)} · ${esc(t.load)}</option>`).join('')}</select></div>
@@ -1257,17 +1273,26 @@ function itemCard(it){
     ${foot ? `<div class="item-foot">${foot}</div>` : ''}
   </article>`;
 }
-function panelHTML(){
-  const o = owners(), open = DECK.filter(i=>!o[i.id]);
+function resolvedOrder(){   // most recently resolved first
+  const log = (window.MFState && MFState.get().log) || [], o = owners();
+  const at = id => { const k = log.findIndex(l=>l.id===id && l.how!=='undo'); return k<0 ? 999 : k; };
+  return DECK.filter(i=>o[i.id]).sort((x,y)=>at(x.id)-at(y.id));
+}
+/* Cues-style stack: newest card on top, older ones slide down. */
+function panelCards(){
+  const o = owners(), open = DECK.filter(i=>!o[i.id]), cards = [];
   const R = MF.resolution || {progressBefore:MF.goal.progress, progressAfter:MF.goal.progress};
-  let h = '<div class="deck">';
-  if (open.length) h += `<div class="dh">Action items to resolve <span class="cnt">${open.length}</span></div>`;
-  else h += `<div class="cue good"><div class="ck">${ic('check')}Resolved</div><h3>All ${FLAGGED.length} resolved</h3>
-      <p>Delivery goal ${R.progressBefore}% → <b>${R.progressAfter}%</b>. Step 3 is moving again.</p></div>`;
-  if (!open.length) h += `<div class="dh" style="margin-top:18px">Stop this from happening again</div>` + cueHTML() + `<div class="dh" style="margin-top:18px">Action items · ${FLAGGED.length} resolved</div>`;
-  h += DECK.map(itemCard).join('');
-  if (open.length && (sim.state!=='idle' || deployed)) h += `<div class="dh" style="margin-top:18px">Stop this from happening again</div>` + cueHTML();
-  return h + '</div>';
+  if (!open.length || sim.state!=='idle' || deployed) cards.push({key:'cue-'+sim.state+(deployed?'-live':''), html:cueHTML()});
+  if (!open.length) cards.push({key:'all', html:`<div class="cue good"><div class="ck">${ic('check')}Resolved</div><h3>All ${FLAGGED.length} resolved</h3>
+      <p>Delivery goal ${R.progressBefore}% → <b>${R.progressAfter}%</b>. Step 3 is moving again.</p></div>`});
+  open.forEach(i=>cards.push({key:'ic-'+i.id+(waiting[i.id]?'-w':''), html:itemCard(i)}));
+  resolvedOrder().forEach(i=>cards.push({key:'done-'+i.id, html:itemCard(i)}));
+  return cards;
+}
+function panelHTML(){
+  const cards = panelCards(), open = openItems().length;
+  const head = open && sim.state==='idle' ? `<div class="dh">Action items to resolve <span class="cnt">${open}</span></div>` : '';
+  return `<div class="deck">${head}${cards.map((c,k)=>`<div class="card-slot${k===0 && c.key.replace('-w','')!==(insp.dataset.top||'').replace('-w','') ? ' slidein' : ''}" data-key="${c.key}">${c.html}</div>`).join('')}</div>`;
 }
 function settle(it, who, how, text, reply){
   waiting[it.id] = {text: esc(reply), ok:true}; renderInspector();
@@ -1294,31 +1319,38 @@ insp.addEventListener('click', e=>{
     record(it.id, it.owner, 'approved-owner', `${ME} approved ${it.owner} as owner of “${it.title}” and approved the Jira sync.`);
     toast(`${it.owner} confirmed as owner · queued for Jira`); renderAll(); renderBanner();
     if (allResolved()) setTimeout(()=>toast(`All ${FLAGGED.length} resolved · goal back to ${(MF.resolution||{}).progressAfter}%`), 1400); }
+  else if (d.remind && !it.owner){ const who = it.suggestedOwner.name;
+    viaSlack(it, who, 'reminder-confirmed', `${ME} sent ${who} a reminder in Slack about “${it.title}”; ${firstName(who)} confirmed ownership (simulated reply).`,
+      `Pending ${esc(firstName(who))}'s reply in Slack · the agent is watching`, `${firstName(who)} replied: “Yes, I've got it.”`); }
   else if (d.remind){
     viaSlack(it, it.owner, 'reminder-confirmed', `${ME} sent ${it.owner} a reminder in Slack; ${firstName(it.owner)} confirmed ownership of “${it.title}” (simulated reply).`,
       `Reminder sent to ${esc(firstName(it.owner))} · the agent is watching`, `${firstName(it.owner)} replied: “On it, I'll check residency with security by noon.”`); }
 });
+['mouseover','focusin'].forEach(ev=>insp.addEventListener(ev, e=>{ const b = e.target.closest('[data-fix]'); const k = b ? b.dataset.fix : null; if (k!==preview){ preview = k; renderCanvas(); } }));
+['mouseleave','focusout'].forEach(ev=>insp.addEventListener(ev, ()=>{ if (preview){ preview = null; renderCanvas(); } }));
 insp.addEventListener('change', e=>{
   const s = e.target.closest('[data-pick]'); if (!s || !s.value) return;
   const it = FLAGGED.find(i=>i.id===s.dataset.pick), so = it.suggestedOwner, who = s.value;
   viaSlack(it, who, 'override', `${ME} overrode the suggestion (${so.name}, ${pct(so.confidence)}) and assigned ${who} to “${it.title}”. ${firstName(who)} confirmed in Slack (simulated reply).`,
     `Pending ${esc(firstName(who))}'s reply in Slack · the agent is watching`, `${firstName(who)} replied: “Yes, I've got it.” The agent will learn from your pick.`);
 });
+let preview = null;   // 'ask' | 'me' while a fix card button is hovered/focused
 function cueHTML(){
   const N = FLAGGED.length;
   const f = sim.path && sim.path.fail ? title(node(sim.path.fail)) : 'Owner Found?';
-  if (deployed) return `<div class="cue good"><div class="ck">${ic('check')}Live</div><h3>Your fix is live.</h3><p>${fix==='me' ? 'Next time, unsure matches come to you.' : 'Next time, the agent asks the suggested owner in Slack.'}</p></div>`;
+  const WC = `<div class="ck">${ic('flow')}Workflow change</div>`;
+  if (deployed) return `<div class="cue wf">${WC}<h3>Your fix is live.</h3><p>${fix==='me' ? 'Low-confidence matches now come to you to decide.' : 'Low-confidence matches are now asked in Slack, then escalated.'}</p></div>`;
   switch(sim.state){
-    case 'running': return `<div class="cue"><div class="ck">${ic('play2')}Testing</div><h3>Running ${N} stuck items…</h3><p>Watch the path light up.</p></div>`;
-    case 'failed': return `<div class="cue bad"><div class="ck">${ic('alert')}Next step</div><h3>${esc(f)} failed on ${N} test items</h3>
-      <p>No confirmed owner, and the matches are under your ${pct(cfg.threshold)} auto-assign rule. Nothing handles the <b>No</b> branch.</p>
+    case 'running': return `<div class="cue wf">${WC}<h3>Testing the workflow…</h3><p>Replaying ${N} items. Watch the path light up.</p></div>`;
+    case 'failed': return `<div class="cue wf">${WC}<h3>${esc(f)} failed on ${N} test items</h3>
+      <p>Matches under your ${pct(cfg.threshold)} rule take the <b>No</b> branch, and nothing handles it. Pick a step to add:</p>
       <div class="fixes">
-        <button class="btn primary" data-fix="ask">${ic('msg')}<span>Ask the suggested owner in Slack<small>Wait ${cfg.timeoutH}h for a reply, then escalate</small></span></button>
-        <button class="btn" data-fix="me">${ic('ucheck')}<span>Send them to me to decide<small>You pick the owner</small></span></button>
+        <button class="btn primary" data-fix="me">${ic('ucheck')}<span>Add to workflow: Send them to me to decide<small>Adds a “You decide” step after ${esc(f)} (No)</small></span></button>
+        <button class="btn" data-fix="ask">${ic('msg')}<span>Add to workflow: Ask the suggested owner in Slack<small>Adds Slack DM → Wait ${cfg.timeoutH}h → Escalate after ${esc(f)} (No)</small></span></button>
       </div></div>`;
-    case 'fixed': return `<div class="cue good"><div class="ck">${ic('check')}Fixed</div><h3>Fixed. Run test again.</h3><p>${fix==='ask' ? 'Added: Slack DM → wait for reply → escalate.' : 'Added: You decide.'}</p></div>`;
-    case 'passed': return `<div class="cue good"><div class="ck">${ic('check')}Next step</div><h3>All steps passed.</h3><p>Deploy when ready.</p></div>`;
-    default: return `<div class="cue"><div class="ck">${ic('spark')}Optional</div><h3>Find what caused this</h3><p>Click <b>Run test</b> to replay these ${N} items through the workflow.</p></div>`;
+    case 'fixed': return `<div class="cue wf">${WC}<h3>Added to your workflow</h3><p>${fix==='ask' ? 'Slack DM → Wait for reply → Escalate.' : '“You decide” on the No branch.'} Click <b>Run test again</b>.</p></div>`;
+    case 'passed': return `<div class="cue wf">${WC}<h3>All steps passed</h3><p>Click <b>Deploy</b> to make the change live.</p></div>`;
+    default: return `<div class="cue wf">${WC}<h3>Stop this from happening again</h3><p>Click <b>Run test</b> to replay these ${N} items and find the step that stalled them.</p></div>`;
   }
 }
 function simPath(){
@@ -1356,7 +1388,7 @@ function applyFix(kind){
   } else {
     add('n12','decide','You decide',4,1); on('n4','no','n12'); on('n12','out','n9');
   }
-  fix = kind; sim = {state:'fixed'}; cfgVer++;
+  fix = kind; preview = null; sim = {state:'fixed'}; cfgVer++;
   renderAll(); renderBanner();
 }
 function portsHTML(c){
@@ -1595,7 +1627,7 @@ function doDeploy(){
   const flagged = FLAGGED;
   const what = it => { const c = cand(it); return fix==='ask' ? (c ? `Asking ${c.name} in Slack` : 'Asking in Slack') : 'Waiting for your pick'; };
   $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Your fix is live</h3>
-    <p>${fix==='me' ? `Next time the agent is under ${pct(cfg.threshold)} sure, it sends the item to you to decide.` : `Next time the agent is under ${pct(cfg.threshold)} sure, it asks the suggested owner in Slack, waits ${cfg.timeoutH}h, then escalates.`}</p>
+    <p>${fix==='me' ? `Low-confidence matches now come to you to decide. Anything under ${pct(cfg.threshold)} lands in your queue instead of stalling.` : `Next time the agent is under ${pct(cfg.threshold)} sure, it asks the suggested owner in Slack, waits ${cfg.timeoutH}h, then escalates.`}</p>
     <div class="acts"><button class="btn primary" id="mClose">Done</button></div>`;
   $('#modal').classList.add('on');
   $('#mClose').onclick = ()=>$('#modal').classList.remove('on');

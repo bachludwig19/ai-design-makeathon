@@ -11,7 +11,7 @@
     home: [
       { when: () => !(window.MFState && MFState.get().created), sel: '#ask button[type="submit"]', n: 1, text: "Start here: describe your goal, then click <b>Create goal</b>." },
       { when: () => !resolved(), sel: '#goals a.goal-card[href="goal.html"]', n: 2, text: "Your new goal is <b>at risk</b>. Open it to see why." },
-      { when: resolved, sel: '#mf-nav a.nav-link[href="canvas.html"]', n: 8, text: "Delivery is back on track. See the workflow behind it in <b>Create workflows</b>." }
+      // Tour ends here once the goal is back on track: no hint sends the tester round again.
     ],
     goal: [
       { when: () => !resolved(), sel: 'a.btn[href="canvas.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
@@ -24,10 +24,11 @@
       { sel: '#banner-slot a.btn[href="goal.html"]', n: 6, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
     ],
     canvas: [
-      { sel: "#insp [data-accept]", n: 4, text: "The agent found a likely owner. Click <b>Assign</b>." },
-      { sel: "#insp [data-approve]", n: 5, text: "David hasn't confirmed. Click <b>Approve &amp; sync</b>." },
+      { sel: "#ic-ai-1 [data-accept]", n: 4, text: "The agent found a likely owner. Click <b>Assign</b>." },
+      { sel: "#ic-ai-2 [data-approve]", n: 5, text: "David hasn't confirmed. Click <b>Approve &amp; sync</b>." },
+      { sel: "#ic-ai-3 [data-remind]", n: 5, text: "Jordan was mentioned but hasn't said yes. Click <b>Send reminder</b>." },
       { when: () => window.MFCanvas && MFCanvas.resolved && MFCanvas.state === "idle" && !MFCanvas.deployed, sel: "#runBtn", n: 6, text: "Now stop this from happening again. Click <b>Run test</b>." },
-      { when: () => window.MFCanvas && MFCanvas.state === "failed", sel: '#insp [data-fix="ask"]', n: 7, text: "A step failed. Pick a fix on the right." },
+      { when: () => window.MFCanvas && MFCanvas.state === "failed", sel: '#insp [data-fix="me"]', n: 7, text: "Add a step where you decide: click <b>Send them to me to decide</b>." },
       { when: () => window.MFCanvas && MFCanvas.state === "fixed", sel: "#runBtn", n: 8, text: "Click <b>Run test again</b>." },
       { when: () => window.MFCanvas && MFCanvas.state === "passed" && !MFCanvas.deployed, sel: "#deployBtn", n: 9, text: "All green. Click <b>Deploy</b>." },
       { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 9, text: "Your fix is live. Click <b>Done</b>." },
