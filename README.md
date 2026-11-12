@@ -2,7 +2,11 @@
 
 Describe the goal. The agent builds the flow.
 
-Goal with the Flow connects your team's goals to the AI agent workflows that keep them on track. You describe what good looks like in plain language, and the agent drafts the workflow for you, so you never start from a blank canvas. When a goal like *Keep product delivery on track* slips, its agents show you which meeting action items are stuck, suggest an owner for each with evidence from the conversation, and ask you before acting when they aren't sure. You resolve the items from one panel, then open the workflow on a visual canvas, run a test that highlights the failing step, and deploy a fix so the same problem doesn't happen again.
+Goal with the Flow ties your goals to the AI agent workflows that keep them on track: you describe what good looks like in plain language, and the agent drafts the workflow for you, so you never start from a blank canvas.
+
+**Why start with the goal?** AI works better when the goal is well defined. A clear goal tells the agent what success looks like, so it can pick the right steps, weigh the evidence, notice when things drift, and know when to stop and ask you. A hand-built workflow gives the agent only the steps, not the reason behind them. So Goal with the Flow asks for the goal first and lets the agent work out the flow.
+
+Goals fail through small dropped commitments that no one sees, and today's tools make you either build the automation yourself or blindly trust an agent. Goal with the Flow drafts the workflow from your goal, asks you before acting when it's unsure, and shows you exactly where to fix it when something stalls.
 
 **Try it live:** <https://goal-with-the-flow.netlify.app>. The guided tour starts on the home page.
 
