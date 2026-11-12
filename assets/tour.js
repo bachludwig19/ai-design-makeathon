@@ -11,7 +11,7 @@
     home: [
       { when: () => !(window.MFState && MFState.get().created), sel: '#ask button[type="submit"]', n: 1, text: "Start here: describe your goal, then click <b>Create goal</b>." },
       { when: () => !resolved(), sel: '#attention a.btn[href="goal.html"]', n: 2, text: "Your new goal hit a snag. Click <b>Review</b>." },
-      { when: resolved, sel: ".hero-cta a.btn", n: 8, text: "Delivery is back on track. Now see the workflow behind it: <b>Build a workflow</b>." }
+      { when: resolved, sel: '#mf-nav a.nav-link[href="canvas.html"]', n: 8, text: "Delivery is back on track. See the workflow behind it in <b>Create workflows</b>." }
     ],
     goal: [
       { when: () => !resolved(), sel: 'a.btn[href="workflow.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
