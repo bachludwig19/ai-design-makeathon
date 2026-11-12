@@ -151,6 +151,8 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .spin{width:14px;height:14px;flex:none;border:2px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #banner{display:none}
+.nx{position:absolute;top:-9px;left:-9px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--danger);font-size:14px;line-height:1;display:none;place-items:center;cursor:pointer;z-index:4;box-shadow:var(--shadow);padding:0}
+.node:hover .nx,.node.sel .nx{display:grid}.nx:hover{background:var(--danger);color:var(--on-dark);border-color:var(--danger)}
 .node.flagged{border-color:var(--risk)}
 .node.flagged .nb.warn{background:#FBF3DC}
 .backcue{margin:12px 18px 0;font-size:12px;color:var(--text-2);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
@@ -1009,7 +1011,7 @@ function renderCanvas(){
       const lc = branchClass(p.id)==='yes' ? 'var(--teal)' : branchClass(p.id)==='no' ? 'var(--danger)' : 'var(--text-2)';
       ports += `<span class="port out" data-node="${n.id}" data-port="${p.id}" data-type="${p.type}" style="top:${y}px;--pc:${TYPES[p.type].c}" title="out · ${TYPES[p.type].l} · drag to connect">${p.label?`<span class="pl" style="color:${lc}">${esc(p.label)}</span>`:''}</span>`; });
     html += `<div class="${cls}" data-node="${n.id}" style="left:${n.x}px;top:${n.y}px">${badge}
-      <div class="nrow"><span class="ni">${ic(c.icon)}</span><div class="ntx"><div class="nt">${esc(title(n))}</div><div class="nsub">${esc(sub(n))}</div></div></div>${ports}</div>`;
+      ${n.t!=='transcript' ? `<button class="nx" data-rm="${n.id}" title="Remove step" aria-label="Remove ${esc(title(n))}">×</button>` : ''}<div class="nrow"><span class="ni">${ic(c.icon)}</span><div class="ntx"><div class="nt">${esc(title(n))}</div><div class="nsub">${esc(sub(n))}</div></div></div>${ports}</div>`;
   });
 
   // waiting actions on canvas
@@ -1213,7 +1215,7 @@ function renderInspector(){
     <div class="insp-body" id="ib">${configHTML(n)}</div>`;
   insp.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; renderInspector(); });
   $('#backCue').onclick = ()=>{ sel = null; renderAll(); };
-  if (['decide','slack','wait','escalate'].includes(n.t)){
+  if (n.t!=='transcript'){
     insp.querySelector('.insp-body').insertAdjacentHTML('beforeend', `<button class="btn" id="rmStep" style="margin-top:14px;color:var(--danger)">${ic('x')}Remove step</button>`);
     $('#rmStep').onclick = ()=>removeStep(n.id);
   }
@@ -1350,8 +1352,9 @@ function addSlackToStep3(){
 function removeStep(id){
   const n = node(id); if (!n) return;
   nodes = nodes.filter(x=>x.id!==id); edges = edges.filter(e=>e.f!==id && e.t!==id);
-  if (fix!=='swap' && !node('n13')) fix = null;
-  deployed = false; sim = {state:'fixed'}; sel = null; cfgVer++;
+  const FIXN = {me:['n12'], ask:['n6','n7','n8'], swap:['n13']};
+  if (fix && FIXN[fix] && FIXN[fix].includes(id)) fix = null;
+  deployed = false; sim = {state: sim.state==='idle' ? 'idle' : 'fixed'}; sel = null; cfgVer++;
   renderAll(); toast(`${title(n)} removed`);
 }
 function leg2Step(){
@@ -1377,7 +1380,8 @@ function cueHTML(){
         <button class="btn primary" data-fix="me">${ic('ucheck')}<span>Add to workflow: Send them to me to decide<small>Adds a “You decide” step after ${esc(f)} (No)</small></span></button>
         <button class="btn" data-fix="ask">${ic('msg')}<span>Add to workflow: Ask the suggested owner in Slack<small>Adds Slack DM → Wait ${cfg.timeoutH}h → Escalate after ${esc(f)} (No)</small></span></button>
       </div></div>`;
-    case 'fixed': return `<div class="cue wf">${WC}<h3>Added to your workflow</h3><p>${fix==='ask' ? 'Slack DM → Wait for reply → Escalate.' : '“You decide” on the No branch.'} Click <b>Run test again</b>.</p></div>`;
+    case 'fixed': if (!fix) return `<div class="cue wf">${WC}<h3>Workflow changed</h3><p>Click <b>Run test again</b> to check it.</p></div>`;
+      return `<div class="cue wf">${WC}<h3>Added to your workflow</h3><p>${fix==='ask' ? 'Slack DM → Wait for reply → Escalate.' : '“You decide” on the No branch.'} Click <b>Run test again</b>.</p></div>`;
     case 'passed': return `<div class="cue wf">${WC}<h3>All steps passed</h3><p>Click <b>Deploy</b> to make the change live.</p></div>`;
     default: return `<div class="cue wf">${WC}<h3>Stop this from happening again</h3><p>Click <b>Run test</b> to replay these ${N} items and find the step that stalled them.</p></div>`;
   }
@@ -1683,6 +1687,7 @@ scroller.addEventListener('mousedown', e=>{
   if (e.button!==0) return;
   const t = e.target;
   if (t.closest('.waitbar')) return;
+  const rm = t.closest('.nx'); if (rm){ e.preventDefault(); e.stopPropagation(); removeStep(rm.dataset.rm); return; }
   const outPort = t.closest('.port.out');
   if (outPort){ e.preventDefault(); startConnect(outPort, e); return; }
   const nd = t.closest('.node');
