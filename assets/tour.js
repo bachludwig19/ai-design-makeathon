@@ -14,7 +14,7 @@
       { when: resolved, sel: '#mf-nav a.nav-link[href="canvas.html"]', n: 8, text: "Delivery is back on track. See the workflow behind it in <b>Create workflows</b>." }
     ],
     goal: [
-      { when: () => !resolved(), sel: 'a.btn[href="workflow.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
+      { when: () => !resolved(), sel: 'a.btn[href="canvas.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
       { when: resolved, sel: '#mf-nav a.nav-link[href="index.html"]', n: 7, text: "Blockers cleared: 72% → 81%. Head back <b>Home</b>." }
     ],
     workflow: [
@@ -24,12 +24,14 @@
       { sel: '#banner-slot a.btn[href="goal.html"]', n: 6, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
     ],
     canvas: [
-      { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 4, text: "Your fix is live. Click <b>Done</b>." },
-      { when: () => window.MFCanvas && MFCanvas.deployed, sel: '#nav a.mf-link[href="index.html"]', n: 5, text: "Done. Head back <b>Home</b>." },
-      { when: () => window.MFCanvas && MFCanvas.state === "passed", sel: "#deployBtn", n: 4, text: "All green. Click <b>Deploy</b>." },
-      { when: () => window.MFCanvas && MFCanvas.state === "failed", sel: "#insp [data-fix]", n: 2, text: "A step failed. Pick a fix on the right." },
-      { when: () => window.MFCanvas && MFCanvas.state === "fixed", sel: "#runBtn", n: 3, text: "Click <b>Run test again</b>." },
-      { when: () => window.MFCanvas && MFCanvas.state === "idle", sel: "#runBtn", n: 1, text: "Click <b>Run test</b>." }
+      { sel: "#insp [data-accept]", n: 4, text: "The agent found a likely owner. Click <b>Assign</b>." },
+      { sel: "#insp [data-approve]", n: 5, text: "David hasn't confirmed. Click <b>Approve &amp; sync</b>." },
+      { when: () => window.MFCanvas && MFCanvas.resolved && MFCanvas.state === "idle" && !MFCanvas.deployed, sel: "#runBtn", n: 6, text: "Now stop this from happening again. Click <b>Run test</b>." },
+      { when: () => window.MFCanvas && MFCanvas.state === "failed", sel: '#insp [data-fix="ask"]', n: 7, text: "A step failed. Pick a fix on the right." },
+      { when: () => window.MFCanvas && MFCanvas.state === "fixed", sel: "#runBtn", n: 8, text: "Click <b>Run test again</b>." },
+      { when: () => window.MFCanvas && MFCanvas.state === "passed" && !MFCanvas.deployed, sel: "#deployBtn", n: 9, text: "All green. Click <b>Deploy</b>." },
+      { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 9, text: "Your fix is live. Click <b>Done</b>." },
+      { when: () => window.MFCanvas && MFCanvas.deployed, sel: "#backGoal", n: 10, text: "Head back to your goal: <b>Back to goal</b>." }
     ]
   }[page];
   if (!RULES) return;

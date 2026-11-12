@@ -90,6 +90,61 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .cue .fixes .btn{justify-content:flex-start;text-align:left;white-space:normal;height:auto;padding:12px 14px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:600}
 .cue .fixes .btn small{display:block;font-weight:400;color:inherit;opacity:.75;font-size:12.5px;margin-top:2px}
 .cue .fixes .btn .i{align-self:flex-start;margin-top:2px}
+.deck{flex:1;overflow:auto;padding:14px 16px 20px}
+.deck .cue{margin:0 0 14px}
+.dh{font-family:var(--display);font-stretch:125%;text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;font-weight:700;color:var(--text-2);margin:4px 2px 10px;display:flex;align-items:center;gap:8px}
+.dh .cnt{background:var(--text);color:var(--on-dark);border-radius:999px;padding:1px 8px;font-size:11px;letter-spacing:0}
+.deck .pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:7px;font-size:12px;font-weight:500;white-space:nowrap}
+.deck .pill.healthy{background:var(--teal-soft);color:var(--teal);border-radius:999px}.deck .pill.risk{background:var(--risk-soft);color:var(--danger)}.deck .pill.grey{background:#ECEAE4;color:var(--text-2)}
+.deck .avatar{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:11.5px;font-weight:600;flex:none}
+.deck .avatar.gold{background:var(--primary)}
+.item{padding:16px 16px 14px;margin-bottom:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;transition:border-color .4s,background .4s}
+.item.done{background:#F6FAF8;border-color:#CFE5DD}
+.item-top{display:flex;align-items:flex-start;gap:10px}
+.item-top .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.item-ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--risk-soft);color:var(--danger)}
+.item-ic.wait{background:#ECEAE4;color:var(--text)}.item-ic.ok{background:var(--teal-soft);color:var(--teal)}
+.item-title{font-weight:600;font-size:14.5px;line-height:1.3}
+.deck .quote{margin:12px 0 0;padding:2px 0 2px 12px;border-left:3px solid var(--risk);font-style:italic;color:var(--text-2);line-height:1.55;font-size:13px}
+.deck .quote.wait{border-color:var(--dark)}.deck .quote.ok{border-color:var(--teal)}
+.deck .quote b{font-style:normal;font-weight:500;color:var(--text)}
+.item-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12.5px}
+.item-meta .k{color:var(--text-2)}.item-meta .due-risk{color:var(--danger);font-weight:600}
+.deck .ts{font-family:var(--mono);font-size:11.5px;color:var(--primary);background:var(--primary-soft);padding:1px 6px;border-radius:5px;font-style:normal}
+.item-foot{display:flex;align-items:center;gap:8px 12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.item-foot .k{color:var(--text-2)}
+.item-foot .actions{display:flex;gap:8px;flex-wrap:wrap;width:100%}
+.deck .jira{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:500;color:var(--teal);background:var(--teal-soft);padding:3px 9px;border-radius:6px}
+.deck .waiting{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-2)}.deck .waiting.ok{color:var(--text)}.deck .waiting.ok .i{color:var(--teal)}
+.decide{margin:12px 0 2px;padding:4px 14px 14px;background:var(--card);border:1px solid #E8DDBF;border-radius:12px}
+.decide-label{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9A7720;font-weight:600}
+.cand{display:flex;gap:10px;align-items:center;margin-top:12px}.cand .nm{font-size:14.5px;font-weight:600}.cand .rl{font-size:12px;color:var(--text-2)}
+.conf{margin-top:10px}.conf .row{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--text-2)}
+.conf b{font-size:18px;font-weight:600;color:var(--teal)}
+.conf .bar{height:8px;margin-top:6px;position:relative;border-radius:99px;background:#E9E6DF}
+.conf .bar>i{display:block;height:100%;border-radius:99px;background:var(--teal)}
+.conf .bar::after{content:"";position:absolute;left:var(--thr,90%);top:-4px;bottom:-4px;width:2px;border-radius:2px;background:var(--dark)}
+.conf .thr{font-size:11px;color:var(--text-3);margin-top:4px;text-align:right}
+.why-box{display:flex;gap:10px;margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--primary-soft);border:1px solid #EAD9A6}
+.why-box .hd{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8A6A18}
+.why-box .bd{margin-top:3px;font-size:13px;line-height:1.5;color:#4A3A0E}
+.evid h4{margin:12px 0 6px;font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.08em}
+.evid ul{list-style:none;margin:0;padding:0}
+.evid li{display:flex;gap:8px;padding:3px 0;font-size:12.5px;line-height:1.45}.evid li .i{color:var(--teal);flex:none;margin-top:2px;width:14px;height:14px}
+.src{background:var(--surface);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5}
+.src q{font-style:italic;color:var(--text)}
+.src .by{display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--text-2);font-size:12px}
+.src .by .avatar{width:20px;height:20px;font-size:9px}
+.choices{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.choices .btn{justify-content:center;min-height:38px}
+.choices .btn.assign{white-space:normal;height:auto;padding:9px 12px;line-height:1.35;text-align:left}
+.choices .btn.assign .i{flex:none}
+.choices select{height:38px;width:100%;border-radius:var(--radius);border:1px solid var(--line);background:var(--card);padding:0 10px;font:inherit;font-size:13px;color:var(--text);cursor:pointer}
+.spin{width:14px;height:14px;flex:none;border:2px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#banner{display:none}
+.node.flagged{border-color:var(--risk)}
+.node.flagged .nb.warn{background:#FBF3DC}
 .backcue{margin:12px 18px 0;font-size:12px;color:var(--text-2);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
 .tour-tip{bottom:128px !important}
 .btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:var(--radius);padding:7px 13px;font-size:13px;font-weight:500;white-space:nowrap}
@@ -241,7 +296,7 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .waitbar .btn{justify-content:center}
 
 /* ---------- inspector ---------- */
-.insp{width:360px;flex:none;border-left:1px solid var(--hair);background:var(--bg);display:flex;flex-direction:column;min-height:0}
+.insp{width:400px;flex:none;border-left:1px solid var(--hair);background:var(--bg);display:flex;flex-direction:column;min-height:0}
 .insp-head{padding:16px 18px 0}
 .insp-head .k{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:600;text-transform:uppercase}
 .insp-head h3{margin:2px 0 0;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
@@ -397,10 +452,9 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
       <li data-g="add"><i>1</i>Add steps</li><li data-g="connect"><i>2</i>Connect</li><li data-g="test"><i>3</i>Test</li><li data-g="deploy"><i>4</i>Deploy</li>
     </ol>
     <span class="spacer"></span>
-    <span id="engineChip"></span>
     <button class="btn" id="cvReset" title="Clear demo decisions and start over" style="margin-left:8px">Reset demo</button>
     <span id="saveState" hidden></span>
-    <a class="btn" href="workflow.html"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back to workflow</a>
+    <a class="btn" id="backGoal" href="goal.html"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back to goal</a>
   </header>
 
   <div class="ws">
@@ -858,12 +912,13 @@ function renderCanvas(){
   // stage band + background
   STAGES.forEach(s=>{
     const x0 = colX(s.cols[0]) - 18, x1 = colX(s.cols[1]) + NW + 18;
-    const status = (deployed && s.n===3) ? 'resumed' : s.status;
-    if (s.status==='attention' && !deployed) html += `<div class="stage attn" id="stage3bg" style="left:${x0}px;top:16px;width:${x1-x0}px;height:${H-32}px"></div>`;
-    const flagged = s.status==='attention' ? FLAGGED.length : 0;
+    const openN = openItems().length;
+    const status = (s.n===3 && !openN) ? 'completed' : (deployed && s.n===3) ? 'resumed' : s.status;
+    if (status==='attention') html += `<div class="stage attn" id="stage3bg" style="left:${x0}px;top:16px;width:${x1-x0}px;height:${H-32}px"></div>`;
+    const flagged = openN;
     html += `<div class="stage-h ${status}" data-stage="${s.n}" style="left:${x0}px;top:28px;width:${x1-x0}px" title="Frame this step">
-      <span class="sn">${s.status==='completed'?ic('check'):s.n}</span><span class="st">${esc(s.name)}</span>
-      ${status==='attention' && !deployed ? `<span class="ss">${flagged} stuck</span>` : status==='resumed' ? '<span class="ss">Resumed</span>' : ''}</div>`;
+      <span class="sn">${status==='completed'?ic('check'):s.n}</span><span class="st">${esc(s.name)}</span>
+      ${status==='attention' ? `<span class="ss">${flagged} stuck</span>` : (s.n===3 && status==='completed') ? '<span class="ss">Resolved</span>' : status==='resumed' ? '<span class="ss">Resumed</span>' : ''}</div>`;
   });
 
   // edges
@@ -921,6 +976,11 @@ function renderCanvas(){
         else { cls += ' s-ok'; badge = `<span class="nb done">${ic('check')}Passed</span>`; }
       } else if (k === sim.shown && sim.state==='running') cls += ' s-next anim';
     }
+    if (!badge && n.t==='ownerFound' && (!sim.path || sim.state==='idle' || sim.state==='fixed')){
+      const k = openItems().length;
+      if (k){ cls += ' flagged'; badge = `<span class="nb warn">${ic('alert')}${k} stuck</span>`; }
+      else { cls += ' s-ok'; badge = `<span class="nb done">${ic('check')}Resolved</span>`; }
+    }
     if (st){
       const map = {done:['done','check','Done'], skipped:['skipped','','Skipped'], warn:['warn','alert','Warning'], waiting:['waiting','hour','Waiting on you']};
       const [bc, bi, bt] = map[st.status]||map.done;
@@ -954,15 +1014,15 @@ function renderBanner(){
   const flagged = FLAGGED;
   const by = s => flagged.filter(i=>i.state===s).length;
   const b = $('#banner');
-  if (deployed){
+  const openN = openItems().length;
+  if (!openN){
     b.className = 'banner ok';
-    b.innerHTML = `<span class="bi">${ic('check')}</span><span class="bt"><b>Deployed.</b> The ${flagged.length} stuck items are moving again.</span>
-      <a class="btn sm" href="workflow.html">View workflow</a>`;
+    b.innerHTML = `<span class="bi">${ic('check')}</span><span class="bt">${deployed ? `<b>Fix deployed.</b> This won't stall again.` : sim.state==='passed' ? `<b>All steps pass.</b> Deploy so this doesn't happen again.` : `<b>All ${flagged.length} resolved.</b> Step 3 is moving again.`}</span>`;
     return;
   }
   b.className = 'banner';
   b.innerHTML = `<span class="bi">${ic('alert')}</span>
-    <span class="bt">${sim.state==='passed' ? `<b>All steps pass.</b> Deploy to unblock the ${flagged.length} items.` : `<b>${flagged.length} action items are stuck at step 3.</b> Run a test to find out why.`}</span>`;
+    <span class="bt"><b>${openN} action item${openN>1?'s are':' is'} stuck at step 3.</b> Resolve ${openN>1?'them':'it'} on the right.</span>`;
 }
 function renderLegend(){
   $('#legend').innerHTML = ['Transcript','ActionItems','ActionItem','Message','Task'].map(t=>`<span class="tchip"><i style="background:${TYPES[t].c}"></i>${TYPES[t].l}</span>`).join('');
@@ -1120,9 +1180,19 @@ function json(o){
 function renderInspector(){
   const n = node(sel);
   if (sel==='n4') openedStuck = true;
-  if (!n){ insp.innerHTML = cueHTML(); bindCue(); return; }
+  if (!n){
+    const prev = insp.querySelector('.deck'), top = prev ? prev.scrollTop : 0, wasOpen = insp.dataset.open;
+    insp.innerHTML = panelHTML(); insp.dataset.open = openItems().length;
+    const d = insp.querySelector('.deck'); d.scrollTop = (wasOpen && +wasOpen && !openItems().length) ? 0 : top;
+    // keep the next decision button on screen so the guide can point at it
+    const t = d.querySelector('[data-accept],[data-approve]');
+    if (t){ const r = t.getBoundingClientRect(), q = d.getBoundingClientRect();
+      if (r.bottom > q.bottom - 16) d.scrollTop += r.bottom - q.bottom + 72;
+      else if (r.top < q.top) d.scrollTop -= q.top - r.top + 72; }
+    return;
+  }
   const c = cat(n), st = run && run.byNode[n.id];
-  insp.innerHTML = `<button class="backcue" id="backCue">← Next step</button><div class="insp-head">
+  insp.innerHTML = `<button class="backcue" id="backCue">← Back to items</button><div class="insp-head">
       <h3><span class="ni ${KCLASS[c.cat]}" style="background:none">${ic(c.icon)}</span>${esc(title(n))}</h3>
       </div>
     <div class="insp-body" id="ib">${configHTML(n)}</div>`;
@@ -1130,13 +1200,117 @@ function renderInspector(){
   $('#backCue').onclick = ()=>{ sel = null; renderAll(); };
   bindConfig(n);
 }
+/* ---------------- action items to resolve (Cues-style deck) ---------------- */
+const firstName = s => String(s).split(' ')[0];
+const inits = s => String(s).split(' ').map(w=>w[0]).join('');
+const shortQ = (q, n=96) => q.length>n ? q.slice(0,n).replace(/\s+\S*$/,'')+'…' : q;
+const ME = (MF.user && MF.user.name) || 'You';
+const waiting = {};   // id -> {text, ok}
+function owners(){ try { return (window.MFState ? MFState.get().owners : {}) || {}; } catch(e){ return {}; } }
+function openItems(){ const o = owners(); return FLAGGED.filter(i=>!o[i.id]); }
+function allResolved(){ return openItems().length===0; }
+const DECK = FLAGGED.filter(i=>i.suggestedOwner).concat(FLAGGED.filter(i=>!i.suggestedOwner));
+function record(id, name, how, text){
+  if (!window.MFState) return;
+  MFState.assign(id, name, how);
+  const s = MFState.get(); if (s.log && s.log[0]){ s.log[0].text = text; s.log[0].by = 'human'; }
+  if (FLAGGED.every(i=>s.owners[i.id])) s.pipelineDoneAt = s.pipelineDoneAt || new Date().toISOString();
+  MFState.set(s);
+}
+const STATE_TAGS = { unassigned:[['Overdue','risk'],['Unassigned','grey']], 'awaiting-confirmation':[['Awaiting confirmation','grey']], overdue:[['Overdue','risk'],['No owner','grey']] };
+const clock = iso => { try { return new Date(iso).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } };
+function decideHTML(it){
+  const so = it.suggestedOwner, alts = it.alternatives || [];
+  const others = (MF.team||[]).filter(t=>t.name!==so.name && !alts.some(a=>a.name===t.name));
+  return `<div class="decide">
+    <div class="evid"><h4>Evidence</h4><ul>${so.evidence.map(e=>`<li>${ic('check')}<span>${esc(e)}</span></li>`).join('')}</ul>
+      <h4>From the meeting</h4><div class="src"><q>${esc(so.sourceQuote||it.quote)}</q>
+        <div class="by"><span class="avatar">${esc(inits(so.sourceSpeaker||so.name))}</span>${esc(so.sourceSpeaker||'')}<span class="ts">▶ ${esc(so.sourceTs||it.ts)}</span></div></div></div>
+    <div class="choices"><button class="btn primary assign" data-accept="${it.id}">${ic('check')}<span>Assign ${esc(firstName(so.name))}${so.role?' · '+esc(so.role):''}</span></button>
+      <select data-pick="${it.id}" aria-label="Pick someone else"><option value="">Pick someone else…</option>
+        ${alts.map(a=>`<option value="${esc(a.name)}">${esc(a.name)} · ${pct(a.confidence)} match</option>`).join('')}
+        ${others.map(t=>`<option value="${esc(t.name)}">${esc(t.name)} · ${esc(t.role)} · ${esc(t.load)}</option>`).join('')}</select></div>
+  </div>`;
+}
+function itemCard(it){
+  const o = owners()[it.id], so = it.suggestedOwner, w = waiting[it.id], done = !!o;
+  const tone = done ? 'ok' : it.state==='awaiting-confirmation' ? 'wait' : '';
+  const tags = done ? `<span class="pill healthy">Owner confirmed</span>` : STATE_TAGS[it.state].map(([t,c])=>`<span class="pill ${c}">${t}</span>`).join('');
+  const src = `<span><span class="k">Source:</span> <b style="font-weight:600">${esc(MF.meeting.title)}</b> <span class="ts">${esc(it.ts||'')}</span></span>`;
+  const due = `<span><span class="k">Due:</span> <span class="${!done && it.state!=='awaiting-confirmation'?'due-risk':''}">${esc(it.due)}</span></span>`;
+  let foot;
+  if (done){
+    const entry = ((window.MFState && MFState.get().log)||[]).find(l=>l.id===it.id && l.how!=='undo');
+    const key = MF.resolution && MF.resolution.jiraKeys && MF.resolution.jiraKeys[it.id];
+    foot = `<span><span class="k">Owner:</span> <b>${esc(o)}</b></span><span class="k">Decided by you${entry?' · '+clock(entry.t):''}</span>
+      ${allResolved() && key ? `<span class="jira">${ic('check')}Synced · ${esc(key)}</span>` : `<span class="waiting"><span class="spin"></span>Jira sync waits for all ${FLAGGED.length}</span>`}`;
+  } else if (w) foot = `<span class="waiting ${w.ok?'ok':''}">${w.ok?ic('check'):'<span class="spin"></span>'}${w.text}</span>`;
+  else if (so) foot = '';
+  else foot = `<span><span class="k">Owner:</span> <b>${esc(it.owner)}</b> · hasn't confirmed</span>
+      <span class="actions"><button class="btn primary sm" data-approve="${it.id}">${ic('check')}Approve &amp; sync to Jira</button><button class="btn sm" data-remind="${it.id}">${ic('msg')}Send reminder</button></span>`;
+  return `<article class="item ${done?'done':''}" id="ic-${it.id}">
+    <div class="item-top"><span class="item-ic ${tone}">${ic(done?'check':tone==='wait'?'hour':'alert')}</span>
+      <div><div class="item-title">${esc(it.title)}</div><div class="tags">${tags}</div></div></div>
+    <div class="quote ${tone}">“${esc(it.quote)}”${it.speaker?` — <b>${esc(it.speaker)}</b>`:''}</div>
+    <div class="item-meta">${src}${due}</div>
+    ${so && !done && !w ? decideHTML(it) : ''}
+    ${foot ? `<div class="item-foot">${foot}</div>` : ''}
+  </article>`;
+}
+function panelHTML(){
+  const o = owners(), open = DECK.filter(i=>!o[i.id]);
+  const R = MF.resolution || {progressBefore:MF.goal.progress, progressAfter:MF.goal.progress};
+  let h = '<div class="deck">';
+  if (open.length) h += `<div class="dh">Action items to resolve <span class="cnt">${open.length}</span></div>`;
+  else h += `<div class="cue good"><div class="ck">${ic('check')}Resolved</div><h3>All ${FLAGGED.length} resolved</h3>
+      <p>Delivery goal ${R.progressBefore}% → <b>${R.progressAfter}%</b>. Step 3 is moving again.</p></div>`;
+  if (!open.length) h += `<div class="dh" style="margin-top:18px">Stop this from happening again</div>` + cueHTML() + `<div class="dh" style="margin-top:18px">Action items · ${FLAGGED.length} resolved</div>`;
+  h += DECK.map(itemCard).join('');
+  if (open.length && (sim.state!=='idle' || deployed)) h += `<div class="dh" style="margin-top:18px">Stop this from happening again</div>` + cueHTML();
+  return h + '</div>';
+}
+function settle(it, who, how, text, reply){
+  waiting[it.id] = {text: esc(reply), ok:true}; renderInspector();
+  setTimeout(()=>{
+    delete waiting[it.id]; record(it.id, who, how, text);
+    renderAll(); renderBanner();
+    if (allResolved()) toast(`All ${FLAGGED.length} resolved · goal back to ${(MF.resolution||{}).progressAfter||MF.goal.progress}%`);
+  }, 1100);
+}
+function viaSlack(it, who, how, text, pendText, reply){
+  waiting[it.id] = {text: pendText}; renderInspector();
+  toast(`Slack DM sent to ${who}`);
+  setTimeout(()=>settle(it, who, how, text, reply), 2400);
+}
+insp.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset, it = d.accept ? FLAGGED.find(i=>i.id===d.accept) : d.approve ? FLAGGED.find(i=>i.id===d.approve) : d.remind ? FLAGGED.find(i=>i.id===d.remind) : null;
+  if (d.fix){ applyFix(d.fix); return; }
+  if (!it || waiting[it.id]) return;
+  if (d.accept){ const so = it.suggestedOwner;
+    viaSlack(it, so.name, 'approved-suggestion', `${ME} assigned suggested owner ${so.name} (${pct(so.confidence)}) to “${it.title}” from the workflow canvas. ${firstName(so.name)} confirmed in Slack (simulated reply).`,
+      `Pending ${esc(firstName(so.name))}'s reply in Slack · the agent is watching`, `${firstName(so.name)} replied: “Yes, I've got it.”`); }
+  else if (d.approve){
+    record(it.id, it.owner, 'approved-owner', `${ME} approved ${it.owner} as owner of “${it.title}” and approved the Jira sync.`);
+    toast(`${it.owner} confirmed as owner · queued for Jira`); renderAll(); renderBanner();
+    if (allResolved()) setTimeout(()=>toast(`All ${FLAGGED.length} resolved · goal back to ${(MF.resolution||{}).progressAfter}%`), 1400); }
+  else if (d.remind){
+    viaSlack(it, it.owner, 'reminder-confirmed', `${ME} sent ${it.owner} a reminder in Slack; ${firstName(it.owner)} confirmed ownership of “${it.title}” (simulated reply).`,
+      `Reminder sent to ${esc(firstName(it.owner))} · the agent is watching`, `${firstName(it.owner)} replied: “On it, I'll check residency with security by noon.”`); }
+});
+insp.addEventListener('change', e=>{
+  const s = e.target.closest('[data-pick]'); if (!s || !s.value) return;
+  const it = FLAGGED.find(i=>i.id===s.dataset.pick), so = it.suggestedOwner, who = s.value;
+  viaSlack(it, who, 'override', `${ME} overrode the suggestion (${so.name}, ${pct(so.confidence)}) and assigned ${who} to “${it.title}”. ${firstName(who)} confirmed in Slack (simulated reply).`,
+    `Pending ${esc(firstName(who))}'s reply in Slack · the agent is watching`, `${firstName(who)} replied: “Yes, I've got it.” The agent will learn from your pick.`);
+});
 function cueHTML(){
   const N = FLAGGED.length;
   const f = sim.path && sim.path.fail ? title(node(sim.path.fail)) : 'Owner Found?';
-  if (deployed) return `<div class="cue good"><div class="ck">${ic('check')}Live</div><h3>Your fix is live.</h3><p>The ${N} stuck items are moving again.</p><div class="fixes"><a class="btn" href="index.html">${ic('reply')}Back to Home</a></div></div>`;
+  if (deployed) return `<div class="cue good"><div class="ck">${ic('check')}Live</div><h3>Your fix is live.</h3><p>${fix==='me' ? 'Next time, unsure matches come to you.' : 'Next time, the agent asks the suggested owner in Slack.'}</p></div>`;
   switch(sim.state){
     case 'running': return `<div class="cue"><div class="ck">${ic('play2')}Testing</div><h3>Running ${N} stuck items…</h3><p>Watch the path light up.</p></div>`;
-    case 'failed': return `<div class="cue bad"><div class="ck">${ic('alert')}Next step</div><h3>${esc(f)} failed on ${N} items</h3>
+    case 'failed': return `<div class="cue bad"><div class="ck">${ic('alert')}Next step</div><h3>${esc(f)} failed on ${N} test items</h3>
       <p>No confirmed owner, and the matches are under your ${pct(cfg.threshold)} auto-assign rule. Nothing handles the <b>No</b> branch.</p>
       <div class="fixes">
         <button class="btn primary" data-fix="ask">${ic('msg')}<span>Ask the suggested owner in Slack<small>Wait ${cfg.timeoutH}h for a reply, then escalate</small></span></button>
@@ -1144,10 +1318,9 @@ function cueHTML(){
       </div></div>`;
     case 'fixed': return `<div class="cue good"><div class="ck">${ic('check')}Fixed</div><h3>Fixed. Run test again.</h3><p>${fix==='ask' ? 'Added: Slack DM → wait for reply → escalate.' : 'Added: You decide.'}</p></div>`;
     case 'passed': return `<div class="cue good"><div class="ck">${ic('check')}Next step</div><h3>All steps passed.</h3><p>Deploy when ready.</p></div>`;
-    default: return `<div class="cue"><div class="ck">${ic('spark')}Next step</div><h3>${N} items are stuck.</h3><p>Click <b>Run test</b> to find the step that blocks them.</p></div>`;
+    default: return `<div class="cue"><div class="ck">${ic('spark')}Optional</div><h3>Find what caused this</h3><p>Click <b>Run test</b> to replay these ${N} items through the workflow.</p></div>`;
   }
 }
-function bindCue(){ insp.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>applyFix(b.dataset.fix)); }
 function simPath(){
   const seq = [], es = []; let cur = nodes.find(n=>n.t==='transcript'), guard = 0;
   while (cur && guard++ < 40){
@@ -1422,8 +1595,7 @@ function doDeploy(){
   const flagged = FLAGGED;
   const what = it => { const c = cand(it); return fix==='ask' ? (c ? `Asking ${c.name} in Slack` : 'Asking in Slack') : 'Waiting for your pick'; };
   $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Your fix is live</h3>
-    <p>The ${flagged.length} stuck items are moving again:</p>
-    ${flagged.map(it=>`<div class="route"><span class="rt"><b>${esc(it.title)}</b><small>${esc(what(it))}</small></span></div>`).join('')}
+    <p>${fix==='me' ? `Next time the agent is under ${pct(cfg.threshold)} sure, it sends the item to you to decide.` : `Next time the agent is under ${pct(cfg.threshold)} sure, it asks the suggested owner in Slack, waits ${cfg.timeoutH}h, then escalates.`}</p>
     <div class="acts"><button class="btn primary" id="mClose">Done</button></div>`;
   $('#modal').classList.add('on');
   $('#mClose').onclick = ()=>$('#modal').classList.remove('on');
@@ -1607,7 +1779,8 @@ window.MFCanvas = {
   get state(){ return sim.state; },
   get deployed(){ return deployed; },
   get modalOpen(){ return $('#modal').classList.contains('on'); },
-  get panelOpen(){ return !sel; }
+  get panelOpen(){ return !sel; },
+  get resolved(){ return allResolved(); }
 };
 
 /* "How this works" guide in the top bar: shows where the user is. */
@@ -1643,7 +1816,6 @@ function setLib(collapsed){ $('#lib').classList.toggle('collapsed', collapsed); 
 $('#libClose').onclick = ()=>setLib(true);
 $('#libOpen').onclick = $('#libOpen2').onclick = ()=>setLib(false);
 { const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
-document.getElementById('engineChip').innerHTML = '<span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>';
 document.getElementById('cvReset').onclick = () => { try { window.MFState && MFState.reset(); sessionStorage.clear(); localStorage.removeItem('mf.canvas.v1'); } catch (e) {} location.href = 'index.html'; };
 requestAnimationFrame(initialView);
 let rzT = null;
