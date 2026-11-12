@@ -434,6 +434,75 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
 .btn.dark{background:var(--primary);border-color:var(--primary);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 22px -14px rgba(0,0,0,.7)}
 .node.sel{border-color:var(--gold);box-shadow:inset 0 0 0 4px var(--card),inset 0 0 0 5px rgba(var(--gold-rgb),.35),0 0 0 3px rgba(var(--gold-rgb),.16),var(--shadow)}
 .tab.on{border-bottom-color:var(--text)}
+
+/* ===== Aurora glass theme (canvas-local overrides; behavior unchanged) ===== */
+:root{--av:#6D5DFC;--av2:#8B7BFF;--at:#19C3B1;--ap:#FFB38A;--ac:#FF7A59;--ar:#E5484D;--av-soft:rgba(109,93,252,.10);
+  --glass:rgba(255,255,255,.70);--glass-line:rgba(255,255,255,.75);--glass-shadow:0 10px 30px -12px rgba(76,60,190,.28);--rad:14px}
+body{background:#F4F2FB}
+.canvas{background:
+  radial-gradient(40% 50% at 15% 20%,rgba(109,93,252,.22),transparent 70%),
+  radial-gradient(35% 45% at 80% 15%,rgba(25,195,177,.20),transparent 70%),
+  radial-gradient(45% 50% at 60% 85%,rgba(255,179,138,.26),transparent 70%),
+  linear-gradient(135deg,#F3F1FF,#EEF9F7 50%,#FFF4EC);background-size:180% 180%;animation:aurora 24s ease-in-out infinite alternate}
+@keyframes aurora{0%{background-position:0% 0%}100%{background-position:100% 100%}}
+.world{background-image:radial-gradient(rgba(60,50,140,.10) 1px,transparent 1px)}
+.top{background:var(--glass);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border-bottom:1px solid var(--glass-line);box-shadow:0 6px 24px -18px rgba(76,60,190,.4)}
+.insp{background:rgba(255,255,255,.55);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border-left:1px solid var(--glass-line)}
+.lib,.sim{background:rgba(255,255,255,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.toolbar{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-line);border-radius:12px;box-shadow:var(--glass-shadow)}
+/* nodes */
+.node{background:var(--glass);backdrop-filter:blur(12px) saturate(1.2);-webkit-backdrop-filter:blur(12px) saturate(1.2);border:1px solid var(--glass-line);border-radius:var(--rad);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),var(--glass-shadow)}
+.node .ni{border-radius:10px;width:30px;height:30px}
+.node.k-trig .ni{background:rgba(255,179,138,.28);color:#C2562B}
+.node.k-ai .ni{background:rgba(109,93,252,.16);color:var(--av)}
+.node.k-cond .ni{background:rgba(255,196,0,.20);color:#A77300}
+.node.k-int .ni{background:rgba(25,195,177,.18);color:#0E8C80}
+.node.k-human .ni{background:rgba(229,72,77,.12);color:#C2363B}
+.node[data-node] .ni svg{stroke:currentColor}
+.node.sel{border-color:var(--av);box-shadow:0 0 0 3px rgba(109,93,252,.22),var(--glass-shadow)}
+.node.s-ok{border-color:var(--at);box-shadow:0 0 0 3px rgba(25,195,177,.2),0 10px 30px -12px rgba(25,195,177,.45)}
+.node.s-fail{border-color:var(--ac);box-shadow:0 0 0 4px rgba(255,122,89,.22),0 10px 30px -10px rgba(229,72,77,.45)}
+.nb{border-radius:999px;padding:2px 9px}
+.nb.done{background:var(--at);color:#fff}
+.nb.fail{background:var(--ar);color:#fff}
+.node.s-next.anim,.node.flagged{animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 6px rgba(109,93,252,.18),0 0 28px rgba(109,93,252,.35)}}
+.node.flagged{border-color:var(--ap)}
+.node.flagged .nb.warn{background:#FFE6D6;color:#B4471F;border-color:rgba(255,122,89,.35)}
+/* edges */
+.edge{stroke:rgba(70,60,140,.35)}
+.edge.yes,.edge.ok{stroke:var(--at)}
+.edge.no{stroke:var(--ac)}
+.world.running .edge.ok{stroke-dasharray:10 6;animation:flow .6s linear infinite}
+/* stage band */
+.stage.attn{background:rgba(255,179,138,.16);border-color:rgba(255,122,89,.35);border-radius:18px}
+.stage-h{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--glass-line);border-radius:12px}
+.stage-h.attention{border-color:rgba(255,122,89,.45)}.stage-h.attention .sn{background:var(--ac);box-shadow:0 0 0 3px rgba(255,122,89,.25)}.stage-h.attention .ss{color:#C2462B}
+.stage-h.completed .sn{background:var(--at)}.stage-h.completed .ss{color:#0E8C80}
+/* buttons: sentence case, rounded, violet primary */
+.btn{text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;border-radius:10px;border-color:rgba(70,60,140,.16);background:rgba(255,255,255,.8)}
+.btn.primary{background:linear-gradient(135deg,var(--av),var(--av2));border-color:transparent;color:#fff;box-shadow:0 10px 22px -10px rgba(109,93,252,.7)}
+.btn.primary:hover{background:linear-gradient(135deg,#5E4EF0,#7D6CFF)}
+.btn.dark{background:#1E1B3A;border-color:#1E1B3A;color:#fff;border-radius:10px}
+.lib-head h2,.insp-head h3,.stage-h .st,.modal h3,.pop h4,.crumbs .here,.dh,.cue .ck,.evid h4,.decide-label,.lib-sec,.mf-sec,.libitem .soon{text-transform:none;letter-spacing:0;font-stretch:100%}
+.stage-h .st{font-size:13px}.dh{font-size:13px}.cue .ck{font-size:12px}.evid h4{font-size:12px}
+/* cards */
+.cue{background:rgba(255,255,255,.75);border:1px solid var(--glass-line);border-radius:16px;box-shadow:var(--glass-shadow)}
+.cue.good .ck{color:#0E8C80}
+.cue.wf{background:linear-gradient(135deg,rgba(109,93,252,.14),rgba(139,123,255,.08));border-color:rgba(109,93,252,.28);border-left:3px solid var(--av)}
+.cue.wf .ck{color:var(--av)}
+.item{background:rgba(255,255,255,.72);border:1px solid var(--glass-line);border-radius:16px;box-shadow:var(--glass-shadow)}
+.item.done{background:rgba(236,250,247,.8);border-color:rgba(25,195,177,.3)}
+.decide{border-color:rgba(109,93,252,.2);border-radius:12px}
+.deck .quote{border-left-color:var(--ac)}.deck .quote.ok{border-left-color:var(--at)}
+.deck .ts{color:var(--av);background:var(--av-soft)}
+.dh .cnt{background:var(--av)}
+.modal{border-radius:18px;background:rgba(255,255,255,.88);backdrop-filter:blur(18px)}
+.ghost{border-color:var(--av);color:var(--av);background:rgba(109,93,252,.06);border-radius:var(--rad)}
+.libitem{border-radius:10px;background:rgba(255,255,255,.75)}
+.spin{border-top-color:var(--av)}
+@media (prefers-reduced-motion:reduce){.canvas,.node.s-next.anim,.node.flagged,.world.running .edge.ok{animation:none}}
 </style>
 </head>
 <body>
@@ -1023,6 +1092,7 @@ function renderCanvas(){
     }
   }
   world.innerHTML = html;
+  world.classList.toggle('running', sim.state==='running');
 }
 
 /* ---------------- banner & legend ---------------- */
