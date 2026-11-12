@@ -59,6 +59,18 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .chip.teal{background:var(--teal-soft);color:var(--teal)}
 .chip.gold{background:transparent;border:1px solid var(--hair);color:var(--gold)}
 .spacer{flex:1}
+.ptitle{display:flex;flex-direction:column;line-height:1.15;white-space:nowrap}
+.ptitle .psub{font-size:12px;color:var(--text-3)}
+.guide{display:flex;gap:4px;list-style:none;margin:0 0 0 12px;padding:0}
+.guide li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);padding:5px 10px 5px 6px;border-radius:2px;white-space:nowrap}
+.guide li i{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;border:1px solid var(--hair-strong);color:var(--text-2)}
+.guide li.on{color:var(--text);background:var(--accent-soft)}
+.guide li.on i{background:var(--text);border-color:var(--text);color:var(--on-dark)}
+.guide li.done i{background:var(--teal);border-color:var(--teal);color:var(--on-dark)}
+.mf-link.off,.libitem.off{opacity:.35;cursor:not-allowed}
+.libitem.off:hover{border-color:var(--line)}
+.libitem .soon{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
+.about.muted{color:var(--text-3)}
 .btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:var(--radius);padding:7px 13px;font-size:13px;font-weight:500;white-space:nowrap}
 .btn:hover{border-color:var(--hair-strong)}
 .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-dark);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 22px -14px rgba(0,0,0,.7)}
@@ -163,7 +175,7 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .elabel.cold{opacity:.3}
 
 /* nodes */
-.node{position:absolute;width:216px;height:108px;background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 14px;cursor:grab;user-select:none;transition:box-shadow .2s,border-color .2s,opacity .25s;z-index:2}
+.node{position:absolute;width:216px;height:76px;display:flex;align-items:center;background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 14px;cursor:grab;user-select:none;transition:box-shadow .2s,border-color .2s,opacity .25s;z-index:2}
 .node.multi{padding-right:66px}
 .node:hover{border-color:var(--hair-strong)}
 .node .nh{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.08em;color:var(--text-3);font-weight:600;white-space:nowrap}
@@ -174,7 +186,8 @@ svg.edges{position:absolute;left:0;top:0;overflow:visible}
 .k-human .ni{background:var(--k-human-bg);color:var(--port-task)}
 .k-int .ni{background:var(--k-int-bg);color:var(--text-2)}
 .k-trig .ni{background:var(--k-trig-bg);color:var(--port-transcript)}
-.node .nt{font-weight:600;font-size:15px;margin-top:8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .nrow{display:flex;align-items:center;gap:10px;min-width:0}
+.node .nt{font-weight:600;font-size:15px;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .node .ns{font-size:12.5px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node.sel{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft),var(--shadow)}
 .node.dragging{cursor:grabbing;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:4}
@@ -234,7 +247,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .avail .ah span{margin-left:auto;font-weight:400;color:var(--text-3)}
 .avail .ag{margin-top:8px}
 .avail .agt{font-size:11px;color:var(--text-3);margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.vchip{display:inline-flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line);background:var(--bg);border-radius:var(--radius);padding:4px 8px;margin:0 4px 4px 0;font-size:11.5px;font-family:var(--mono);max-width:100%;text-align:left}
+.vchip{display:inline-flex;align-items:center;font-family:var(--font) !important;border:1px solid var(--line);background:var(--bg);border-radius:var(--radius);padding:4px 8px;margin:0 4px 4px 0;font-size:11.5px;font-family:var(--mono);max-width:100%;text-align:left}
 .vchip:hover{border-color:var(--accent);background:var(--accent-soft)}
 .vchip em{font-style:normal;font-family:var(--font);color:var(--text-3);font-size:11px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vchip.empty em{color:var(--danger)}
@@ -341,41 +354,39 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
   <a class="mf-logo" href="index.html"><span class="mf-mark">MF</span><span class="lbl">MeetFlow Alpine</span></a>
   <div class="mf-sec">Platform</div>
   <a class="mf-link" href="index.html" title="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/><path d="M9 21v-6h6v6"/></svg><span class="lbl">Home</span></a>
-  <a class="mf-link" href="#" title="AI Assistant"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M2 12v3M22 12v3"/></svg><span class="lbl">AI Assistant</span></a>
-  <a class="mf-link" href="#" title="Workflow Marketplace"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l2-5h14l2 5M3 9h18v3a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 14v6h14v-6"/></svg><span class="lbl">Workflow Marketplace</span></a>
-  <a class="mf-link" href="#" title="My Tasks &amp; Approvals"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span class="lbl">My Tasks &amp; Approvals</span></a>
-  <a class="mf-link" href="#" title="Activity &amp; Insights"><svg class="i" viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg><span class="lbl">Activity &amp; Insights</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="AI Assistant · not in this demo"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M2 12v3M22 12v3"/></svg><span class="lbl">AI Assistant</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="Workflow Marketplace · not in this demo"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l2-5h14l2 5M3 9h18v3a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 14v6h14v-6"/></svg><span class="lbl">Workflow Marketplace</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="My Tasks &amp; Approvals · not in this demo"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span class="lbl">My Tasks &amp; Approvals</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="Activity &amp; Insights · not in this demo"><svg class="i" viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg><span class="lbl">Activity &amp; Insights</span></a>
   <div class="mf-sec">Build &amp; configure</div>
   <a class="mf-link active" href="canvas.html" title="Workflow Studio"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><path d="M10 6.5h4a3 3 0 0 1 3 3V14"/></svg><span class="lbl">Workflow Studio</span></a>
-  <a class="mf-link" href="#" title="Agents &amp; Skills"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M5 21c1-4 4-6 7-6s6 2 7 6"/></svg><span class="lbl">Agents &amp; Skills</span></a>
-  <a class="mf-link" href="#" title="Integrations"><svg class="i" viewBox="0 0 24 24"><path d="M9 3v4M15 3v4M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span class="lbl">Integrations</span></a>
-  <a class="mf-link" href="#" title="Knowledge &amp; Data"><svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span class="lbl">Knowledge &amp; Data</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="Agents &amp; Skills · not in this demo"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M5 21c1-4 4-6 7-6s6 2 7 6"/></svg><span class="lbl">Agents &amp; Skills</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="Integrations · not in this demo"><svg class="i" viewBox="0 0 24 24"><path d="M9 3v4M15 3v4M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span class="lbl">Integrations</span></a>
+  <a class="mf-link off" href="#" aria-disabled="true" title="Knowledge &amp; Data · not in this demo"><svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span class="lbl">Knowledge &amp; Data</span></a>
   <div class="mf-user"><span class="mf-avatar" id="avatar">AM</span><span class="lbl"><span id="uname">Alex Mercer</span><small id="utier">Alpine Pro Tier</small></span></div>
 </nav>
 
 <div class="app">
   <header class="top">
     <button class="iconbtn" id="navToggle" title="Toggle navigation" aria-label="Toggle navigation"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></button>
-    <div class="crumbs">
-      <a href="goal.html" id="crumbGoal">Goal</a><span>›</span>
-      <a href="workflow.html">Action Item Tracking</a><span>›</span>
-      <span class="here">Workflow Design</span>
-    </div>
-    <span class="chip gold mono">v2.4 live · editing draft v2.5</span>
-    <span id="engineChip"></span>
+    <div class="ptitle"><span class="here">Workflow builder</span><span class="psub">Action Item Tracking</span></div>
+    <ol class="guide" aria-label="How this works">
+      <li data-g="add"><i>1</i>Add steps</li><li data-g="connect"><i>2</i>Connect</li><li data-g="test"><i>3</i>Test</li><li data-g="deploy"><i>4</i>Deploy</li>
+    </ol>
     <span class="spacer"></span>
-    <span class="chip" id="saveState">Draft saved</span>
+    <span id="engineChip"></span>
+    <span id="saveState" hidden></span>
     <a class="btn" href="workflow.html"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back to workflow</a>
   </header>
 
   <div class="ws">
     <!-- Node library -->
     <aside class="lib" id="lib" aria-label="Node library">
-      <div class="rail"><button class="iconbtn" id="libOpen" title="Open node library"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button class="vt" id="libOpen2">Node library</button></div>
+      <div class="rail"><button class="iconbtn" id="libOpen" title="Add steps"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button class="vt" id="libOpen2">Add steps</button></div>
       <div class="lib-head">
-        <h2>Node library <button class="iconbtn" id="libClose" title="Collapse library"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button></h2>
+        <h2>Add steps <button class="iconbtn" id="libClose" title="Collapse library"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button></h2>
         <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>
-          <input id="q" placeholder="Describe it: “remind owner if no reply”" autocomplete="off"></label>
+          <input id="q" placeholder="Search steps" autocomplete="off"></label>
       </div>
       <div class="lib-body">
         <div id="sugg"></div>
@@ -403,7 +414,7 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
         </div>
         <div class="banner" id="banner"></div>
       </div>
-      <div class="legend" id="legend"></div>
+      
     </main>
 
     <!-- Inspector -->
@@ -436,7 +447,7 @@ const ITEMS = FLAGGED.concat((MF.completedItems||[]).map((c,i)=>Object.assign(
 const LEAD = 'Marcus Vance (Product Lead)';
 
 /* ---------------- geometry ---------------- */
-const NW = 216, NH = 108, COLW = 272, LANEH = 160, PADX = 40, TOP = 108;
+const NW = 216, NH = 76, COLW = 272, LANEH = 160, PADX = 40, TOP = 108;
 const OFFY = 62;                 // space above the world for the toolbar/banner overlay
 const colX = c => PADX + c * COLW;
 const laneY = l => TOP + l * LANEH;
@@ -491,9 +502,9 @@ const CAT = {
   transcript:{name:'Meeting Transcript Ingest', cat:'Triggers', kind:'TRIGGER', icon:'mic', ins:[], outs:OUT('Transcript'),
     desc:'Starts a run when a meeting ends and its transcript (Zoom VTT or audio) is available.', perm:'Reads Zoom recordings for meetings you host',
     syn:'meeting zoom recording audio transcript start trigger call when meeting ends', ex:'Q3 Architecture Alignment · 52 min · 6 speakers'},
-  calendar:{name:'Calendar Event Webhook', cat:'Triggers', kind:'TRIGGER', icon:'cal', ins:[], outs:OUT('Event'),
+  calendar:{demo:false, name:'Calendar Event Webhook', cat:'Triggers', kind:'TRIGGER', icon:'cal', ins:[], outs:OUT('Event'),
     desc:'Starts a run on a calendar event (created, starting, ended).', perm:'Reads your calendar', syn:'calendar event schedule start trigger webhook', ex:'Event ended: Sprint review'},
-  manual:{name:'Manual Run', cat:'Triggers', kind:'TRIGGER', icon:'play', ins:[], outs:OUT('Event'),
+  manual:{demo:false, name:'Manual Run', cat:'Triggers', kind:'TRIGGER', icon:'play', ins:[], outs:OUT('Event'),
     desc:'Start the workflow by hand, e.g. for a one-off meeting.', perm:'None', syn:'manual run start button trigger now', ex:'Started by Alex Mercer'},
   extractor:{name:'NLP Action Item Extractor', cat:'AI processors', kind:'AI AGENT', icon:'spark', ins:IN('Transcript'), outs:OUT('ActionItems'),
     desc:'Finds commitments in a transcript: what, who, by when, with the quote as evidence.', perm:'Model: GPT-4o Alpine · no data retained',
@@ -778,13 +789,11 @@ function checks(){
   const warns = templateWarnings();
   const uw = unwired();
   const ranStale = run && run.ver !== cfgVer;
+  const ownerNode = conds.find(n=>n.t==='ownerFound') || conds[0];
+  const tested = p => ownerNode && cov.has(ownerNode.id+':'+p);
   return [
-    {ok: passVer===cfgVer, t: passVer===cfgVer ? 'A test run passed on this config'
-      : ranStale ? 'Config changed since the last test · re-run it' : 'Run a test to the end without warnings'},
-    {ok: need.length>0 && missing.length===0, t: `Branches tested: ${got.length}/${need.length}` +
-      (missing.length ? ` · still untested: ${missing.map(x=>title(x.n)+' '+x.p.label).join(', ')}` : '')},
-    {ok: !warns.length, t: warns.length ? `Slack message has empty ${warns[0].vars.map(v=>'{{'+v+'}}').join(', ')} for ${warns.map(w=>w.it.id).join(', ')}` : 'No empty message fields'},
-    {ok: !uw.length, t: uw.length ? `Not wired: ${uw.map(u=>title(u.n)+' · '+u.what).join(', ')}` : 'Every input and branch is wired'}
+    {ok: !!tested('no') && passVer===cfgVer, t: 'Test an item with no owner (e.g. Finalize onboarding…)'},
+    {ok: !!tested('yes') && passVer===cfgVer && missing.length===0 && !warns.length && !uw.length, t: 'Test an item that has an owner (e.g. Confirm API…)'}
   ];
 }
 
@@ -795,7 +804,7 @@ function worldSize(){
   const H = Math.max(laneY(3)+20, ...nodes.map(n=>n.y+NH+80));
   return {W, H};
 }
-function portY(count, i){ return count===1 ? NH/2 : 34 + i*42; }
+function portY(count, i){ return count===1 ? NH/2 : 22 + i*32; }
 function portPos(n, side, idx){
   const ports = side==='in' ? cat(n).ins : cat(n).outs;
   const y = portY(ports.length, idx);
@@ -830,7 +839,7 @@ function renderCanvas(){
     const flagged = s.status==='attention' ? FLAGGED.length : 0;
     html += `<div class="stage-h ${status}" data-stage="${s.n}" style="left:${x0}px;top:28px;width:${x1-x0}px" title="Frame this step">
       <span class="sn">${s.status==='completed'?ic('check'):s.n}</span><span class="st">${esc(s.name)}</span>
-      <span class="ss">${status==='attention' && !deployed ? flagged+' flagged · ' : ''}${STATUS_LABEL[status]}</span></div>`;
+      ${status==='attention' && !deployed ? `<span class="ss">${flagged} stuck</span>` : status==='resumed' ? '<span class="ss">Resumed</span>' : ''}</div>`;
   });
 
   // edges
@@ -857,12 +866,7 @@ function renderCanvas(){
     svg += `<path class="${cls}" data-e="${e.id}" d="${d}" marker-end="url(#${mk})"/><path class="hit" data-edge="${e.id}" d="${d}"/>`;
     const op = cat(a).outs.find(p=>p.id===e.fp);
     let label;
-    if (runActive) label = run.edges.includes(e.id) ? `${run.itemId}${op&&op.label?' · '+op.label:''}` : (op&&op.label) || '';
-    else {
-      const n = counts[e.id]||0;
-      const cnt = a.t==='transcript' ? 1 : n;
-      label = op && op.label ? `${op.label}${cnt?' · '+cnt:''}` : (cnt ? `×${cnt}` : '');
-    }
+    label = (op && op.label) || '';
     if (label) labels += `<div class="elabel ${lcls}" data-el="${e.id}" style="left:${mid.x}px;top:${mid.y}px" title="${esc(TYPES[op.type].l)}">${esc(label)}</div>`;
   });
   svg += `<path id="tempEdge" class="edge temp" d="" style="display:none"/></svg>`;
@@ -885,7 +889,7 @@ function renderCanvas(){
     if (st){
       const map = {done:['done','check','Done'], skipped:['skipped','','Skipped'], warn:['warn','alert','Warning'], waiting:['waiting','hour','Waiting on you']};
       const [bc, bi, bt] = map[st.status]||map.done;
-      badge = `<span class="nb ${bc}">${bi?ic(bi):''}${bt}${st.status!=='waiting'&&st.ms?` · ${st.ms}ms`:''}</span>`;
+      badge = `<span class="nb ${bc}">${bi?ic(bi):''}${bt}</span>`;
     } else if (uw.some(u=>u.n.id===n.id)){
       badge = `<span class="nb unwired">${ic('link')}Not wired</span>`;
     }
@@ -896,15 +900,14 @@ function renderCanvas(){
       const lc = branchClass(p.id)==='yes' ? 'var(--teal)' : branchClass(p.id)==='no' ? 'var(--danger)' : 'var(--text-2)';
       ports += `<span class="port out" data-node="${n.id}" data-port="${p.id}" data-type="${p.type}" style="top:${y}px;--pc:${TYPES[p.type].c}" title="out · ${TYPES[p.type].l} · drag to connect">${p.label?`<span class="pl" style="color:${lc}">${esc(p.label)}</span>`:''}</span>`; });
     html += `<div class="${cls}" data-node="${n.id}" style="left:${n.x}px;top:${n.y}px">${badge}
-      <div class="nh"><span class="ni">${ic(c.icon)}</span>${c.kind}</div>
-      <div class="nt" title="${esc(title(n))}">${esc(title(n))}</div><div class="ns" title="${esc(sub(n))}">${esc(sub(n))}</div>${ports}</div>`;
+      <div class="nrow"><span class="ni">${ic(c.icon)}</span><div class="nt" title="${esc(sub(n))}">${esc(title(n))}</div></div>${ports}</div>`;
   });
 
   // waiting actions on canvas
   if (run && run.state==='waiting'){
     const wn = node(run.cursor), st = run.byNode[run.cursor];
     if (wn && st && st.choices){
-      html += `<div class="waitbar" style="left:${wn.x}px;top:${wn.y+NH+12}px"><div class="wl">${esc(st.reason)}</div>` +
+      html += `<div class="waitbar" style="left:${wn.x}px;top:${wn.y+NH+12}px">` +
         st.choices.map((ch,i)=>`<button class="btn sm ${ch.primary?'primary':''}" data-choice="${i}">${ic(ch.icon)}${esc(ch.label)}</button>`).join('') + `</div>`;
     }
   }
@@ -918,13 +921,13 @@ function renderBanner(){
   const b = $('#banner');
   if (deployed){
     b.className = 'banner ok';
-    b.innerHTML = `<span class="bi">${ic('check')}</span><span class="bt"><b>v2.5 deployed.</b> Step 3 resumed for ${flagged.length} items · ${esc(MF.goal.title)}</span>
+    b.innerHTML = `<span class="bi">${ic('check')}</span><span class="bt"><b>Deployed.</b> The ${flagged.length} stuck items are moving again.</span>
       <a class="btn sm" href="workflow.html">View workflow</a>`;
     return;
   }
   b.className = 'banner';
   b.innerHTML = `<span class="bi">${ic('alert')}</span>
-    <span class="bt"><b>Step 3 stalled: ${flagged.length} items</b><br>${by('unassigned')} unassigned · ${by('awaiting-confirmation')} awaiting · ${by('overdue')} overdue</span>
+    <span class="bt"><b>${flagged.length} action items are stuck at step 3.</b> Test the fix, then deploy.</span>
     <button class="btn sm" id="showMe">${ic('target')}Show me</button>`;
   $('#showMe').onclick = showProblem;
 }
@@ -968,8 +971,9 @@ const STOP = new Set(['the','a','an','if','to','of','and','or','for','when','is'
 function libItem(key, extra, hl){
   const c = CAT[key];
   const name = hl ? hl(c.name) : esc(c.name);
+  if (c.demo===false) return `<button class="libitem off ${KCLASS[c.cat]}" data-key="${key}" aria-disabled="true" title="Not available in this demo"><span class="ni">${ic(c.icon)}</span><span class="lt">${esc(c.name)}</span><span class="soon">Soon</span></button>`;
   return `<button class="libitem ${KCLASS[c.cat]}" draggable="true" data-key="${key}" ${extra||''}>
-    <span class="ni">${ic(c.icon)}</span><span class="lt">${name}<small>${esc(c.ins.map(p=>TYPES[p.type].l).join(', ')||'start')} → ${esc(c.outs.map(p=>TYPES[p.type].l).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||'end')}</small></span>
+    <span class="ni">${ic(c.icon)}</span><span class="lt">${name}</span>
     <span class="add">+ Add</span></button>`;
 }
 function renderLib(){
@@ -1010,7 +1014,7 @@ function suggestions(){
 function renderSugg(){
   const s = suggestions(), el = $('#sugg');
   if (!s || !s.keys.length || $('#q').value.trim()){ el.innerHTML=''; return; }
-  el.innerHTML = `<div class="sugg"><div class="lib-sec">${ic('spark')} Suggested after ${esc(title(s.n))}${s.port.label?' · '+esc(s.port.label):''}</div>${s.keys.map(k=>libItem(k,'data-sugg="1"')).join('')}</div>`;
+  el.innerHTML = `<div class="sugg"><div class="lib-sec">${ic('spark')} Suggested next</div>${s.keys.map(k=>libItem(k,'data-sugg="1"')).join('')}</div>`;
 }
 function showCard(btn){
   const c = CAT[btn.dataset.key], r = btn.getBoundingClientRect(), pc = $('#pcard');
@@ -1082,14 +1086,13 @@ function json(o){
 }
 function renderInspector(){
   const n = node(sel);
-  if (!n){ insp.innerHTML = `<div class="empty">${ic('target')}<p>Select a node to configure it,<br>or run a test from the bar below.</p></div>`; return; }
+  if (!n){ insp.innerHTML = `<div class="empty">${ic('target')}<p>Click a step to edit it.</p></div>`; return; }
   const c = cat(n), st = run && run.byNode[n.id];
   insp.innerHTML = `<div class="insp-head">
-      <div class="k">Node inspector</div>
       <h3><span class="ni ${KCLASS[c.cat]}" style="background:none">${ic(c.icon)}</span>${esc(title(n))}</h3>
       <div class="tabs">
-        <button class="tab ${tab==='config'?'on':''}" data-tab="config">Configure</button>
-        <button class="tab ${tab==='run'?'on':''}" data-tab="run">Test run ${st?'<span class="dot"></span>':''}</button>
+        <button class="tab ${tab==='config'?'on':''}" data-tab="config">Settings</button>
+        <button class="tab ${tab==='run'?'on':''}" data-tab="run">Result ${st?'<span class="dot"></span>':''}</button>
       </div></div>
     <div class="insp-body" id="ib">${tab==='config' ? configHTML(n) : runHTML(n)}</div>`;
   insp.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; renderInspector(); });
@@ -1110,58 +1113,50 @@ const VARS = [
   {t:'extractor', label:'Action item', vars:['action_item.title','action_item.due','action_item.quote','action_item.speaker','action_item.state']},
   {t:'matcher', label:'Owner match', vars:['owner.name','owner.confidence','owner.evidence']}
 ];
+const VAR_LABEL = {'meeting.title':'Meeting','meeting.ts':'Time','action_item.title':'Task','action_item.due':'Due date',
+  'action_item.quote':'Quote','action_item.speaker':'Raised by','action_item.state':'Status','owner.name':'Owner','owner.confidence':'Match %','owner.evidence':'Why them'};
 function availHTML(n){
-  const up = upstream(n.id), it = item(testItem), cx = ctx(it);
-  const groups = VARS.map(g=>({g, src:nodes.find(x=>x.t===g.t && up.has(x.id))})).filter(x=>x.src);
-  if (!groups.length) return `<div class="avail"><div class="ah">Available data</div><p class="about" style="margin:6px 0 0">Nothing upstream yet. Connect this node’s input to see the fields you can use.</p></div>`;
-  return `<div class="avail" id="avail"><div class="ah">${ic('link')}Available data from upstream <span>sample: ${it.id}</span></div>` +
-    groups.map(({g,src})=>`<div class="ag"><div class="agt">${esc(g.label)} · from <b>${esc(title(src))}</b></div>${g.vars.map(v=>{
-      const val = getPath(cx, v);
-      return `<button class="vchip ${val?'':'empty'}" data-var="${v}" title="Insert {{${v}}}">{{${v}}}<em>${val?esc(val):'empty for '+it.id}</em></button>`;
-    }).join('')}</div>`).join('') + `</div>`;
+  const up = upstream(n.id);
+  const vars = VARS.filter(g=>nodes.some(x=>x.t===g.t && up.has(x.id))).flatMap(g=>g.vars);
+  if (!vars.length) return `<p class="about muted">Connect this step to use data from earlier steps.</p>`;
+  return `<div class="avail" id="avail"><div class="ah">${ic('plus')}Insert data</div><div class="ag">` +
+    vars.map(v=>`<button class="vchip" data-var="${v}" title="Inserts {{${v}}}">${esc(VAR_LABEL[v]||v)}</button>`).join('') + `</div></div>`;
 }
 function itemSelect(id){
   return `<select class="inp" id="${id}" style="width:auto;padding:4px 8px;font-size:12px">${ITEMS.map(i=>`<option value="${i.id}" ${i.id===testItem?'selected':''}>${i.id} · ${stateLabel(i.state)}</option>`).join('')}</select>`;
 }
 function configHTML(n){
   const c = cat(n);
-  let h = `<p class="about">${esc(c.desc)}</p>${portsHTML(c)}`;
+  let h = `<p class="about">${esc(c.desc)}</p>`;
   switch(n.t){
     case 'slack':
-      h += `<div class="field"><label>Send to</label>
-          <select class="inp" id="f-rec"><option value="suggested" ${cfg.recipient==='suggested'?'selected':''}>Suggested owner (DM), else the fallback channel</option><option value="channel" ${cfg.recipient==='channel'?'selected':''}>Fallback channel only</option></select></div>
-        <div class="field"><div class="flabel">Message template <span class="hint">type {{ or click a field below</span></div>
-          <textarea class="inp" id="f-tpl" rows="5" spellcheck="false">${esc(cfg.template)}</textarea>
+      h += `<div class="field"><div class="flabel">Message</div>
+          <textarea class="inp" id="f-tpl" rows="4" spellcheck="false">${esc(cfg.template)}</textarea>
           <div id="d-warn"></div>${availHTML(n)}</div>
-        <div class="field"><div class="flabel">Preview ${itemSelect('f-pitem')}</div><div id="d-prev"></div></div>
-        <div class="field"><label>Fallback channel</label><input class="inp" id="f-ch" value="${esc(cfg.channel)}"></div>
-        <div class="field"><label>Fallback timeout <span class="rangev" id="d-to">${cfg.timeoutH}h</span></label><input type="range" id="f-to" min="1" max="72" value="${cfg.timeoutH}"></div>
-        <div class="field"><label>AI confirmation prompt style</label><select class="inp" id="f-tone">${['Friendly & Casual (Alpine Tone)','Direct & Brief','Formal'].map(t=>`<option ${t===cfg.tone?'selected':''}>${t}</option>`).join('')}</select></div>
-        <div class="field"><div class="flabel">Test payload <span class="tag">JSON · live</span></div><pre class="json" id="d-pay"></pre></div>`;
+        <div class="field"><div class="flabel">Preview</div><div id="d-prev"></div></div>
+        <div class="field"><label>Wait for reply <span class="rangev" id="d-to">${cfg.timeoutH}h</span></label><input type="range" id="f-to" min="1" max="72" value="${cfg.timeoutH}"></div>`;
       break;
     case 'ownerFound':
-      h += `<div class="field"><label>Auto-assign when match is at least <span class="rangev" id="d-thr">${pct(cfg.threshold)}</span></label>
-          <input type="range" id="f-thr" min="0.5" max="1" step="0.01" value="${cfg.threshold}">
-          <p class="about" style="margin-top:6px">Below this, MeetFlow asks the suggested owner first instead of assigning on its own.</p></div>
-        <div class="field"><div class="flabel">How the ${ITEMS.length} items route right now</div><div id="d-routes"></div></div>`;
+      h += `<div class="field"><label>Assign without asking above <span class="rangev" id="d-thr">${pct(cfg.threshold)}</span></label>
+          <input type="range" id="f-thr" min="0.5" max="1" step="0.01" value="${cfg.threshold}"></div>
+        <div class="field"><div id="d-routes"></div></div>`;
       break;
     case 'matcher': {
       const it = item('ai-1'), so = it.suggestedOwner;
-      h += `<div class="field"><div class="flabel">Signals used</div><p class="about">Who spoke and was addressed · Jira assignee history · sprint capacity · past replies.</p></div>
-        ${so ? `<div class="field"><div class="flabel">Evidence for ${it.id} → ${esc(so.name)} · ${pct(so.confidence)}</div>${so.evidence.map(e=>`<div class="route"><span class="rid">✓</span><span class="rt">${esc(e)}</span></div>`).join('')}</div>`:''}`;
+      h += `${so ? `<div class="field"><div class="flabel">${esc(so.name)} · ${pct(so.confidence)} match</div>${so.evidence.map(e=>`<div class="route"><span class="rid">✓</span><span class="rt">${esc(e)}</span></div>`).join('')}</div>`:''}`;
       break; }
     case 'jira':
       h += `<div class="field"><label>Project</label><select class="inp" id="f-proj">${['ENG-CORE','PLATFORM','MOBILE'].map(p=>`<option ${p===cfg.jiraProject?'selected':''}>${p}</option>`).join('')}</select></div>
-        <div class="field"><div class="flabel">Rules</div><p class="about">Priority is High when Deadline Analyzer says overdue. Items that already have an issue are deduped, not created twice.</p></div>`;
+`;
       break;
     case 'wait':
-      h += `<div class="field"><div class="flabel">Timeout</div><p class="about">${cfg.timeoutH}h, set on <b>Slack DM: ask owner</b>. <b>Replied</b> continues to Jira; <b>Timeout</b> escalates.</p></div>`;
+      h += `<p class="about">Waits ${cfg.timeoutH}h. No reply → escalate.</p>`;
       break;
     case 'approval':
-      h += `<div class="field"><div class="flabel">Approver</div><p class="about">Alex Mercer. Every run pauses here; nothing reaches Track & Follow-up without a sign-off.</p></div>`;
+      h += `<p class="about">Pauses until you approve.</p>`;
       break;
     default:
-      h += `<div class="field"><p class="about">No settings for this node in the demo.</p></div>`;
+      h += `<p class="about muted">No settings in this demo.</p>`;
   }
   return h;
 }
@@ -1196,9 +1191,8 @@ function updateDerived(){
   const w = $('#d-warn');
   if (w){
     const ws = templateWarnings();
-    w.innerHTML = ws.length ? ws.map(x=>`<div class="warn">${ic('alert')}<div><b>${x.vars.map(v=>'{{'+esc(v)+'}}').join(', ')}</b> is empty for ${x.it.id} “${esc(x.it.title)}”: it has no owner and no suggestion, so the DM would read “Hi ,”.
-        <br><button class="btn sm" data-fix="${esc(x.vars[0])}">Use fallback “team”</button></div></div>`).join('')
-      : `<div class="okline">${ic('check')}Every field has a value for all ${ITEMS.length} test items</div>`;
+    w.innerHTML = ws.length ? ws.map(x=>`<div class="warn">${ic('alert')}<div><b>${x.vars.map(v=>'{{'+esc(v)+'}}').join(', ')}</b> is empty for ${x.it.id}.<br><button class="btn sm" data-fix="${esc(x.vars[0])}">Use fallback “team”</button></div></div>`).join('')
+      : '';
     w.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>{
       const v = b.dataset.fix;
       cfg.template = cfg.template.replace(new RegExp('\\{\\{\\s*'+v.replace('.','\\.')+'\\s*\\}\\}','g'), `{{${v} | "team"}}`);
@@ -1207,27 +1201,25 @@ function updateDerived(){
     });
   }
   const p = $('#d-prev');
-  if (p) p.innerHTML = `<div class="bubble"><div class="who"><span>MeetFlow → ${esc(recipient(it))}</span><span>${esc(cfg.tone.split(' (')[0])}</span></div>${renderTpl(esc(cfg.template).replace(/&quot;/g,'"'), it, true)}</div>`;
+  if (p) p.innerHTML = `<div class="bubble"><div class="who"><span>To ${esc(recipient(it))}</span></div>${renderTpl(esc(cfg.template).replace(/&quot;/g,'"'), it, true)}</div>`;
   const pay = $('#d-pay'); if (pay) pay.innerHTML = json(payload(it));
   const to = $('#d-to'); if (to) to.textContent = cfg.timeoutH+'h';
   const thr = $('#d-thr'); if (thr) thr.textContent = pct(cfg.threshold);
   const rt = $('#d-routes');
   if (rt) rt.innerHTML = ITEMS.map(i=>{ const c = cand(i), r = routeOwner(i);
-    return `<div class="route"><span class="rid">${i.id}</span><span class="rt"><b>${esc(i.title)}</b><small>${c?esc(c.name)+' · '+pct(c.confidence)+(c.confirmed?' · confirmed':''):'no candidate'}</small></span><span class="pill ${r}">${r==='yes'?'Yes':'No'}</span></div>`; }).join('');
+    return `<div class="route"><span class="rid">${i.id}</span><span class="rt"><b>${c?esc(c.name)+' · '+pct(c.confidence):'No one'}</b></span><span class="pill ${r}">${r==='yes'?'Assign':'Ask first'}</span></div>`; }).join('');
   renderSugg();
 }
 function runHTML(n){
   const st = run && run.byNode[n.id];
-  if (!st) return `<div class="empty">${ic('play')}<p>${run ? `This node wasn’t on ${run.itemId}’s path.` : 'Not run yet.'}<br>Pick a test item below and press <b>Run test</b>.</p></div>`;
+  if (!st) return `<div class="empty">${ic('play')}<p>${run ? 'Not used in this test.' : 'Press <b>Run test</b> below.'}</p></div>`;
   const colors = {done:'var(--teal)', skipped:'var(--text-3)', warn:'var(--danger)', waiting:'var(--primary-hover)'};
   const labels = {done:'Done', skipped:'Skipped', warn:'Done with warning', waiting:'Waiting on you'};
-  return `${run.ver!==cfgVer?`<div class="stale">${ic('alert')}Config changed after this run. Re-run to test the new version.</div>`:''}
+  return `${run.ver!==cfgVer?`<div class="stale">${ic('alert')}You changed something. Run the test again.</div>`:''}
     <div class="runhead"><div style="flex:1"><div class="rs" style="color:${colors[st.status]}">${labels[st.status]}</div><p>${esc(st.reason)}</p>
       ${st.status==='waiting' && st.choices ? `<div class="choices">${st.choices.map((ch,i)=>`<button class="btn sm ${ch.primary?'primary':''}" data-choice="${i}">${ic(ch.icon)}${esc(ch.label)}</button>`).join('')}</div>`:''}
       ${st.resolved ? `<p style="color:var(--text-2)">→ ${esc(st.resolved)}</p>`:''}</div></div>
-    <div class="field"><div class="flabel">Input</div><pre class="json">${json(st.input)}</pre></div>
-    <div class="field"><div class="flabel">Output ${st.port && cat(n).outs.length>1 ? `<span class="pill ${branchClass(st.port)}">${esc((cat(n).outs.find(p=>p.id===st.port)||{}).label||'')}</span>`:''}</div><pre class="json">${st.status==='waiting'?'// waiting for a person':json(st.output)}</pre></div>
-    <div class="meta"><span>Test item ${run.itemId}</span><span>Config v2.5.${run.ver}</span>${st.ms?`<span>${st.ms}ms simulated</span>`:''}</div>`;
+`;
 }
 function bindRun(){ insp.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>resolveWait(+b.dataset.choice)); }
 
@@ -1293,7 +1285,7 @@ function finish(){
   run.state = 'done'; run.lastEdge = null;
   if (!run.warn && run.ver===cfgVer) passVer = cfgVer;
   const it = item(run.itemId);
-  toast(run.warn ? `Test ${it.id} finished with a warning. Check the highlighted node.` : `Test ${it.id} passed · ${run.steps.length} nodes`, null, run.warn);
+  toast(run.warn ? 'Problem found. Check the red step.' : 'Test passed', null, run.warn);
 }
 function resetRun(){ clearTimeout(timer); run = null; renderAll(); }
 function setTestItem(id){
@@ -1309,9 +1301,9 @@ function renderSim(){
   const tl = $('#timeline');
   if (run && run.steps.length){
     tl.className = 'timeline';
-    tl.innerHTML = `<span class="tlh">Test ${run.itemId}${run.ver!==cfgVer?' · <b style="color:var(--danger)">stale</b>':''}</span>` + run.steps.map((id,i)=>{
+    tl.innerHTML = run.steps.map((id,i)=>{
       const n = node(id), st = run.byNode[id]; if(!n||!st) return '';
-      return `${i?`<span class="tlarrow">→</span>`:''}<button class="tl s-${st.status}" data-node="${id}"><span class="d"></span><b>${esc(title(n))}</b><span>${esc(st.resolved||st.reason)}</span></button>`;
+      return `${i?`<span class="tlarrow">→</span>`:''}<button class="tl s-${st.status}" data-node="${id}" title="${esc(st.resolved||st.reason)}"><span class="d"></span><b>${esc(title(n))}</b></button>`;
     }).join('');
     tl.querySelectorAll('.tl').forEach(b=>b.onclick=()=>{ sel=b.dataset.node; tab='run'; selEdge=null; renderAll(); renderSugg(); });
     const last = tl.lastElementChild; if (last) last.scrollIntoView({block:'nearest', inline:'end'});
@@ -1319,33 +1311,31 @@ function renderSim(){
 
   // controls
   const cks = checks(), okN = cks.filter(c=>c.ok).length, allOk = okN===cks.length;
-  let status = ['','Simulator ready'];
+  let status = ['','Ready to test'];
   if (run){
-    if (run.state==='running') status = [animating()?'running anim':'running', `${run.mode==='auto'?'Running':'Stepping'} ${run.itemId} · step ${run.steps.length+1}`];
-    else if (run.state==='waiting') status = ['waiting', `Paused on ${title(node(run.cursor))}`];
-    else status = run.warn ? ['warn', `${run.itemId} finished with a warning`] : ['', `${run.itemId} passed`];
+    if (run.state==='running') status = [animating()?'running anim':'running', 'Testing…'];
+    else if (run.state==='waiting') status = ['waiting', 'Your move'];
+    else status = run.warn ? ['warn', 'Problem found'] : ['', 'Test passed'];
   }
   const busy = run && run.state==='running' && run.mode==='auto';
   $('#simrow').innerHTML = `
     <span class="status ${status[0]}"><span class="d"></span>${esc(status[1])}</span>
-    <div class="seg" role="radiogroup" aria-label="Test item">${ITEMS.map(i=>`<button class="st-${i.state} ${i.id===testItem?'on':''}" data-item="${i.id}" title="${esc(i.title)}"><span class="sid">${i.id}</span><small>${stateLabel(i.state)}</small></button>`).join('')}</div>
+    <div class="seg" role="radiogroup" aria-label="Test item">${ITEMS.map(i=>`<button class="st-${i.state} ${i.id===testItem?'on':''}" data-item="${i.id}" title="${esc(i.title)}"><span class="sid">${esc(i.title.split(' ').slice(0,2).join(' '))}…</span><small>${stateLabel(i.state)}</small></button>`).join('')}</div>
     <button class="btn dark" id="runBtn" ${busy?'disabled':''}>${ic('play2')}Run test</button>
-    <button class="btn" id="stepBtn" ${run&&run.state==='waiting'?'disabled':''}>${ic('step')}Step</button>
     ${run?`<button class="btn ghost" id="resetBtn">${ic('reset')}Reset</button>`:''}
     <span class="spacer"></span>
-    <button class="checksbtn" id="checksBtn" aria-expanded="false"><span class="meter">${cks.map(c=>`<i class="${c.ok?'ok':''}"></i>`).join('')}</span>Deploy checks ${okN}/${cks.length}</button>
-    <button class="btn primary deploy" id="deployBtn" ${allOk && !deployed?'':'aria-disabled="true" style="opacity:.5"'}>${ic('rocket')}${deployed?'Deployed':'Deploy v2.5'}</button>`;
+    <button class="checksbtn" id="checksBtn" aria-expanded="false"><span class="meter">${cks.map(c=>`<i class="${c.ok?'ok':''}"></i>`).join('')}</span>Tests ${okN}/${cks.length}</button>
+    <button class="btn primary deploy" id="deployBtn" ${allOk && !deployed?'':'aria-disabled="true" style="opacity:.5"'}>${ic('rocket')}${deployed?'Deployed':'Deploy'}</button>`;
   $('#simrow').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>setTestItem(b.dataset.item));
   $('#runBtn').onclick = ()=>startRun('auto');
-  $('#stepBtn').onclick = ()=>{ if (!run || run.state==='done' || run.itemId!==testItem || run.mode!=='step'){ startRun('step'); } else stepOnce(); };
   if ($('#resetBtn')) $('#resetBtn').onclick = resetRun;
   $('#checksBtn').onclick = e=>{ e.stopPropagation(); togglePop(); };
   $('#deployBtn').onclick = e=>{ e.stopPropagation(); if (allOk && !deployed) doDeploy(); else togglePop(true); };
-  renderPop();
+  renderPop(); renderGuide();
 }
 function renderPop(){
   const cks = checks();
-  $('#pop').innerHTML = `<h4>Before this goes live</h4><p>Deploy unlocks when the current config has passed a test and every branch has been tried.</p>` +
+  $('#pop').innerHTML = `<h4>To deploy</h4>` +
     cks.map(c=>`<div class="check ${c.ok?'ok':''}"><span class="cb">${c.ok?ic('check'):''}</span><span>${esc(c.t)}</span></div>`).join('');
 }
 function togglePop(force){ const p = $('#pop'); p.classList.toggle('on', force===true ? true : !p.classList.contains('on')); }
@@ -1497,11 +1487,12 @@ const lib = document.querySelector('.lib');
 lib.addEventListener('click', e=>{
   const b = e.target.closest('.libitem'); if (!b) return;
   $('#pcard').classList.remove('on');
+  if (b.classList.contains('off')){ toast('Not available in this demo'); return; }
   addNode(b.dataset.key, null, null, CAT[b.dataset.key].ins.length ? sel : null);
 });
-lib.addEventListener('mouseover', e=>{ const b = e.target.closest('.libitem'); if (b) showCard(b); });
+
 lib.addEventListener('mouseout', e=>{ const b = e.target.closest('.libitem'); if (b && !b.contains(e.relatedTarget)) $('#pcard').classList.remove('on'); });
-lib.addEventListener('focusin', e=>{ const b = e.target.closest('.libitem'); if (b) showCard(b); });
+
 lib.addEventListener('focusout', ()=>$('#pcard').classList.remove('on'));
 lib.addEventListener('dragstart', e=>{
   const b = e.target.closest('.libitem'); if (!b) return;
@@ -1546,11 +1537,23 @@ document.addEventListener('click', e=>{ if (!e.target.closest('#pop') && !e.targ
 $('#navToggle').onclick = ()=>$('#nav').classList.toggle('collapsed');
 $('#modal').addEventListener('click', e=>{ if (e.target.id==='modal') $('#modal').classList.remove('on'); });
 
+/* "How this works" guide in the top bar: shows where the user is. */
+function renderGuide(){
+  const cks = checks(), allOk = cks.every(c=>c.ok);
+  const cur = deployed ? 'deploy' : allOk ? 'deploy' : run ? 'test' : 'test';
+  const order = ['add','connect','test','deploy'];
+  document.querySelectorAll('.guide li').forEach(li=>{
+    const g = li.dataset.g;
+    li.classList.toggle('on', g===cur && !deployed);
+    li.classList.toggle('done', deployed || order.indexOf(g) < order.indexOf(cur));
+  });
+}
+document.querySelectorAll('.mf-link.off').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); toast('Not available in this demo'); }));
+
 /* ---------------- boot ---------------- */
 $('#uname').textContent = MF.user.name; $('#utier').textContent = MF.user.tier;
 $('#avatar').textContent = MF.user.name.split(' ').map(s=>s[0]).join('');
-$('#crumbGoal').textContent = MF.goal.title;
-renderLegend(); renderBanner(); renderLib(); renderInspector(); renderSim();
+renderBanner(); renderLib(); renderInspector(); renderSim();
 renderCanvas();
 /* Initial view: fit the whole flow if text stays legible (title >= 11px on screen); otherwise frame the step-3 decision area. */
 function initialView(){
