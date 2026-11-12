@@ -1,0 +1,11 @@
+/* MeetFlow Alpine shared design tokens — from the user's mockups. All screens use these. */
+:root{
+  --bg:#F8F7F4; --surface:#F3F2EE; --card:#FFFFFF; --sidebar:#F1F0EC;
+  --line:#E6E3DC; --text:#1F1F1C; --text-2:#5C5A54; --text-3:#9A978F;
+  --primary:#C49A2C; --primary-hover:#B08A24; --primary-soft:#F6EDD3;
+  --teal:#2F7473; --teal-soft:#DCEFE9; --risk:#B9645E; --risk-soft:#F8E3E1;
+  --danger:#A3332B; --dark:#22302E;
+  --radius:14px; --radius-sm:10px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+  --font:'Inter',system-ui,-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);}
