@@ -398,6 +398,7 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
     </ol>
     <span class="spacer"></span>
     <span id="engineChip"></span>
+    <button class="btn" id="cvReset" title="Clear demo decisions and start over" style="margin-left:8px">Reset demo</button>
     <span id="saveState" hidden></span>
     <a class="btn" href="workflow.html"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back to workflow</a>
   </header>
@@ -1643,6 +1644,7 @@ $('#libClose').onclick = ()=>setLib(true);
 $('#libOpen').onclick = $('#libOpen2').onclick = ()=>setLib(false);
 { const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
 document.getElementById('engineChip').innerHTML = '<span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>';
+document.getElementById('cvReset').onclick = () => { try { window.MFState && MFState.reset(); sessionStorage.clear(); localStorage.removeItem('mf.canvas.v1'); } catch (e) {} location.href = 'index.html'; };
 requestAnimationFrame(initialView);
 let rzT = null;
 window.addEventListener('resize', ()=>{ clearTimeout(rzT); rzT = setTimeout(initialView, 150); });

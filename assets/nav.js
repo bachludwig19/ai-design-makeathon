@@ -103,9 +103,7 @@
         <div class="nav-foot">
           <div class="who"><span class="avatar">${icon("user", "ic-sm")}</span>
             <div><div class="who-name">${esc(MF.user.name)}</div><div class="who-tier">${esc(MF.user.tier)}</div></div></div>
-          <a class="reset-link" href="#" id="mf-reset" title="Clear demo decisions and start over">Reset demo</a>
         </div>`;
-      navEl.querySelector("#mf-reset").addEventListener("click", (e) => { e.preventDefault(); reset(); });
     }
     // Collapsible left menu (icons only), remembered per browser.
     const CK = "mf.nav.collapsed", app = document.querySelector(".app");
@@ -125,7 +123,9 @@
       top.innerHTML = `
         <button class="icon-btn" id="mf-collapse" aria-label="Collapse menu" title="Collapse menu">${icon("menu")}</button><span class="crumb"></span>
         <span style="flex:1"></span>
-        <span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>`;
+        <span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>
+        <button class="btn btn-white btn-sm" id="mf-reset" title="Clear demo decisions and start over" style="margin-left:8px">Reset demo</button>`;
+      top.querySelector("#mf-reset").addEventListener("click", (e) => { e.preventDefault(); reset(); });
       top.querySelector("#mf-collapse").addEventListener("click", () => setC(!(app && app.classList.contains("nav-collapsed"))));
       // No engine settings in the demo: always run the scripted flow.
       try { const k = "mf.engine.v1", e = JSON.parse(localStorage.getItem(k) || "{}"); if (e.mode === "live") { e.mode = "sim"; localStorage.setItem(k, JSON.stringify(e)); } } catch (e) {}
