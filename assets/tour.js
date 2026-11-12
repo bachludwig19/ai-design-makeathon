@@ -19,7 +19,7 @@
     ],
     workflow: [
       { sel: "[data-accept]", n: 4, text: "Here is the agent's evidence and confidence. <b>Assign</b> its pick, or choose someone else." },
-      { when: () => !(window.MFState && MFState.resolved()), sel: "#a-assign:not([disabled])", n: 4, text: "The agent paused: it's under 90% sure who owns these items. Click <b>Assign suggested owner</b>." },
+      { when: () => !(window.MFState && MFState.resolved()), sel: "[data-open]", n: 4, text: "The agent paused: it's under 90% sure who owns this. Click <b>Assign suggested owner</b>." },
       { sel: "[data-approve]", n: 5, text: "This owner hasn't confirmed yet. <b>Approve &amp; sync</b>, or send a reminder." },
       { sel: '#banner-slot a.btn[href="goal.html"]', n: 6, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
     ],
