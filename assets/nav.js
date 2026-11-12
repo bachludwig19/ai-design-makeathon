@@ -110,7 +110,7 @@
     const top = document.getElementById("mf-top");
     if (top) {
       top.innerHTML = `
-        <span class="crumb">${icon("menu")}${esc(document.body.dataset.crumb || "Workspace / Autonomous Pipeline")}</span>
+        <span class="crumb"></span>
         <div class="top-search off" aria-disabled="true" title="Not available in this demo">${icon("search", "ic-sm")}Search nodes, runs…<span class="kbd">⌘K</span></div>
         <span id="mf-engine-chip"></span>
         <button class="icon-btn off" aria-label="Notifications" aria-disabled="true" title="Not available in this demo">${icon("bell")}</button>

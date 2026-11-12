@@ -27,7 +27,7 @@
   body[data-page="home"] .ai-answer{max-width:none;margin:0}
   body[data-page="home"] .ask [hidden]{display:none!important}
   body[data-page="home"] .ask h1.hello-h{display:block!important;margin:0;color:var(--text);font-family:var(--display);font-stretch:112%;font-weight:600;font-size:clamp(24px,2.4vw,32px);letter-spacing:.01em}
-  .hello-s{margin:8px 0 0;color:var(--text-2);font-size:16px}
+  .hello-s{margin:0;color:var(--text);font-size:18px}
   .ask .hero-cta{margin:0}
   body[data-page="home"] #dash .health{order:0;margin:28px 0 0}
 </style>
@@ -40,14 +40,13 @@
     <main class="content">
       <section class="ask">
         <div class="hello">
-          <h1 class="hello-h">Good evening, Alex.</h1>
           <p class="hello-s" id="hello-s"></p>
         </div>
         <div class="hero-cta"><a class="btn btn-white" href="canvas.html">Build a workflow <span class="hero-arrow"></span></a></div>
         <form class="ask-box" id="ask">
           <span id="ask-ic"></span>
           <input id="ask-in" placeholder="Describe your goal, and I’ll draft the workflows for you…" autocomplete="off">
-          <button class="btn btn-primary" type="submit">Draft workflows <span id="ask-arrow"></span></button>
+          <button class="btn btn-primary" type="submit">Create goal <span id="ask-arrow"></span></button>
         </form>
         <div id="ask-out"></div>
         <div class="persona" hidden>
@@ -65,8 +64,8 @@
           </div>
         </section>
 
-        <div class="sec-head"><h2 class="h-sec">Needs your attention</h2></div>
-        <section id="attention"></section>
+        <div id="attn-sec"><div class="sec-head"><h2 class="h-sec">Needs your attention</h2></div>
+        <section id="attention"></section></div>
 
         <div class="sec-head"><h2 class="h-sec" id="goals-h"></h2></div>
         <section class="goals" id="goals"></section>
@@ -89,12 +88,21 @@
   document.querySelectorAll(".hero-arrow").forEach((e) => (e.innerHTML = icon("arrow", "ic-sm")));
 
   // Persona-specific view. Product Manager is the wired path; its delivery goal reflects the workflow decisions.
+  // Demo opening: the delivery goal doesn't exist until the tester describes it in the goal box.
+  const created = () => { try { return !!MFState.get().created; } catch (e) { return false; } };
+  let firstRun = false; // the new goal's workflows are on their first run: no snag shown yet
+  const setCreated = () => { const st = MFState.get(); st.created = true; MFState.set(st); };
   function view(name) {
     const p = JSON.parse(JSON.stringify(MF.personas[name]));
-    if (name === "Product Manager") {
+    if (name === "Product Manager" && !created()) {
+      p.goals = p.goals.filter((x) => x.id !== "delivery");
+      p.attention = p.attention.filter((a) => a.id !== "delivery");
+      p.fresh = true;
+    } else if (name === "Product Manager") {
       const g = goalNow();
       const d = p.goals.find((x) => x.id === "delivery");
       d.status = g.status; d.progress = g.progress;
+      if (firstRun) { d.status = "on-track"; p.attention = p.attention.filter((a) => a.id !== "delivery"); }
       if (g.resolved) {
         d.desc = "Owners confirmed for all " + MF.actionItems.length + " stalled items. Tickets synced to Jira.";
         p.health.onTrack += 1; p.health.atRisk -= 1;
@@ -112,8 +120,10 @@
     const p = view(name);
     $("#persona-chip").textContent = name;
     $("#goals-h").textContent = "Your goals";
-    $("#hello-s").textContent = p.cleared ? "All your goals are moving. Your agents have it from here."
-      : "Your agents are running 10 goals. 1 needs a decision from you.";
+    $("#hello-s").textContent = firstRun ? "Setting up your new goal…" : p.fresh ? "Describe a goal below and your agents will set up the work."
+      : p.cleared ? "All your goals are moving. Your agents have it from here."
+      : "1 goal needs a decision from you.";
+    $("#attn-sec").style.display = p.attention.some((a) => a.href) || p.cleared ? "" : "none";
     const h = p.health;
     $("#h-on").textContent = `${h.onTrack} On track`;
     $("#h-risk").textContent = `${h.atRisk} At risk`;
@@ -180,23 +190,31 @@
   });
   $("#dash").style.transition = "opacity .25s, transform .25s";
 
-  // Goal box: describe a goal, the agent drafts workflows for it (simulated), then opens the canvas.
+  // Goal box: describe a goal; the agent creates it with its workflows (simulated).
+  const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+  if (!created()) $("#ask-in").value = MF.goal.title;
   $("#ask").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const goal = $("#ask-in").value.trim() || "Keep product delivery on track";
-    const out = $("#ask-out");
+    const goal = $("#ask-in").value.trim() || MF.goal.title;
+    const out = $("#ask-out"), first = !created();
     out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div class="waiting"><span class="spin"></span>Drafting workflows for “${esc(goal)}”…</div></div>`;
-    await new Promise((res) => setTimeout(res, 1200));
-    const drafts = [
-      ["Action Item Tracking", "turns meeting decisions into owned, dated tickets"],
-      ["Sprint Monitoring", "flags scope creep and slipping velocity"],
-      ["Dependency Monitoring", "spots cross-team blockers early"]
-    ];
-    out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div style="flex:1">
-      <div>Drafted ${drafts.length} workflows for <b>“${esc(goal)}”</b>. Review them, test, then go live.</div>
-      <ul style="margin:10px 0 0;padding-left:18px;color:var(--text-2)">${drafts.map(([n, d]) => `<li><b style="color:var(--text)">${n}</b> · ${d}</li>`).join("")}</ul>
-      <div class="row" style="margin-top:12px"><a class="btn btn-primary" href="canvas.html">Open drafts ${icon("arrow", "ic-sm")}</a>
-      <span class="pill grey" style="margin-left:auto;height:22px;font-size:11.5px">Simulated agent</span></div></div></div>`;
+    await sleep(1300);
+    const wfs = MF.supportingWorkflows;
+    const list = `<ul style="margin:10px 0 0;padding-left:18px;color:var(--text-2)">${wfs.map((w) => `<li><b style="color:var(--text)">${esc(w.name)}</b> · ${esc(w.desc)}</li>`).join("")}</ul>`;
+    if (!first) {
+      out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div style="flex:1"><div>Drafted ${wfs.length} workflows for <b>“${esc(goal)}”</b>.</div>${list}
+        <div class="row" style="margin-top:12px"><a class="btn btn-primary" href="canvas.html">Open drafts ${icon("arrow", "ic-sm")}</a></div></div></div>`;
+      return;
+    }
+    setCreated(); $("#ask-in").value = "";
+    out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div style="flex:1"><div>Created the goal <b>“${esc(MF.goal.title)}”</b> with ${wfs.length} workflows. They’re running now.</div>${list}
+      <div class="waiting" style="margin-top:12px"><span class="spin"></span>First run: reading yesterday’s ${esc(MF.meeting.title)}…</div></div></div>`;
+    firstRun = true; render(persona(), true);
+    await sleep(2200);
+    firstRun = false;
+    out.innerHTML = `<div class="ai-answer fade-in">${icon("sparkles")}<div style="flex:1"><div>Created <b>“${esc(MF.goal.title)}”</b> with ${wfs.length} workflows.
+      First run found <b>${MF.actionItems.length} action items with no confirmed owner</b>, so Action Item Tracking paused and needs you.</div></div></div>`;
+    render(persona(), true);
   });
 
   // Only Product Manager is wired for the demo; fall back if a tab still holds another persona.

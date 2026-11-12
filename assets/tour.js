@@ -9,18 +9,19 @@
 
   const RULES = {
     home: [
-      { when: () => !resolved(), sel: '#attention a.btn[href="goal.html"]', n: 1, text: "A goal you own is at risk. Click <b>Review</b>." },
-      { when: resolved, sel: ".hero-cta a.btn", n: 5, text: "Delivery is back on track. Now see the workflow behind it: <b>Build a workflow</b>." }
+      { when: () => !(window.MFState && MFState.get().created), sel: '#ask button[type="submit"]', n: 1, text: "Start here: describe your goal, then click <b>Create goal</b>." },
+      { when: () => !resolved(), sel: '#attention a.btn[href="goal.html"]', n: 2, text: "Your new goal hit a snag. Click <b>Review</b>." },
+      { when: resolved, sel: ".hero-cta a.btn", n: 8, text: "Delivery is back on track. Now see the workflow behind it: <b>Build a workflow</b>." }
     ],
     goal: [
-      { when: () => !resolved(), sel: 'a.btn[href="workflow.html"]', n: 2, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
-      { when: resolved, sel: '#mf-nav a.nav-link[href="index.html"]', n: 5, text: "Blockers cleared: 72% → 81%. Head back <b>Home</b>." }
+      { when: () => !resolved(), sel: 'a.btn[href="workflow.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
+      { when: resolved, sel: '#mf-nav a.nav-link[href="index.html"]', n: 7, text: "Blockers cleared: 72% → 81%. Head back <b>Home</b>." }
     ],
     workflow: [
-      { sel: "[data-accept]", n: 3, text: "Here is the agent's evidence and confidence. <b>Assign</b> its pick, or choose someone else." },
-      { when: () => !(window.MFState && MFState.resolved()), sel: "#a-assign:not([disabled])", n: 3, text: "The agent paused: it's under 90% sure who owns these items. Click <b>Assign suggested owner</b>." },
-      { sel: "[data-approve]", n: 4, text: "This owner hasn't confirmed yet. <b>Approve &amp; sync</b>, or send a reminder." },
-      { sel: '#banner-slot a.btn[href="goal.html"]', n: 5, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
+      { sel: "[data-accept]", n: 4, text: "Here is the agent's evidence and confidence. <b>Assign</b> its pick, or choose someone else." },
+      { when: () => !(window.MFState && MFState.resolved()), sel: "#a-assign:not([disabled])", n: 4, text: "The agent paused: it's under 90% sure who owns these items. Click <b>Assign suggested owner</b>." },
+      { sel: "[data-approve]", n: 5, text: "This owner hasn't confirmed yet. <b>Approve &amp; sync</b>, or send a reminder." },
+      { sel: '#banner-slot a.btn[href="goal.html"]', n: 6, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
     ],
     canvas: [
       { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 4, text: "Your fix is live. Click <b>Done</b>." },
