@@ -34,6 +34,13 @@
 .mfs-btn:hover{background:var(--surface,#F3F2EE)}
 .mfs-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--line,#E6E3DC)}
 .mfs-test{display:flex;gap:10px;align-items:center;margin-top:12px}
+.mfs-off .mfs-dim{opacity:.5}
+.mfs-off{background:var(--surface,#F3F2EE)}
+.mfs-off input[type=radio]{opacity:.5}
+.mfs-warn{display:flex;gap:8px;align-items:flex-start;margin:0 0 10px;padding:9px 12px;border-radius:10px;background:var(--primary-soft,#F6EDD3);color:var(--text,#1F1F1C);font-size:13px}
+.mfs-hint{margin:8px 0 0;font-size:12.5px;color:var(--text-2,#5C5A54)}
+.mfs-hint code{white-space:normal;word-break:break-all}
+.mfs-link{border:0;background:none;padding:0;font:inherit;font-size:12.5px;color:var(--primary-hover,#B08A24);text-decoration:underline;cursor:pointer;margin-left:6px}
 .mfs-ok{color:var(--teal,#2F7473)} .mfs-err{color:var(--danger,#A3332B)}
 .mfs-dots{display:inline-flex;gap:4px}.mfs-dots i{width:6px;height:6px;border-radius:50%;background:var(--primary,#C49A2C);animation:mfs-b 1s infinite}
 .mfs-dots i:nth-child(2){animation-delay:.15s}.mfs-dots i:nth-child(3){animation-delay:.3s}
@@ -60,6 +67,7 @@
     const s = Engine.get();
     const r = (n, v, cur) => `name="mfs-${n}" value="${v}" ${cur === v ? "checked" : ""}`;
     const live = s.mode === "live";
+    const loc = Engine.local(), down = loc.state === "down", offline = Engine.offline(s);
     return `<div class="mfs-h"><h3>AI engine</h3><button class="mfs-x" data-x aria-label="Close">&times;</button></div>
       <p class="mfs-note">Choose what powers the agent's reasoning and answers. The workspace data is the same either way.</p>
       <label class="mfs-opt ${!live ? "on" : ""}"><input type="radio" ${r("mode", "sim", s.mode)}>
@@ -67,11 +75,13 @@
         <p class="mfs-note">Scripted dummy replies. Nothing to install, works offline, identical every run.</p></div></label>
       <label class="mfs-opt ${live ? "on" : ""}"><input type="radio" ${r("mode", "live", s.mode)}>
         <div><b>Live AI agent</b>
-        <p class="mfs-note">A real model writes the agent's reasoning from the same data. If a call fails, the app falls back to the simulated reply.</p></div></label>
+        <p class="mfs-note">A real model writes the agent's reasoning from the same data. If the model can't be reached, the app uses the simulation instead.</p></div></label>
       ${live ? `<div class="mfs-sub">
-        <label class="mfs-opt ${s.provider === "ollama" ? "on" : ""}" style="margin-top:0"><input type="radio" ${r("provider", "ollama", s.provider)}>
-          <div style="flex:1"><b>Local Gemma via Ollama</b><span class="mfs-pill ok">Data stays on this computer</span>
-            <p class="mfs-note" style="margin-top:4px">One-time setup: install <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a>, then run <code>ollama pull ${esc(s.ollamaModel)}</code>. If this page is served from the web instead of opened from disk, start Ollama with <code>OLLAMA_ORIGINS=*</code>.</p>
+        ${offline ? `<div class="mfs-warn">⚠︎ <span>${esc(Engine.OFFLINE)}</span></div>` : ""}
+        <label class="mfs-opt ${s.provider === "ollama" ? "on" : ""} ${down ? "mfs-off" : ""}" style="margin-top:0"><input type="radio" ${r("provider", "ollama", s.provider)} ${down && s.provider !== "ollama" ? "disabled" : ""}>
+          <div style="flex:1"><div class="mfs-dim"><b>Local Gemma via Ollama</b>${down ? '<span class="mfs-pill grey">Not running</span>' : checking ? '<span class="mfs-pill grey">Checking…</span>' : '<span class="mfs-pill ok">Data stays on this computer</span>'}</div>
+            ${down ? `<p class="mfs-hint">${esc(loc.reason)}<br><code>${esc(loc.hint || "")}</code><button class="mfs-link" data-recheck>Check again</button></p>`
+                   : `<p class="mfs-note mfs-dim" style="margin-top:4px">One-time setup: install <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a>, run <code>ollama pull ${esc(s.ollamaModel)}</code>, then <code>ollama serve</code>.</p>`}
             <div class="mfs-row"><label class="mfs-f"><span>Ollama URL</span><input data-k="ollamaUrl" value="${esc(s.ollamaUrl)}"></label>
               <label class="mfs-f"><span>Model</span><input data-k="ollamaModel" value="${esc(s.ollamaModel)}"></label></div></div></label>
         <details ${s.provider !== "ollama" ? "open" : ""}><summary>Use a cloud model instead (your own API key)</summary>
@@ -94,8 +104,13 @@
   function render() {
     modal.innerHTML = html();
     modal.querySelector("[data-x]").onclick = close;
-    modal.querySelectorAll("input[name^=mfs-]").forEach(i => i.addEventListener("change", () => { Engine.set({ [i.name.slice(4)]: i.value }); render(); }));
-    modal.querySelectorAll("input[data-k]").forEach(i => i.addEventListener("change", () => Engine.set({ [i.dataset.k]: i.value.trim() })));
+    modal.querySelectorAll("input[name^=mfs-]").forEach(i => i.addEventListener("change", () => { Engine.set({ [i.name.slice(4)]: i.value }); render(); maybeCheck(); }));
+    modal.querySelectorAll("input[data-k]").forEach(i => i.addEventListener("change", () => {
+      Engine.set({ [i.dataset.k]: i.value.trim() });
+      if (i.dataset.k.startsWith("ollama")) check();
+    }));
+    const rc = modal.querySelector("[data-recheck]");
+    if (rc) rc.onclick = e => { e.preventDefault(); check(); };
     modal.querySelector("[data-reset]").onclick = () => {
       if (window.MFState) MFState.reset();
       window.dispatchEvent(new Event("mf-reset"));
@@ -106,19 +121,27 @@
       modal.querySelectorAll("input[data-k]").forEach(i => Engine.set({ [i.dataset.k]: i.value.trim() }));
       const out = modal.querySelector("[data-out]");
       out.innerHTML = '<span class="mfs-dots"><i></i><i></i><i></i></span>';
-      try { const r = await Engine.test(); out.innerHTML = `<span class="mfs-ok">Connected \u00b7 replied "${esc(r.trim().slice(0, 40))}"</span>`; }
-      catch (e) { out.innerHTML = `<span class="mfs-err">${esc(e.message)}</span>`; }
+      try { const r = await Engine.test(); render(); modal.querySelector("[data-out]").innerHTML = `<span class="mfs-ok">Connected: replied "${esc(r.trim().slice(0, 40))}"</span>`; }
+      catch (e) { render(); const o = modal.querySelector("[data-out]"); if (o) o.innerHTML = `<span class="mfs-err">${esc(e.message)}</span>`; }
     };
   }
 
-  function open() { ensure(); render(); scrim.classList.add("on"); modal.classList.add("on"); }
+  // Probe the local model only while Live + Local is chosen, so Simulated mode never touches the network.
+  let checking = false;
+  async function check() {
+    if (checking) return; checking = true; if (modal) render();
+    try { await Engine.probe(); } finally { checking = false; if (modal) render(); }
+  }
+  function maybeCheck() { const s = Engine.get(); if (s.mode === "live" && s.provider === "ollama") check(); }
+  function open() { ensure(); render(); scrim.classList.add("on"); modal.classList.add("on"); maybeCheck(); }
   function close() { if (!modal) return; scrim.classList.remove("on"); modal.classList.remove("on"); }
 
   function chip(el) {
     if (!el) return;
     const draw = () => {
       const s = Engine.get();
-      el.innerHTML = `<button class="mfs-chip ${s.mode === "live" ? "live" : ""}" title="AI engine settings"><i></i>${esc(Engine.label(s))}</button>`;
+      const off = Engine.offline(s);
+      el.innerHTML = `<button class="mfs-chip ${s.mode === "live" && !off ? "live" : ""}" title="${off ? esc(Engine.OFFLINE) : "AI engine settings"}"><i></i>${esc(Engine.label(s))}</button>`;
       el.firstChild.onclick = open;
     };
     draw(); window.addEventListener("engine-change", draw);

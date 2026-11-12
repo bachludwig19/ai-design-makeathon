@@ -11,27 +11,66 @@ window.Engine = {
     openaiKey: "", openaiModel: ""
   },
   get() { try { return { ...this.defaults, ...(JSON.parse(localStorage.getItem(this.key)) || {}) }; } catch { return { ...this.defaults }; } },
-  set(patch) { const s = { ...this.get(), ...patch }; try { localStorage.setItem(this.key, JSON.stringify(s)); } catch {} window.dispatchEvent(new Event("engine-change")); return s; },
+  set(patch) {
+    if ("ollamaUrl" in patch || "ollamaModel" in patch) { try { localStorage.removeItem(this.statusKey); } catch {} }
+    const s = { ...this.get(), ...patch }; try { localStorage.setItem(this.key, JSON.stringify(s)); } catch {} window.dispatchEvent(new Event("engine-change")); return s; },
+
+  // Local model reachability. Cached in localStorage so pages don't re-probe (and log a refused
+  // connection) on every load; re-checked when the settings modal opens or on "Check again".
+  OFFLINE: "Local model not running. Using the simulation.",
+  statusKey: "mf.engine.local.v1",
+  local() { try { return JSON.parse(localStorage.getItem(this.statusKey)) || { state: "unknown" }; } catch { return { state: "unknown" }; } },
+  setLocal(st) { try { localStorage.setItem(this.statusKey, JSON.stringify({ ...st, at: Date.now() })); } catch {} window.dispatchEvent(new Event("engine-change")); return st; },
+
+  // probe() -> {state: "ok"|"down", reason, hint}. Never throws.
+  async probe() {
+    const s = this.get(), base = s.ollamaUrl.replace(/\/$/, "");
+    const origin = /^https?:/.test(location.origin) ? location.origin : "*";
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 1500);
+    try {
+      const r = await fetch(`${base}/api/tags`, { signal: ctl.signal });
+      if (!r.ok) return this.setLocal({ state: "down", reason: `Ollama answered HTTP ${r.status}.`, hint: "Restart it with: ollama serve" });
+      const j = await r.json(), want = s.ollamaModel.split(":")[0];
+      const has = (j.models || []).some(m => (m.name || m.model || "").split(":")[0] === want);
+      if (!has) return this.setLocal({ state: "down", reason: `Ollama is running, but ${s.ollamaModel} isn't downloaded.`, hint: `Run: ollama pull ${s.ollamaModel}` });
+      return this.setLocal({ state: "ok" });
+    } catch {
+      // Not installed, not started, or blocked by CORS: the browser can't tell these apart.
+      return this.setLocal({ state: "down", reason: "Ollama isn't answering at " + base.replace(/^https?:\/\//, "") + ".",
+        hint: `Install Ollama, then start it with: OLLAMA_ORIGINS=${origin} ollama serve` });
+    } finally { clearTimeout(t); }
+  },
+
+  // True when the chosen engine can't run right now, so replies come from the simulation.
+  offline(s = this.get()) { return s.mode === "live" && s.provider === "ollama" && this.local().state === "down"; },
 
   label(s = this.get()) {
-    if (s.mode !== "live") return "Simulated agent";
+    if (s.mode !== "live" || this.offline(s)) return "Simulated agent";
     if (s.provider === "ollama") return `${s.ollamaModel} \u00b7 local`;
     if (s.provider === "anthropic") return `Claude \u00b7 ${s.anthropicModel}`;
     return `OpenAI \u00b7 ${s.openaiModel || "model?"}`;
   },
 
-  // ask({system, prompt, fallback}) -> {text, live, label, error}
+  _sim(fallback, error) {
+    return new Promise(r => setTimeout(() => r({ text: fallback, live: false, label: "Simulated agent", ...(error ? { error } : {}) }), 650 + Math.random() * 500));
+  },
+  _warned: false, // say "Using the simulation" once per page, not on every reply
+  _once(msg) { if (this._warned) return undefined; this._warned = true; return msg; },
+
+  // ask({system, prompt, fallback}) -> {text, live, label, error?}. Never throws.
   async ask({ system, prompt, fallback }) {
     const s = this.get();
-    if (s.mode !== "live") {
-      await new Promise(r => setTimeout(r, 650 + Math.random() * 500)); // feel like an agent, not a lookup
-      return { text: fallback, live: false, label: "Simulated agent" };
+    if (s.mode !== "live") return this._sim(fallback);
+    if (s.provider === "ollama") {
+      if (this.local().state !== "ok") await this.probe();
+      if (this.local().state !== "ok") return this._sim(fallback, this._once(this.OFFLINE));
     }
     try {
       const text = await this.call(s, system, prompt);
       return { text: text.trim(), live: true, label: this.label(s) };
     } catch (e) {
-      return { text: fallback, live: false, label: "Simulated agent", error: `${this.label(s)} failed: ${e.message}. Showing the simulated reply.` };
+      if (s.provider === "ollama") { this.setLocal({ state: "down", reason: "The local model stopped answering.", hint: "Check that ollama serve is still running." }); return { text: fallback, live: false, label: "Simulated agent", error: this._once(this.OFFLINE) }; }
+      return { text: fallback, live: false, label: "Simulated agent", error: this._once(`${this.label(s)} failed (${e.message}). Using the simulation.`) };
     }
   },
 
@@ -78,6 +117,7 @@ window.Engine = {
 
   async test() {
     const s = this.get();
+    if (s.provider === "ollama") { const p = await this.probe(); if (p.state !== "ok") throw new Error(p.reason); }
     return this.call({ ...s, mode: "live" }, "Reply with the single word: ready", "Are you there?");
   }
 };
