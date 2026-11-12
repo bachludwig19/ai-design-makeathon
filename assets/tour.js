@@ -18,9 +18,19 @@
     ],
     workflow: [
       { sel: "[data-accept]", n: 3, text: "Here is the agent's evidence and confidence. <b>Assign</b> its pick, or choose someone else." },
+      { when: () => !(window.MFState && MFState.resolved()), sel: "#a-assign:not([disabled])", n: 3, text: "The agent paused: it's under 90% sure who owns these items. Click <b>Assign suggested owner</b>." },
       { sel: "[data-approve]", n: 4, text: "This owner hasn't confirmed yet. <b>Approve &amp; sync</b>, or send a reminder." },
-      { sel: "#a-assign:not([disabled])", n: 3, text: "The agent paused: it's under 90% sure who owns these items. Click <b>Assign suggested owner</b>." },
       { sel: '#banner-slot a.btn[href="goal.html"]', n: 5, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
+    ],
+    canvas: [
+      { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 5, text: "Your fix is live. Click <b>Stay on canvas</b>." },
+      { when: () => window.MFCanvas && MFCanvas.deployed, sel: '#nav a.mf-link[href="index.html"]', n: 5, text: "Done. Head back <b>Home</b>." },
+      { sel: ".waitbar .btn.primary", n: 2, text: "The test is waiting on a person. Click the highlighted button." },
+      { when: () => window.MFCanvas && MFCanvas.ready, sel: "#deployBtn", n: 4, text: "Both tests passed. Click <b>Deploy</b>." },
+      { when: () => window.MFCanvas && !MFCanvas.opened, sel: '.node[data-node="n4"]', n: 1, text: "This is your workflow. Click the stuck step, <b>Owner Found?</b>" },
+      { when: () => window.MFCanvas && !MFCanvas.busy && !MFCanvas.testedNo, sel: "#runBtn", n: 2, text: "Test it on a stuck item. Click <b>Run test</b>." },
+      { when: () => window.MFCanvas && !MFCanvas.busy && MFCanvas.testedNo && !MFCanvas.testedYes && MFCanvas.testItem !== "ai-2", sel: '[data-item="ai-2"]', n: 3, text: "Now an item that has an owner. Pick <b>Confirm API…</b>" },
+      { when: () => window.MFCanvas && !MFCanvas.busy && !MFCanvas.testedYes, sel: "#runBtn", n: 3, text: "Click <b>Run test</b> again." }
     ]
   }[page];
   if (!RULES) return;
@@ -43,7 +53,17 @@
   tip.className = "tour-tip"; tip.setAttribute("role", "status");
   let cur = null, curText = "";
 
-  const visible = (el) => el && el.offsetParent !== null && !el.disabled && !el.closest(".off");
+  // Visible = rendered, enabled, and not clipped away by a collapsed ancestor (e.g. a closed .decide-wrap).
+  function visible(el) {
+    if (!el || el.offsetParent === null || el.disabled || el.closest(".off")) return false;
+    const r = el.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return false;
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      if (getComputedStyle(p).overflow === "visible") continue;
+      const q = p.getBoundingClientRect();
+      if (q.height < 2 || r.bottom <= q.top || r.top >= q.bottom) return false;
+    }
+    return true;
+  }
   function update() {
     if (off()) { clear(); return; }
     let hit = null, rule = null;
@@ -58,7 +78,8 @@
       if (cur) {
         cur.classList.add("tour-target");
         const b = cur.getBoundingClientRect();
-        if (b.top < 70 || b.bottom > innerHeight - 110) cur.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Scroll the window only: scrollIntoView would also scroll overflow:hidden panels and clip their content.
+        if (b.top < 70 || b.bottom > innerHeight - 110) scrollBy({ top: b.top - innerHeight / 2 + b.height / 2, behavior: "smooth" });
       }
     }
     if (!rule) { tip.remove(); curText = ""; return; }

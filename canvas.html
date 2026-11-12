@@ -72,6 +72,8 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .libitem.off:hover{border-color:var(--line)}
 .libitem .soon{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
 .about.muted{color:var(--text-3)}
+.node.tour-target{position:absolute}
+.tour-tip{bottom:128px !important}
 .btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:var(--radius);padding:7px 13px;font-size:13px;font-weight:500;white-space:nowrap}
 .btn:hover{border-color:var(--hair-strong)}
 .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-dark);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 22px -14px rgba(0,0,0,.7)}
@@ -325,7 +327,7 @@ pre.json .k{color:var(--gold)}pre.json .s{color:var(--teal)}pre.json .n{color:va
 .check:not(.ok){color:var(--text)}
 .check.ok{color:var(--text-2)}
 
-.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,10px);background:var(--dark);color:var(--on-dark);border-radius:var(--radius);padding:10px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:all .2s;z-index:60;display:flex;gap:12px;align-items:center;max-width:560px}
+.toast{position:fixed;left:50%;bottom:196px;transform:translate(-50%,10px);background:var(--dark);color:var(--on-dark);border-radius:var(--radius);padding:10px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:all .2s;z-index:60;display:flex;gap:12px;align-items:center;max-width:560px}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast.bad{background:var(--danger)}
 .toast button{background:transparent;border:1px solid rgba(255,255,255,.35);color:var(--on-dark);border-radius:var(--radius);padding:3px 9px;font-size:12px}
@@ -1090,6 +1092,7 @@ function json(o){
 }
 function renderInspector(){
   const n = node(sel);
+  if (sel==='n4') openedStuck = true;
   if (!n){ insp.innerHTML = `<div class="empty">${ic('target')}<p>Click a step to edit it.</p></div>`; return; }
   const c = cat(n), st = run && run.byNode[n.id];
   insp.innerHTML = `<div class="insp-head">
@@ -1265,7 +1268,7 @@ function ensureVisible(id){
   if (nl!==L || nt!==T) scroller.scrollTo({left:nl, top:nt, behavior:'smooth'});
 }
 function advance(n, port, output){
-  if (port && cat(n).outs.length>1) cov.add(n.id+':'+port);
+  if (port && cat(n).outs.length>1) (run.ports = run.ports || []).push(n.id+':'+port);  // counted only if the run passes
   const e = port ? edges.find(e=>e.f===n.id && e.fp===port) : null;
   if (!e){
     if (port && cat(n).outs.length && cat(n).outs.some(p=>p.id===port) && cat(n).outs.length>1){
@@ -1287,7 +1290,7 @@ function resolveWait(i){
 }
 function finish(){
   run.state = 'done'; run.lastEdge = null;
-  if (!run.warn && run.ver===cfgVer) passVer = cfgVer;
+  if (!run.warn && run.ver===cfgVer){ passVer = cfgVer; (run.ports||[]).forEach(k=>cov.add(k)); }
   const it = item(run.itemId);
   toast(run.warn ? 'Problem found. Check the red step.' : 'Test passed', null, run.warn);
 }
@@ -1549,6 +1552,19 @@ document.addEventListener('click', e=>{ if (!e.target.closest('#pop') && !e.targ
 $('#navToggle').onclick = ()=>$('#nav').classList.toggle('collapsed');
 $('#modal').addEventListener('click', e=>{ if (e.target.id==='modal') $('#modal').classList.remove('on'); });
 
+/* Read-only state for the guided tour (assets/tour.js, rules under "canvas"). */
+let openedStuck = false;
+window.MFCanvas = {
+  get opened(){ return openedStuck; },
+  get busy(){ return !!(run && run.state!=='done'); },
+  get testedNo(){ return checks()[0].ok; },
+  get testedYes(){ return checks()[1].ok; },
+  get ready(){ return checks().every(c=>c.ok) && !deployed; },
+  get deployed(){ return deployed; },
+  get modalOpen(){ return $('#modal').classList.contains('on'); },
+  get testItem(){ return testItem; }
+};
+
 /* "How this works" guide in the top bar: shows where the user is. */
 function renderGuide(){
   const cks = checks(), allOk = cks.every(c=>c.ok);
@@ -1589,5 +1605,6 @@ let rzT = null;
 window.addEventListener('resize', ()=>{ clearTimeout(rzT); rzT = setTimeout(initialView, 150); });
 })();
 </script>
+<script src="assets/tour.js"></script>
 </body>
 </html>
