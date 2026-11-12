@@ -14,9 +14,34 @@ Built for the AI Design Makeathon, Track 1: Agentic Workflow.
 
 ## The problem
 
+Teams are measured on goals, like *keep delivery on track* or *improve adoption*. The work that moves those goals is spread across meetings, tickets and Slack. AI agent workflows could connect all of it, but today's tools make you think in workflows instead of goals.
+
+- **Workflow builders start from a blank canvas.** To automate anything, the person who owns the goal has to turn it into triggers, nodes, branches and integrations. That is a builder's job. Most product managers and team leads stop at the node library, so the people who own the outcome rarely own the automation that serves it.
+- **Workflows don't know what they're for.** A built workflow reports runs and errors, not whether the goal is on track. When step 3 pauses, nothing tells you it is why delivery is slipping.
 - **Goals slip quietly.** Commitments made in meetings ("someone should bump the rate limits before the load test") never get an owner, and nobody notices until a deadline passes.
-- **Automation is either too hard to build or too risky to trust.** Workflow builders hand goal owners a blank canvas and a node library. Autonomous agents act without asking and lose people's trust the first time they get it wrong.
-- **When automation breaks, nobody can tell where.** Items just stop moving, and finding the cause means digging through logs or asking whoever built the workflow.
+- **Agents are either too timid or too bold.** Rigid automations stall at the first ambiguous case. Autonomous agents act without asking and lose people's trust the first time they get it wrong.
+- **When automation breaks, nobody can tell where.** Items just stop moving. Finding the cause means digging through logs or asking whoever built the workflow.
+
+## Design philosophy: set the goal, not the workflow
+
+People should manage outcomes, and the agent should manage the plumbing. Instead of asking you to build a workflow and hope it serves a goal, Goal with the Flow starts from the goal and works backward to the workflows behind it.
+
+| Workflow-first (today) | Goal-first (Goal with the Flow) |
+|---|---|
+| Start from a blank canvas and a node library | Describe the goal in plain language |
+| You decide which triggers, steps and integrations it needs | The agent drafts the workflows that support the goal |
+| Success means the workflow ran | Success means the goal is on track |
+| Failures show up as errors in a log | Failures show up as a goal at risk, with the reason |
+| You debug by reading the graph | A test run points at the broken step and suggests a fix |
+
+How this shapes the design:
+
+- **The goal is the home screen.** Home shows goal health (on track, at risk, off track) and what needs your attention, not a list of workflows.
+- **Workflows live under goals.** Each goal lists its *supporting workflows*. You reach the canvas from a slipping goal, so it opens on the problem instead of an empty page.
+- **The canvas is for understanding and adjusting, not building from scratch.** It is still there when you want control: inspect a step, test the flow, add or remove steps. You start from the agent's draft, never from nothing.
+- **Your job is judgment, not wiring.** The agent handles routine steps and stops at real decisions. Below its auto-assign threshold (90% confidence) it asks you, with the evidence from the meeting in front of you, instead of guessing.
+- **Problems surface in context.** Stuck items appear next to the workflow that stalled them, and a test run highlights the exact step that failed.
+- **Nothing goes live without you.** Fixes are previewed, tested and deployed by a person.
 
 ## How it works
 
@@ -33,13 +58,6 @@ Built for the AI Design Makeathon, Track 1: Agentic Workflow.
 6. **Keep editing.** Come back from the goal page, open **Add steps**, add a *Slack DM* to step 3, remove *You decide*, test, and deploy again. You can remove any step with the × on the node or **Remove step** in its panel.
 
 A guided tour (numbered hints with a pulsing ring) walks testers through the whole path. Steps 1–3 are on Home and the goal page, 4–10 cover the first pass on the canvas, 11 is back on the goal page, and 12–16 are the edit pass. **Skip tour** hides it, and **Reset demo** in the top bar starts over.
-
-## Design principles
-
-- **Describe the goal, don't build the plumbing.** The agent drafts the workflow, so your work is judgment rather than wiring.
-- **The agent asks when it's unsure.** Below the auto-assign threshold (90%), it pauses and shows its evidence instead of guessing.
-- **Problems surface in context.** Stuck items appear next to the workflow that stalled them, and a test run points to the exact step.
-- **Nothing goes live without you.** Fixes are previewed, tested and deployed by a person.
 
 ## Run it locally
 
