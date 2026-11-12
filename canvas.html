@@ -1213,6 +1213,10 @@ function renderInspector(){
     <div class="insp-body" id="ib">${configHTML(n)}</div>`;
   insp.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; renderInspector(); });
   $('#backCue').onclick = ()=>{ sel = null; renderAll(); };
+  if (['decide','slack','wait','escalate'].includes(n.t)){
+    insp.querySelector('.insp-body').insertAdjacentHTML('beforeend', `<button class="btn" id="rmStep" style="margin-top:14px;color:var(--danger)">${ic('x')}Remove step</button>`);
+    $('#rmStep').onclick = ()=>removeStep(n.id);
+  }
   bindConfig(n);
 }
 /* ---------------- action items to resolve (Cues-style deck) ---------------- */
@@ -1282,7 +1286,7 @@ function resolvedOrder(){   // most recently resolved first
 function panelCards(){
   const o = owners(), open = DECK.filter(i=>!o[i.id]), cards = [];
   const R = MF.resolution || {progressBefore:MF.goal.progress, progressAfter:MF.goal.progress};
-  if (!open.length || sim.state!=='idle' || deployed) cards.push({key:'cue-'+sim.state+(deployed?'-live':''), html:cueHTML()});
+  if (!open.length || sim.state!=='idle' || deployed) cards.push({key:'cue-'+sim.state+(deployed?'-live':'')+(fix||'')+(node('n12')?'':'-x'), html:cueHTML()});
   if (!open.length) cards.push({key:'all', html:`<div class="cue good"><div class="ck">${ic('check')}Resolved</div><h3>All ${FLAGGED.length} resolved</h3>
       <p>Delivery goal ${R.progressBefore}% → <b>${R.progressAfter}%</b>. Step 3 is moving again.</p></div>`});
   open.forEach(i=>cards.push({key:'ic-'+i.id+(waiting[i.id]?'-w':''), html:itemCard(i)}));
@@ -1334,11 +1338,36 @@ insp.addEventListener('change', e=>{
   viaSlack(it, who, 'override', `${ME} overrode the suggestion (${so.name}, ${pct(so.confidence)}) and assigned ${who} to “${it.title}”. ${firstName(who)} confirmed in Slack (simulated reply).`,
     `Pending ${esc(firstName(who))}'s reply in Slack · the agent is watching`, `${firstName(who)} replied: “Yes, I've got it.” The agent will learn from your pick.`);
 });
+/* Second leg (returning after the first deploy): swap "You decide" for a Slack DM. */
+let returning = false;
+function addSlackToStep3(){
+  if (node('n13')) return;
+  nodes.push({id:'n13', t:'slack', title:'Slack DM: ask owner', x:colX(4), y:laneY(2)});
+  edges.push({id:'e'+(++eseq), f:'n4', fp:'no', t:'n13'}, {id:'e'+(++eseq), f:'n13', fp:'out', t:'n9'});
+  fix = 'swap'; deployed = false; sim = {state:'fixed'}; sel = null; cfgVer++;
+  setLib(true); renderAll(); toast('Slack DM added to step 3');
+}
+function removeStep(id){
+  const n = node(id); if (!n) return;
+  nodes = nodes.filter(x=>x.id!==id); edges = edges.filter(e=>e.f!==id && e.t!==id);
+  if (fix!=='swap' && !node('n13')) fix = null;
+  deployed = false; sim = {state:'fixed'}; sel = null; cfgVer++;
+  renderAll(); toast(`${title(n)} removed`);
+}
+function leg2Step(){
+  if (!returning) return null;
+  if (deployed && fix==='swap') return $('#modal').classList.contains('on') ? 'modal' : 'end';
+  if (!node('n13')) return $('#lib').classList.contains('collapsed') ? 'lib' : 'slack';
+  if (node('n12')) return sel==='n12' ? 'rmbtn' : 'remove';
+  return sim.state==='passed' ? 'deploy' : sim.state==='running' ? 'running' : 'test';
+}
 let preview = null;   // 'ask' | 'me' while a fix card button is hovered/focused
 function cueHTML(){
   const N = FLAGGED.length;
   const f = sim.path && sim.path.fail ? title(node(sim.path.fail)) : 'Owner Found?';
   const WC = `<div class="ck">${ic('flow')}Workflow change</div>`;
+  if (deployed && fix==='swap') return `<div class="cue wf">${WC}<h3>Slack DM replaces You decide</h3><p>Live. Low-confidence matches are now asked in Slack.</p></div>`;
+  if (fix==='swap' && sim.state==='fixed') return `<div class="cue wf">${WC}<h3>${node('n12') ? 'Slack DM added to step 3' : 'Slack DM replaces You decide'}</h3><p>${node('n12') ? 'Now remove <b>You decide</b>, then run the test.' : 'Click <b>Run test again</b>.'}</p></div>`;
   if (deployed) return `<div class="cue wf">${WC}<h3>Your fix is live.</h3><p>${fix==='me' ? 'Low-confidence matches now come to you to decide.' : 'Low-confidence matches are now asked in Slack, then escalated.'}</p></div>`;
   switch(sim.state){
     case 'running': return `<div class="cue wf">${WC}<h3>Testing the workflow…</h3><p>Replaying ${N} items. Watch the path light up.</p></div>`;
@@ -1381,10 +1410,12 @@ function applyFix(kind){
   const on = (f,fp,t)=>edges.push({id:'e'+(++eseq), f, fp, t});
   const add = (id,t,ttl,c,l)=>{ if (!node(id)) nodes.push({id, t, title:ttl, c, l, x:colX(c), y:laneY(l)}); };
   edges = edges.filter(e=>!(e.f==='n4' && e.fp==='no'));
-  nodes = nodes.filter(n=>!['n6','n7','n8','n12'].includes(n.id)); edges = edges.filter(e=>node(e.f) && node(e.t));
+  nodes = nodes.filter(n=>!['n6','n7','n8','n12','n13'].includes(n.id)); edges = edges.filter(e=>node(e.f) && node(e.t));
   if (kind==='ask'){
     add('n6','slack','Slack DM: ask owner',4,1); add('n7','wait','Wait for reply',5,1); add('n8','escalate','Escalate to lead',6,1);
     on('n4','no','n6'); on('n6','out','n7'); on('n7','replied','n9'); on('n7','timeout','n8');
+  } else if (kind==='swap'){
+    add('n13','slack','Slack DM: ask owner',4,1); on('n4','no','n13'); on('n13','out','n9');
   } else {
     add('n12','decide','You decide',4,1); on('n4','no','n12'); on('n12','out','n9');
   }
@@ -1628,7 +1659,7 @@ function doDeploy(){
   const flagged = FLAGGED;
   const what = it => { const c = cand(it); return fix==='ask' ? (c ? `Asking ${c.name} in Slack` : 'Asking in Slack') : 'Waiting for your pick'; };
   $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Your fix is live</h3>
-    <p>${fix==='me' ? `Low-confidence matches now come to you to decide. Anything under ${pct(cfg.threshold)} lands in your queue instead of stalling.` : `Next time the agent is under ${pct(cfg.threshold)} sure, it asks the suggested owner in Slack, waits ${cfg.timeoutH}h, then escalates.`}</p>
+    <p>${fix==='swap' ? 'Slack DM replaces You decide. Low-confidence matches are now asked in Slack.' : fix==='me' ? `Low-confidence matches now come to you to decide. Anything under ${pct(cfg.threshold)} lands in your queue instead of stalling.` : `Next time the agent is under ${pct(cfg.threshold)} sure, it asks the suggested owner in Slack, waits ${cfg.timeoutH}h, then escalates.`}</p>
     <div class="acts"><button class="btn primary" id="mClose">Done</button></div>`;
   $('#modal').classList.add('on');
   $('#mClose').onclick = ()=>$('#modal').classList.remove('on');
@@ -1765,6 +1796,7 @@ lib.addEventListener('click', e=>{
   const b = e.target.closest('.libitem'); if (!b) return;
   $('#pcard').classList.remove('on');
   if (b.classList.contains('off')){ toast('Not available in this demo'); return; }
+  if (returning && b.dataset.key==='slack'){ addSlackToStep3(); return; }
   addNode(b.dataset.key, null, null, CAT[b.dataset.key].ins.length ? sel : null);
 });
 
@@ -1783,6 +1815,7 @@ document.addEventListener('drop', e=>{ e.preventDefault(); });
 scroller.addEventListener('drop', e=>{
   e.preventDefault();
   const key = e.dataTransfer.getData('text/plain'); if (!CAT[key]) return;
+  if (returning && key==='slack'){ addSlackToStep3(); return; }
   const p = wpt(e);
   addNode(key, p.x-NW/2, p.y-NH/2, null);
 });
@@ -1813,7 +1846,8 @@ window.MFCanvas = {
   get deployed(){ return deployed; },
   get modalOpen(){ return $('#modal').classList.contains('on'); },
   get panelOpen(){ return !sel; },
-  get resolved(){ return allResolved(); }
+  get resolved(){ return allResolved(); },
+  get leg2(){ return leg2Step(); }
 };
 
 /* "How this works" guide in the top bar: shows where the user is. */
@@ -1845,13 +1879,14 @@ function initialView(){
   const pick = ranges.find(([c0,c1]) => usable/((colX(c1)+NW+16)-(colX(c0)-16)) * 17 >= 10.5) || [2,5];
   frameCols(pick[0], pick[1]);
 }
-function setLib(collapsed){ $('#lib').classList.toggle('collapsed', collapsed); setTimeout(initialView, 230); }  // after the width transition
+function setLib(collapsed){ $('#lib').classList.toggle('collapsed', collapsed); setTimeout(initialView, 230);
+  if (!collapsed && returning) setTimeout(()=>{ const s = document.querySelector('#libList .libitem[data-key="slack"]'); if (s) s.scrollIntoView({block:'center'}); }, 260); }  // after the width transition
 $('#libClose').onclick = ()=>setLib(true);
 $('#libOpen').onclick = $('#libOpen2').onclick = ()=>setLib(false);
 { const l = $('#lib'); l.style.transition = 'none'; l.classList.add('collapsed'); void l.offsetWidth; l.style.transition = ''; }
 document.getElementById('cvReset').onclick = () => { try { window.MFState && MFState.reset(); sessionStorage.clear(); localStorage.removeItem('mf.canvas.v1'); } catch (e) {} location.href = 'index.html'; };
 // Returning after Deploy: keep the deployed fix so the tour doesn't loop back into the test.
-try { const cf = window.MFState && MFState.get().canvasFix; if (cf && allResolved()){ applyFix(cf); sim = {state:'passed'}; deployed = true; renderAll(); } } catch(e){}
+try { const cf = window.MFState && MFState.get().canvasFix; if (cf && allResolved()){ applyFix(cf); sim = {state:'passed'}; deployed = true; returning = cf==='me'; renderAll(); } } catch(e){}
 requestAnimationFrame(initialView);
 let rzT = null;
 window.addEventListener('resize', ()=>{ clearTimeout(rzT); rzT = setTimeout(initialView, 150); });

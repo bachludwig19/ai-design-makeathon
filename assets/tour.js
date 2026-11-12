@@ -15,7 +15,7 @@
     ],
     goal: [
       { when: () => !resolved(), sel: 'a.btn[href="canvas.html"]', n: 3, text: "3 action items are blocking this goal. Click <b>Resolve blockers</b>." },
-      { when: resolved, sel: '#mf-nav a.nav-link[href="index.html"]', n: 11, text: "Blockers cleared: 72% → 81%. Head back <b>Home</b>." }
+      { when: () => resolved() && !(window.MFState && MFState.get().canvasFix === "swap"), sel: "#wfs a.wf", n: 11, text: "Optional: change how this workflow works. Open <b>Action Item Tracking</b>." }
     ],
     workflow: [
       { sel: "[data-accept]", n: 4, text: "Here is the agent's evidence and confidence. <b>Assign</b> its pick, or choose someone else." },
@@ -24,6 +24,14 @@
       { sel: '#banner-slot a.btn[href="goal.html"]', n: 6, text: "The pipeline resumed and the goal recovered. Click <b>View goal</b>." }
     ],
     canvas: [
+      // Second leg: back from the goal page after the first deploy.
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "lib", sel: "#libOpen2", n: 12, text: "Open <b>Add steps</b>." },
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "slack", sel: '#libList .libitem[data-key="slack"]', n: 13, text: "Click <b>Slack DM</b> to add it to step 3." },
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "remove", sel: '.node[data-node="n12"]', n: 14, text: "Now remove <b>You decide</b>. Click it." },
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "rmbtn", sel: "#rmStep", n: 14, text: "Click <b>Remove step</b>." },
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "test", sel: "#runBtn", n: 15, text: "Click <b>Run test again</b>." },
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "deploy", sel: "#deployBtn", n: 16, text: "All green. Click <b>Deploy</b>." },
+      { when: () => window.MFCanvas && MFCanvas.leg2 === "modal", sel: "#mClose", n: 16, text: "Slack DM is live. Click <b>Done</b>." },
       { sel: "#ic-ai-1 [data-accept]", n: 4, text: "The agent found a likely owner. Click <b>Assign</b>." },
       { sel: "#ic-ai-2 [data-approve]", n: 5, text: "David hasn't confirmed. Click <b>Approve &amp; sync</b>." },
       { sel: "#ic-ai-3 [data-remind]", n: 5, text: "Jordan was mentioned but hasn't said yes. Click <b>Send reminder</b>." },
@@ -32,7 +40,7 @@
       { when: () => window.MFCanvas && MFCanvas.state === "fixed", sel: "#runBtn", n: 8, text: "Click <b>Run test again</b>." },
       { when: () => window.MFCanvas && MFCanvas.state === "passed" && !MFCanvas.deployed, sel: "#deployBtn", n: 9, text: "All green. Click <b>Deploy</b>." },
       { when: () => window.MFCanvas && MFCanvas.deployed && MFCanvas.modalOpen, sel: "#mClose", n: 9, text: "Your fix is live. Click <b>Done</b>." },
-      { when: () => window.MFCanvas && MFCanvas.deployed, sel: "#backGoal", n: 10, text: "Head back to your goal: <b>Back to goal</b>." }
+      { when: () => window.MFCanvas && MFCanvas.deployed && !MFCanvas.leg2 && !(window.MFState && MFState.get().canvasFix === "swap"), sel: "#backGoal", n: 10, text: "Head back to your goal: <b>Back to goal</b>." }
     ]
   }[page];
   if (!RULES) return;
