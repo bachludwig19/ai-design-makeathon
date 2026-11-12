@@ -17,6 +17,7 @@ Built for the AI Design Makeathon, Track 1: Agentic Workflow.
 Teams are measured on goals, like *keep delivery on track* or *improve adoption*. The work that moves those goals is spread across meetings, tickets and Slack. AI agent workflows could connect all of it, but today's tools make you think in workflows instead of goals.
 
 - **Workflow builders start from a blank canvas.** To automate anything, the person who owns the goal has to turn it into triggers, nodes, branches and integrations. That is a builder's job. Most product managers and team leads stop at the node library, so the people who own the outcome rarely own the automation that serves it.
+- **AI works best when it knows the goal, but workflows hide it.** An agent that understands what success looks like can weigh evidence, choose the next step and tell when something is off. A workflow gives the agent only its own step ("validate owner"), not the reason behind it ("delivery ships on time"). Without that context it follows rules blindly, stalls on edge cases, or optimizes the wrong thing.
 - **Workflows don't know what they're for.** A built workflow reports runs and errors, not whether the goal is on track. When step 3 pauses, nothing tells you it is why delivery is slipping.
 - **Goals slip quietly.** Commitments made in meetings ("someone should bump the rate limits before the load test") never get an owner, and nobody notices until a deadline passes.
 - **Agents are either too timid or too bold.** Rigid automations stall at the first ambiguous case. Autonomous agents act without asking and lose people's trust the first time they get it wrong.
@@ -24,7 +25,7 @@ Teams are measured on goals, like *keep delivery on track* or *improve adoption*
 
 ## Design philosophy: set the goal, not the workflow
 
-People should manage outcomes, and the agent should manage the plumbing. Instead of asking you to build a workflow and hope it serves a goal, Goal with the Flow starts from the goal and works backward to the workflows behind it.
+People should manage outcomes, and the agent should manage the plumbing. A clear goal is the best instruction you can give an AI: it tells the agent what to aim for and how to judge its own work. Instead of asking you to build a workflow and hope it serves a goal, Goal with the Flow starts from the goal and works backward to the workflows behind it.
 
 | Workflow-first (today) | Goal-first (Goal with the Flow) |
 |---|---|
