@@ -124,7 +124,7 @@
     if (top) {
       top.innerHTML = `
         <button class="icon-btn" id="mf-collapse" aria-label="Collapse menu" title="Collapse menu">${icon("menu")}</button><span class="crumb"></span>
-        <div class="top-search off" aria-disabled="true" title="Not available in this demo">${icon("search", "ic-sm")}Search nodes, runs…<span class="kbd">⌘K</span></div>
+        <span style="flex:1"></span>
         <span class="mfs-chip" style="cursor:default"><i></i>Demo flow</span>`;
       top.querySelector("#mf-collapse").addEventListener("click", () => setC(!(app && app.classList.contains("nav-collapsed"))));
       // No engine settings in the demo: always run the scripted flow.
