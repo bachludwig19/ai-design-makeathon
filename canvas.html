@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workflow Studio · MeetFlow Alpine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+body{display:flex;overflow:hidden;font-size:14px;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mono{font-family:var(--mono)}
+
+/* ---------- left nav (shared markup: .mf-nav) ---------- */
+.mf-nav{width:232px;flex:none;background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 12px;transition:width .2s;overflow:hidden}
+.mf-logo{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--text);text-decoration:none;padding:2px 6px 16px;white-space:nowrap}
+.mf-mark{width:30px;height:30px;border-radius:8px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.mf-sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);padding:14px 10px 6px;white-space:nowrap}
+.mf-link{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;color:var(--text);text-decoration:none;white-space:nowrap}
+.mf-link:hover{background:rgba(0,0,0,.04)}
+.mf-link.active{background:var(--card);box-shadow:var(--shadow);color:var(--primary-hover)}
+.mf-user{margin-top:auto;display:flex;gap:10px;align-items:center;padding:14px 6px 0;border-top:1px solid var(--line);white-space:nowrap}
+.mf-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.mf-user small{display:block;color:var(--primary)}
+.mf-nav.collapsed{width:62px}
+.mf-nav.collapsed .lbl,.mf-nav.collapsed .mf-sec{display:none}
+
+/* ---------- shell ---------- */
+.app{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+.iconbtn{width:34px;height:34px;border:0;background:transparent;border-radius:9px;display:grid;place-items:center;color:var(--text-2)}
+.iconbtn:hover{background:var(--surface);color:var(--text)}
+.crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);white-space:nowrap;min-width:0}
+.crumbs a{color:var(--text-2);text-decoration:none}.crumbs a:hover{color:var(--text)}
+.crumbs .here{color:var(--primary-hover);font-weight:600;letter-spacing:.05em;text-transform:uppercase;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;background:var(--surface);color:var(--text-2);white-space:nowrap}
+.chip.risk{background:var(--risk-soft);color:var(--danger)}
+.chip.teal{background:var(--teal-soft);color:var(--teal)}
+.chip.gold{background:var(--primary-soft);color:#86650f}
+.spacer{flex:1}
+.btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 13px;font-size:13px;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:#d4cfc4}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-hover)}
+.btn.dark{background:var(--dark);border-color:var(--dark);color:#fff}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--surface)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn svg.i{width:16px;height:16px}
+
+.ws{flex:1;display:flex;min-height:0}
+
+/* ---------- library ---------- */
+.lib{width:248px;flex:none;border-right:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;min-height:0}
+.lib-head{padding:16px 16px 10px}
+.lib-head h2{font-size:15px;font-weight:600;margin:0 0 10px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid transparent;border-radius:10px;padding:8px 10px}
+.search:focus-within{border-color:var(--primary);background:var(--card)}
+.search input{border:0;background:transparent;outline:0;flex:1;min-width:0;font-size:13px}
+.search svg.i{width:16px;height:16px;color:var(--text-3)}
+.lib-body{flex:1;overflow:auto;padding:0 16px 16px}
+.lib-sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.libitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:13px;cursor:grab}
+.libitem:hover,.libitem:focus-visible{border-color:var(--primary);outline:0}
+.libitem .ni{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--surface);color:var(--text-2);flex:none}
+.libitem .ni svg{width:15px;height:15px}
+.libitem .lt{flex:1;min-width:0}
+.libitem .lt small{display:block;color:var(--text-3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.libitem .add{opacity:0;color:var(--primary-hover);font-size:11px;font-weight:600}
+.libitem:hover .add{opacity:1}
+mark{background:var(--primary-soft);color:inherit;border-radius:3px;padding:0 1px}
+.sugg{background:var(--primary-soft);border-radius:12px;padding:10px 10px 4px;margin-top:4px}
+.sugg .lib-sec{margin:0 0 8px;color:#86650f}
+.sugg .libitem{border-color:transparent}
+.pcard{position:fixed;z-index:50;width:280px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.12);padding:14px;font-size:13px;pointer-events:none;opacity:0;transform:translateX(-4px);transition:opacity .12s,transform .12s}
+.pcard.on{opacity:1;transform:none}
+.pcard h4{margin:0 0 2px;font-size:14px}
+.pcard .k{font-size:10px;letter-spacing:.08em;color:var(--text-3);font-weight:600}
+.pcard p{margin:8px 0;color:var(--text-2)}
+.pcard .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.pcard .perm{font-size:12px;color:var(--text-2);display:flex;gap:6px;align-items:flex-start;border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+.tchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);padding:2px 7px;border-radius:999px;background:var(--surface);color:var(--text-2);white-space:nowrap}
+.tchip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* ---------- canvas ---------- */
+.canvas{flex:1;position:relative;min-width:0;background:var(--surface)}
+.scroller{position:absolute;inset:0;overflow:auto;cursor:default}
+.scroller.panning{cursor:grabbing}
+.sizer{position:relative;margin-top:62px}
+.world{position:absolute;left:0;top:0;transform-origin:0 0;background-image:radial-gradient(#d9d5cb 1px,transparent 1px);background-size:22px 22px}
+.overlay{position:absolute;left:14px;right:14px;top:12px;display:flex;gap:10px;align-items:flex-start;pointer-events:none;z-index:5}
+.overlay>*{pointer-events:auto}
+.toolbar{display:flex;align-items:center;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:var(--shadow)}
+.toolbar .sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.toolbar .zl{font-size:12px;color:var(--text-2);width:42px;text-align:center;font-variant-numeric:tabular-nums}
+.banner{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid #efcfcb;border-left:4px solid var(--risk);border-radius:12px;padding:8px 10px 8px 12px;box-shadow:var(--shadow);font-size:13px}
+.banner .bi{color:var(--danger)}
+.banner .bt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.banner.ok{border-color:#cfe5df;border-left-color:var(--teal)}
+.banner.ok .bi{color:var(--teal)}
+.legend{position:absolute;left:14px;bottom:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:5}
+.legend .tchip{background:var(--card);border:1px solid var(--line)}
+
+/* stage band */
+.stage{position:absolute;border-radius:16px;border:1px dashed transparent}
+.stage.attn{background:rgba(185,100,94,.06);border-color:#e8c3bf}
+.stage.flash{animation:flash 1.2s ease 2}
+@keyframes flash{50%{background:rgba(185,100,94,.16)}}
+.stage-h{position:absolute;display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden}
+.stage-h:hover{border-color:var(--primary)}
+.stage-h .sn{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;flex:none;background:var(--surface);color:var(--text-2)}
+.stage-h .st{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.stage-h .ss{margin-left:auto;font-size:11px;flex:none}
+.stage-h.completed .sn{background:var(--teal);color:#fff}.stage-h.completed .ss{color:var(--teal)}
+.stage-h.attention{border-color:#e8c3bf}.stage-h.attention .sn{background:var(--risk);color:#fff}.stage-h.attention .ss{color:var(--danger);font-weight:600}
+.stage-h.pending .ss,.stage-h.queued .ss{color:var(--text-3)}
+.stage-h.resumed .sn{background:var(--primary);color:#fff}.stage-h.resumed .ss{color:var(--primary-hover);font-weight:600}
+
+/* edges */
+svg.edges{position:absolute;left:0;top:0;overflow:visible}
+.edge{fill:none;stroke:#bfb9ad;stroke-width:2;transition:opacity .2s}
+.edge.yes{stroke:var(--teal)}
+.edge.no{stroke:var(--risk)}
+.edge.walked{stroke:var(--primary);stroke-width:3}
+.edge.hot{stroke:var(--primary);stroke-width:3;stroke-dasharray:8 6;animation:flow .5s linear infinite}
+.edge.cold{opacity:.28}
+.edge.sel{stroke:var(--dark);stroke-width:3}
+.edge.temp{stroke:var(--primary);stroke-width:2.5;stroke-dasharray:6 5}
+.edge.temp.bad{stroke:var(--risk)}
+@keyframes flow{to{stroke-dashoffset:-14}}
+.hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}
+.elabel{position:absolute;transform:translate(-50%,-50%);font-size:11px;font-family:var(--mono);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px;white-space:nowrap;color:var(--text-2);pointer-events:none;z-index:1;transition:opacity .2s}
+.elabel.yes{color:var(--teal);border-color:#cfe5df}
+.elabel.no{color:var(--danger);border-color:#efcfcb}
+.elabel.walked{background:var(--primary);border-color:var(--primary);color:#fff}
+.elabel.cold{opacity:.3}
+
+/* nodes */
+.node{position:absolute;width:200px;height:100px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:10px 14px;cursor:grab;user-select:none;transition:box-shadow .2s,border-color .2s,opacity .25s;z-index:2}
+.node.multi{padding-right:60px}
+.node:hover{border-color:#d4cfc4}
+.node .nh{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.08em;color:var(--text-3);font-weight:600;white-space:nowrap}
+.ni{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--surface);color:var(--text-2);flex:none}
+.ni svg.i{width:15px;height:15px}
+.k-ai .ni{background:var(--primary-soft);color:#8a6a14}
+.k-cond .ni{background:var(--teal-soft);color:var(--teal)}
+.k-human .ni{background:#e6ebf3;color:#4F6F9A}
+.k-int .ni{background:#efeae0;color:#6f6656}
+.k-trig .ni{background:#ece8f4;color:#6d5fa0}
+.node .nt{font-weight:600;font-size:13px;margin-top:8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .ns{font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node.sel{border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft),var(--shadow)}
+.node.dragging{cursor:grabbing;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:4}
+.node.flag{border-color:var(--risk)}
+.node.dim{opacity:.4}
+.node.s-next{border-color:var(--primary);animation:pulse 1s ease infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(196,154,44,.22),var(--shadow)}}
+.node.s-warn{border-color:var(--risk)}
+.node.s-waiting{border-color:var(--primary)}
+.nb{position:absolute;top:-10px;right:10px;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap;border:1px solid transparent}
+.nb svg.i{width:12px;height:12px;stroke-width:2.4}
+.nb.done{background:var(--teal);color:#fff}
+.nb.skipped{background:var(--surface);color:var(--text-2);border-color:var(--line)}
+.nb.warn{background:var(--risk);color:#fff}
+.nb.waiting{background:var(--primary);color:#fff}
+.nb.unwired{background:var(--risk-soft);color:var(--danger);border-color:#efcfcb}
+.port{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--card);border:3px solid var(--pc);z-index:3}
+.port.in{left:-8px}
+.port.out{right:-8px;cursor:crosshair}
+.port.out:hover{transform:scale(1.35)}
+.port .pl{position:absolute;right:15px;top:-4px;font-size:11px;font-weight:600;white-space:nowrap;pointer-events:none}
+.world.connecting .port.in.ok{transform:scale(1.5);border-color:var(--teal);box-shadow:0 0 0 5px rgba(47,116,115,.22)}
+.world.connecting .port.in.no{opacity:.2}
+.world.connecting .node.tgt-no{opacity:.55}
+.waitbar{position:absolute;display:flex;flex-direction:column;gap:6px;width:200px;z-index:6}
+.waitbar .wl{font-size:11px;color:var(--text-2);text-align:center}
+.waitbar .btn{justify-content:center}
+
+/* ---------- inspector ---------- */
+.insp{width:360px;flex:none;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;min-height:0}
+.insp-head{padding:16px 18px 0}
+.insp-head .k{font-size:12px;letter-spacing:.08em;color:var(--primary);font-weight:600;text-transform:uppercase}
+.insp-head h3{margin:2px 0 0;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
+.tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line)}
+.tab{border:0;background:transparent;padding:8px 10px;font-size:13px;color:var(--text-2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+.tab.on{color:var(--text);border-bottom-color:var(--primary);font-weight:500}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:var(--primary)}
+.insp-body{flex:1;overflow:auto;padding:14px 18px 20px}
+.about{font-size:13px;color:var(--text-2);margin:0 0 10px}
+.ports{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--text-3)}
+.perm{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-2);margin-top:8px}
+.perm svg.i{width:14px;height:14px;color:var(--teal)}
+.field{margin-top:16px}
+.field>label,.flabel{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;margin-bottom:6px}
+.flabel .hint,label .hint{font-weight:400;color:var(--text-3);font-size:12px}
+.flabel .tag{margin-left:auto;font-size:10px;font-family:var(--mono);background:var(--primary-soft);color:#86650f;padding:1px 6px;border-radius:6px}
+.inp{width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 11px;font-size:13px;outline:0}
+.inp:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+textarea.inp{font-family:var(--mono);font-size:12.5px;line-height:1.55;resize:vertical;min-height:104px}
+input[type=range]{width:100%;accent-color:var(--primary)}
+.rangev{margin-left:auto;font-weight:600}
+.avail{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:10px;margin-top:8px}
+.avail.flash{animation:aflash 1s ease}
+@keyframes aflash{30%{box-shadow:0 0 0 4px var(--primary-soft);border-color:var(--primary)}}
+.avail .ah{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.avail .ah span{margin-left:auto;font-weight:400;color:var(--text-3)}
+.avail .ag{margin-top:8px}
+.avail .agt{font-size:11px;color:var(--text-3);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.vchip{display:inline-flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px 8px;margin:0 4px 4px 0;font-size:11.5px;font-family:var(--mono);max-width:100%;text-align:left}
+.vchip:hover{border-color:var(--primary);background:var(--primary-soft)}
+.vchip em{font-style:normal;font-family:var(--font);color:var(--text-3);font-size:11px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vchip.empty em{color:var(--danger)}
+.warn{display:flex;gap:10px;align-items:flex-start;background:var(--risk-soft);color:#7d2a24;border-radius:10px;padding:10px 12px;font-size:12.5px;margin-top:8px}
+.warn svg.i{width:16px;height:16px;margin-top:1px}
+.warn .btn{margin-top:6px;border-color:#e3b7b2;background:#fff}
+.okline{display:flex;gap:8px;align-items:center;color:var(--teal);font-size:12.5px;margin-top:8px}
+.okline svg.i{width:15px;height:15px}
+.bubble{background:var(--card);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:10px 12px;font-size:13px}
+.bubble .who{font-size:11px;color:var(--text-3);margin-bottom:4px;display:flex;justify-content:space-between}
+.bubble .gap{background:var(--risk-soft);color:var(--danger);border-radius:4px;padding:0 4px;font-family:var(--mono);font-size:11px}
+pre.json{margin:0;background:var(--surface);border-radius:10px;padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:1.55;overflow:auto;max-height:240px;white-space:pre-wrap;word-break:break-word}
+pre.json .k{color:#8a6a14}pre.json .s{color:var(--teal)}pre.json .n{color:#a3332b}
+.route{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.route:last-child{border-bottom:0}
+.route .rid{font-family:var(--mono);font-size:11px;color:var(--text-3);width:30px;flex:none}
+.route .rt{flex:1;min-width:0}
+.route .rt b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route .rt small{color:var(--text-3)}
+.pill{font-size:11px;font-weight:600;border-radius:999px;padding:2px 9px;flex:none}
+.pill.yes{background:var(--teal-soft);color:var(--teal)}
+.pill.no{background:var(--risk-soft);color:var(--danger)}
+.runhead{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.runhead .rs{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.runhead p{margin:3px 0 0;font-size:13px}
+.choices{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.choices .btn{justify-content:center}
+.meta{font-size:11.5px;color:var(--text-3);margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
+.stale{display:flex;gap:8px;align-items:center;background:var(--primary-soft);color:#6f540c;font-size:12px;border-radius:10px;padding:8px 10px;margin-bottom:10px}
+.empty{color:var(--text-2);font-size:13px;text-align:center;padding:40px 10px}
+
+/* ---------- simulator bar ---------- */
+.sim{flex:none;border-top:1px solid var(--line);background:var(--card);position:relative}
+.timeline{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:10px 16px 0;scrollbar-width:thin}
+.timeline .tlh{font-size:11px;color:var(--text-3);white-space:nowrap;margin-right:4px}
+.tl{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:5px 10px;font-size:12px;white-space:nowrap;flex:none}
+.tl:hover{border-color:var(--primary)}
+.tl b{font-weight:600}
+.tl span{color:var(--text-2);max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.tl .d{width:8px;height:8px;border-radius:50%;flex:none;background:var(--teal)}
+.tl.s-warn .d{background:var(--risk)}.tl.s-waiting .d{background:var(--primary)}.tl.s-skipped .d{background:var(--text-3)}
+.tl.s-waiting{border-color:var(--primary);background:var(--primary-soft)}
+.tlarrow{color:var(--text-3);flex:none}
+.simrow{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.status{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:500;white-space:nowrap}
+.status .d{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+.status.running .d,.status.waiting .d{background:var(--primary);animation:blink 1s infinite}
+.status.warn .d{background:var(--risk)}
+@keyframes blink{50%{opacity:.3}}
+.seg{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;border-radius:8px;padding:5px 9px;font-size:12px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;white-space:nowrap}
+.seg button small{color:var(--text-3);font-size:10.5px}
+.seg button.on{background:var(--card);box-shadow:var(--shadow)}
+.seg button .sid{font-family:var(--mono);font-weight:500}
+.seg .st-unassigned small,.seg .st-overdue small{color:var(--danger)}
+.seg .st-awaiting-confirmation small{color:#86650f}
+.seg .st-completed small{color:var(--teal)}
+.checksbtn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:7px 12px;font-size:12.5px;white-space:nowrap}
+.checksbtn .meter{display:flex;gap:3px}
+.checksbtn .meter i{width:14px;height:6px;border-radius:3px;background:var(--line)}
+.checksbtn .meter i.ok{background:var(--teal)}
+.deploy{padding:9px 16px}
+.pop{position:absolute;right:16px;bottom:calc(100% + 8px);width:360px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.14);padding:14px;z-index:30;display:none}
+.pop.on{display:block}
+.pop h4{margin:0 0 4px;font-size:14px}
+.pop p{margin:0 0 10px;font-size:12.5px;color:var(--text-2)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:6px 0}
+.check .cb{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--surface);color:var(--text-3);margin-top:1px}
+.check .cb svg.i{width:12px;height:12px;stroke-width:2.6}
+.check.ok .cb{background:var(--teal);color:#fff}
+.check:not(.ok){color:var(--text)}
+.check.ok{color:var(--text-2)}
+
+.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,10px);background:var(--dark);color:#fff;border-radius:12px;padding:10px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:all .2s;z-index:60;display:flex;gap:12px;align-items:center;max-width:560px}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast.bad{background:#7d2a24}
+.toast button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:3px 9px;font-size:12px}
+.modal-bg{position:fixed;inset:0;background:rgba(31,31,28,.35);display:none;place-items:center;z-index:70}
+.modal-bg.on{display:grid}
+.modal{width:520px;max-width:calc(100vw - 32px);background:var(--card);border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{margin:0;font-size:18px;display:flex;gap:10px;align-items:center}
+.modal h3 .ok{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center}
+.modal p{color:var(--text-2);font-size:13.5px}
+.modal .route{font-size:13px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+</style>
+</head>
+<body>
+
+<nav class="mf-nav collapsed" id="nav" aria-label="Main">
+  <a class="mf-logo" href="index.html"><span class="mf-mark">MF</span><span class="lbl">MeetFlow Alpine</span></a>
+  <div class="mf-sec">Platform</div>
+  <a class="mf-link" href="index.html" title="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/><path d="M9 21v-6h6v6"/></svg><span class="lbl">Home</span></a>
+  <a class="mf-link" href="#" title="AI Assistant"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M2 12v3M22 12v3"/></svg><span class="lbl">AI Assistant</span></a>
+  <a class="mf-link" href="#" title="Workflow Marketplace"><svg class="i" viewBox="0 0 24 24"><path d="M3 9l2-5h14l2 5M3 9h18v3a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 14v6h14v-6"/></svg><span class="lbl">Workflow Marketplace</span></a>
+  <a class="mf-link" href="#" title="My Tasks &amp; Approvals"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span class="lbl">My Tasks &amp; Approvals</span></a>
+  <a class="mf-link" href="#" title="Activity &amp; Insights"><svg class="i" viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg><span class="lbl">Activity &amp; Insights</span></a>
+  <div class="mf-sec">Build &amp; configure</div>
+  <a class="mf-link active" href="canvas.html" title="Workflow Studio"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><path d="M10 6.5h4a3 3 0 0 1 3 3V14"/></svg><span class="lbl">Workflow Studio</span></a>
+  <a class="mf-link" href="#" title="Agents &amp; Skills"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M5 21c1-4 4-6 7-6s6 2 7 6"/></svg><span class="lbl">Agents &amp; Skills</span></a>
+  <a class="mf-link" href="#" title="Integrations"><svg class="i" viewBox="0 0 24 24"><path d="M9 3v4M15 3v4M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span class="lbl">Integrations</span></a>
+  <a class="mf-link" href="#" title="Knowledge &amp; Data"><svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span class="lbl">Knowledge &amp; Data</span></a>
+  <div class="mf-user"><span class="mf-avatar" id="avatar">AM</span><span class="lbl"><span id="uname">Alex Mercer</span><small id="utier">Alpine Pro Tier</small></span></div>
+</nav>
+
+<div class="app">
+  <header class="top">
+    <button class="iconbtn" id="navToggle" title="Toggle navigation" aria-label="Toggle navigation"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></button>
+    <div class="crumbs">
+      <a href="goal.html" id="crumbGoal">Goal</a><span>›</span>
+      <a href="workflow.html">Action Item Tracking</a><span>›</span>
+      <span class="here">Workflow Design</span>
+    </div>
+    <span class="chip gold mono">v2.4 live · editing draft v2.5</span>
+    <span class="spacer"></span>
+    <span class="chip" id="saveState">Draft saved</span>
+    <a class="btn" href="workflow.html"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back to workflow</a>
+  </header>
+
+  <div class="ws">
+    <!-- Node library -->
+    <aside class="lib" aria-label="Node library">
+      <div class="lib-head">
+        <h2>Node library</h2>
+        <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>
+          <input id="q" placeholder="Describe it: “remind owner if no reply”" autocomplete="off"></label>
+      </div>
+      <div class="lib-body">
+        <div id="sugg"></div>
+        <div id="libList"></div>
+      </div>
+    </aside>
+
+    <!-- Canvas -->
+    <main class="canvas" id="canvas">
+      <div class="scroller" id="scroller">
+        <div class="sizer" id="sizer">
+          <div class="world" id="world"></div>
+        </div>
+      </div>
+      <div class="overlay">
+        <div class="toolbar">
+          <button class="iconbtn" id="zIn" title="Zoom in"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5M8 11h6M11 8v6"/></svg></button>
+          <span class="zl" id="zl">100%</span>
+          <button class="iconbtn" id="zOut" title="Zoom out"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5M8 11h6"/></svg></button>
+          <span class="sep"></span>
+          <button class="iconbtn" id="zFit" title="Fit whole workflow"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/></svg></button>
+          <button class="iconbtn" id="zFocus" title="Frame step 3 (needs attention)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+          <span class="sep"></span>
+          <button class="btn ghost sm" id="tidy" title="Auto-layout left to right"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="6" rx="1.5"/><rect x="15" y="4" width="6" height="6" rx="1.5"/><rect x="15" y="14" width="6" height="6" rx="1.5"/><path d="M9 7h6M12 7v10h3"/></svg>Tidy up</button>
+        </div>
+        <div class="banner" id="banner"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </main>
+
+    <!-- Inspector -->
+    <aside class="insp" id="insp" aria-label="Node inspector"></aside>
+  </div>
+
+  <!-- Simulator -->
+  <section class="sim" id="sim" aria-label="Simulator">
+    <div id="timeline"></div>
+    <div class="simrow" id="simrow"></div>
+    <div class="pop" id="pop"></div>
+  </section>
+</div>
+
+<div class="pcard" id="pcard"></div>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modal"><div class="modal" id="modalBody"></div></div>
+
+<script src="assets/data.js"></script>
+<script>
+(function(){
+'use strict';
+const MF = window.MF;
+const FLAGGED = MF.actionItems;                       // step 3 flags exactly these
+// Test items: the flagged ones plus the already-completed item(s), so the Yes path can be tested too.
+const ITEMS = FLAGGED.concat((MF.completedItems||[]).map((c,i)=>Object.assign(
+  {id:'ai-'+(FLAGGED.length+1+i), state:'completed', due:'Monday, 5:00 PM'}, c)));
+const LEAD = 'Marcus Vance (Product Lead)';
+
+/* ---------------- geometry ---------------- */
+const NW = 200, NH = 100, COLW = 280, LANEH = 160, PADX = 40, TOP = 108;
+const OFFY = 62;                 // space above the world for the toolbar/banner overlay
+const colX = c => PADX + c * COLW;
+const laneY = l => TOP + l * LANEH;
+
+/* ---------------- icons ---------------- */
+const ICON = {
+  mic:'<path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+  play:'<path d="M7 4l13 8-13 8z"/>',
+  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+  userq:'<circle cx="10" cy="8" r="4"/><path d="M3 21c0-4 3-6 7-6"/><circle cx="17" cy="17" r="3"/><path d="M21 21l-1.8-1.8"/>',
+  clock:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',
+  ticket:'<path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><path d="M9 12l2 2 4-4"/>',
+  msg:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  cond:'<path d="M12 2l10 10-10 10L2 12z"/><path d="M10 10a2 2 0 1 1 3 1.7c-.6.4-1 .8-1 1.6M12 16h.01"/>',
+  alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  hour:'<path d="M6 2h12M6 22h12M7 2v3a5 5 0 0 0 10 0V2M7 22v-3a5 5 0 0 1 10 0v3"/>',
+  ucheck:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M16 11l2 2 4-4"/>',
+  up:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+  repeat:'<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+  check:'<path d="M5 12l5 5 9-10"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  play2:'<path d="M7 4l13 8-13 8z"/>',
+  step:'<path d="M5 4l10 8-10 8z"/><path d="M19 5v14"/>',
+  reset:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+  rocket:'<path d="M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2M9 15l-3-3 6-7c2-2 5-3 9-3 0 4-1 7-3 9l-7 6z"/><circle cx="15" cy="9" r="1.5"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  ff:'<path d="M4 5l8 7-8 7zM12 5l8 7-8 7z"/>',
+  reply:'<path d="M9 14l-5-5 5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  target:'<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/>'
+};
+const ic = (n, cls) => `<svg class="i${cls?' '+cls:''}" viewBox="0 0 24 24">${ICON[n]||''}</svg>`;
+
+/* ---------------- types & catalog ---------------- */
+const TYPES = {
+  Transcript:{c:'#8A7CB5', l:'transcript'},
+  Event:{c:'#9A978F', l:'event'},
+  ActionItems:{c:'#A9821F', l:'action_items[]'},
+  ActionItem:{c:'#C49A2C', l:'action_item'},
+  Message:{c:'#2F7473', l:'message'},
+  Task:{c:'#4F6F9A', l:'task'}
+};
+const compat = (o, i) => o === i || (o === 'ActionItems' && i === 'ActionItem');
+const IN = t => [{id:'in', type:t}];
+const OUT = t => [{id:'out', type:t}];
+const CATS = ['Triggers','AI processors','Conditionals','Integrations','Human steps','Tracking'];
+const KCLASS = {'Triggers':'k-trig','AI processors':'k-ai','Conditionals':'k-cond','Integrations':'k-int','Human steps':'k-human','Tracking':'k-int'};
+const CAT = {
+  transcript:{name:'Meeting Transcript Ingest', cat:'Triggers', kind:'TRIGGER', icon:'mic', ins:[], outs:OUT('Transcript'),
+    desc:'Starts a run when a meeting ends and its transcript (Zoom VTT or audio) is available.', perm:'Reads Zoom recordings for meetings you host',
+    syn:'meeting zoom recording audio transcript start trigger call when meeting ends', ex:'Q3 Architecture Alignment · 52 min · 6 speakers'},
+  calendar:{name:'Calendar Event Webhook', cat:'Triggers', kind:'TRIGGER', icon:'cal', ins:[], outs:OUT('Event'),
+    desc:'Starts a run on a calendar event (created, starting, ended).', perm:'Reads your calendar', syn:'calendar event schedule start trigger webhook', ex:'Event ended: Sprint review'},
+  manual:{name:'Manual Run', cat:'Triggers', kind:'TRIGGER', icon:'play', ins:[], outs:OUT('Event'),
+    desc:'Start the workflow by hand, e.g. for a one-off meeting.', perm:'None', syn:'manual run start button trigger now', ex:'Started by Alex Mercer'},
+  extractor:{name:'NLP Action Item Extractor', cat:'AI processors', kind:'AI AGENT', icon:'spark', ins:IN('Transcript'), outs:OUT('ActionItems'),
+    desc:'Finds commitments in a transcript: what, who, by when, with the quote as evidence.', perm:'Model: GPT-4o Alpine · no data retained',
+    syn:'extract find tasks todo commitments parse nlp ai action items summarize', ex:'4 action items with quotes and due dates'},
+  matcher:{name:'Owner Matching Heuristic', cat:'AI processors', kind:'AI AGENT', icon:'userq', ins:IN('ActionItem'), outs:OUT('ActionItem'),
+    desc:'Suggests the most likely owner from who spoke, ticket history and sprint capacity, with a confidence score.', perm:'Reads Jira assignees and sprint capacity',
+    syn:'owner assign who person match suggest responsible assignee', ex:'Priya Shah · 86% · 3 pieces of evidence'},
+  deadline:{name:'Deadline Analyzer', cat:'AI processors', kind:'AI PROCESSOR', icon:'clock', ins:IN('ActionItem'), outs:OUT('ActionItem'),
+    desc:'Normalises due dates and flags overdue or at-risk items.', perm:'None', syn:'due date late overdue deadline time risk schedule', ex:'due_status: overdue'},
+  ownerFound:{name:'Owner Found?', cat:'Conditionals', kind:'CONDITION', icon:'cond', ins:IN('ActionItem'),
+    outs:[{id:'yes', type:'ActionItem', label:'Yes'},{id:'no', type:'ActionItem', label:'No'}],
+    desc:'Yes when the owner is confirmed or the match is above the confidence threshold. Everything else goes to No.', perm:'None',
+    syn:'missing owner check if condition branch unassigned found confirmed', ex:'No · Priya Shah 86% < 90%'},
+  overdue:{name:'Overdue Risk Filter', cat:'Conditionals', kind:'CONDITION', icon:'alert', ins:IN('ActionItem'),
+    outs:[{id:'yes', type:'ActionItem', label:'Overdue'},{id:'no', type:'ActionItem', label:'On time'}],
+    desc:'Splits overdue items from on-time ones.', perm:'None', syn:'overdue late risk filter condition branch if due', ex:'Overdue · due Today, 9:00 AM'},
+  jira:{name:'Jira Issue Creator', cat:'Integrations', kind:'INTEGRATION', icon:'ticket', ins:IN('ActionItem'), outs:OUT('Task'),
+    desc:'Creates (or dedupes) a Jira / Linear issue for the action item.', perm:'Creates issues in the selected project',
+    syn:'ticket issue jira linear create task sync', ex:'ENG-1284 · High · Priya Shah'},
+  slack:{name:'Slack DM Notifier', cat:'Integrations', kind:'INTEGRATION', icon:'msg', ins:IN('ActionItem'), outs:OUT('Message'),
+    desc:'Sends a Slack DM (or channel post) from a template filled with upstream data.', perm:'Posts as the MeetFlow bot',
+    syn:'notify message ping ask remind slack dm chat request owner confirm', ex:'DM to @Priya Shah: “Can you take it?”'},
+  email:{name:'Email Summary', cat:'Integrations', kind:'INTEGRATION', icon:'mail', ins:IN('ActionItem'), outs:OUT('Message'),
+    desc:'Emails a summary of the item to the owner or a list.', perm:'Sends from meetflow@alpine', syn:'email notify send summary remind mail', ex:'Subject: Action item needs an owner'},
+  wait:{name:'Wait for Reply', cat:'Human steps', kind:'HUMAN STEP', icon:'hour', ins:IN('Message'),
+    outs:[{id:'replied', type:'ActionItem', label:'Replied'},{id:'timeout', type:'ActionItem', label:'Timeout'}],
+    desc:'Pauses until the person replies, or takes the Timeout branch after the fallback window.', perm:'None',
+    syn:'wait reply timer timeout fallback remind no answer pause until response', ex:'Timeout after 24h'},
+  approval:{name:'Human Review & Signoff', cat:'Human steps', kind:'HUMAN STEP', icon:'ucheck', ins:IN('Task'), outs:OUT('Task'),
+    desc:'Pauses the run until a person approves. Nothing downstream happens without it.', perm:'Approver: Alex Mercer',
+    syn:'approve review signoff human check gate confirm approval', ex:'Approved by Alex Mercer'},
+  escalate:{name:'Escalate to Manager', cat:'Human steps', kind:'HUMAN STEP', icon:'up', ins:IN('ActionItem'), outs:OUT('Message'),
+    desc:'Tells the meeting lead that nobody picked the item up.', perm:'Posts as the MeetFlow bot · sends email',
+    syn:'escalate manager lead remind no reply boss', ex:'Escalated to Marcus Vance'},
+  followup:{name:'Track & Follow-up', cat:'Tracking', kind:'TRACKING', icon:'repeat', ins:IN('Task'), outs:[],
+    desc:'Watches the task and nudges the owner until it is done.', perm:'Reads Jira status', syn:'track follow up remind status monitor nudge', ex:'Daily 9:00 AM nudge'}
+};
+
+/* ---------------- workflow state ---------------- */
+const cfg = {
+  threshold: (MF.policy && MF.policy.autoAssignThreshold) || 0.90,
+  recipient: 'suggested',
+  template: 'Hi {{owner.name}}, "{{action_item.title}}" came out of {{meeting.title}} and needs an owner (due {{action_item.due}}). Can you take it? Reply ✅ to confirm or ↪ to pass it on.',
+  channel: '#engineering-leads',
+  timeoutH: 24,
+  tone: 'Friendly & Casual (Alpine Tone)',
+  jiraProject: 'ENG-CORE'
+};
+const SUB = {
+  n1:()=>'Zoom VTT · on meeting end',
+  n2:()=>'GPT-4o Alpine · conf ≥ 0.70',
+  n3:()=>'Speaker, tickets, capacity',
+  n4:()=>`≥ ${Math.round(cfg.threshold*100)}% or confirmed`,
+  n5:()=>'Flags overdue & at-risk',
+  n6:()=>cfg.recipient==='suggested' ? `To suggested owner · else ${cfg.channel}` : `Post to ${cfg.channel}`,
+  n7:()=>`Fallback after ${cfg.timeoutH}h`,
+  n8:()=>'Whoever raised it · Slack + email',
+  n9:()=>`Project: ${cfg.jiraProject}`,
+  n10:()=>'Approver: Alex Mercer',
+  n11:()=>'Daily nudge until done'
+};
+function defaultGraph(){
+  return {
+    nodes:[
+      {id:'n1', t:'transcript', c:0, l:0},
+      {id:'n2', t:'extractor', c:1, l:0},
+      {id:'n3', t:'matcher', c:2, l:0},
+      {id:'n4', t:'ownerFound', c:3, l:0},
+      {id:'n5', t:'deadline', c:4, l:0},
+      {id:'n6', t:'slack', title:'Slack DM: ask owner', c:4, l:1},
+      {id:'n7', t:'wait', title:'Wait for reply', c:5, l:1},
+      {id:'n8', t:'escalate', title:'Escalate to meeting lead', c:6, l:2},
+      {id:'n9', t:'jira', c:7, l:0},
+      {id:'n10', t:'approval', c:8, l:0},
+      {id:'n11', t:'followup', c:9, l:0}
+    ].map(n=>({...n, x:colX(n.c), y:laneY(n.l)})),
+    edges:[
+      ['n1','out','n2'],['n2','out','n3'],['n3','out','n4'],['n4','yes','n5'],['n4','no','n6'],
+      ['n6','out','n7'],['n7','replied','n9'],['n7','timeout','n8'],['n5','out','n9'],['n9','out','n10'],['n10','out','n11']
+    ].map(([f,fp,t],i)=>({id:'e'+(i+1), f, fp, t}))
+  };
+}
+const STAGES = [[0,0],[1,1],[2,6],[7,7],[8,8],[9,9]].map((cols,i)=>({n:i+1, name:MF.pipeline[i], cols, status:(MF.pipelineStatus||[])[i]||'queued'}));
+const STATUS_LABEL = {completed:'Completed', attention:'Needs attention', pending:'Pending review', queued:'Queued', resumed:'Resumed'};
+
+let {nodes, edges} = defaultGraph();
+let seq = 20, eseq = 50;
+let sel = 'n6', selEdge = null, tab = 'config';
+let testItem = ITEMS[0].id;
+let cfgVer = 1;
+let run = null;                // current/last test run
+let passVer = null;            // config version that last passed
+const cov = new Set();         // "nodeId:port" branches taken on current config
+let z = 1;
+let deployed = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const node = id => nodes.find(n=>n.id===id);
+const cat = n => CAT[n.t];
+const title = n => n.title || cat(n).name;
+const sub = n => SUB[n.id] ? SUB[n.id]() : (n.sub || cat(n).ex);
+const item = id => ITEMS.find(i=>i.id===id);
+const pct = v => Math.round(v*100)+'%';
+const stateLabel = s => ({'unassigned':'Unassigned','awaiting-confirmation':'Awaiting confirmation','overdue':'Overdue','completed':'Completed'})[s]||s;
+
+/* ---------------- data context per item ---------------- */
+function cand(it){
+  if (it.owner) return {name:it.owner, confidence: it.state==='completed'?1:0.95, confirmed: it.state==='completed',
+    evidence: it.state==='completed' ? ['Owner of Jira '+it.jira] : ['Named directly in the meeting quote']};
+  if (it.suggestedOwner) return {...it.suggestedOwner, confirmed:false};
+  return null;
+}
+function ctx(it){
+  const c = cand(it);
+  return {
+    action_item:{id:it.id, title:it.title, quote:it.quote, due:it.due, speaker:it.speaker||'', state:stateLabel(it.state)},
+    owner: c ? {name:c.name, confidence:pct(c.confidence), evidence:(c.evidence||[])[0]||''} : {name:'', confidence:'', evidence:''},
+    meeting:{title:MF.meeting.title, ts:it.ts||''}
+  };
+}
+const getPath = (o, p) => p.split('.').reduce((a,k)=>a==null?undefined:a[k], o);
+const VAR_RE = /\{\{\s*([\w.]+)\s*(?:\|\s*"([^"]*)")?\s*\}\}/g;
+function renderTpl(tpl, it, html){
+  const c = ctx(it);
+  return tpl.replace(VAR_RE, (m, p, fb) => {
+    const v = getPath(c, p);
+    if (v) return html ? `<b>${esc(v)}</b>` : v;
+    if (fb != null) return html ? `<b>${esc(fb)}</b>` : fb;
+    return html ? `<span class="gap">{{${esc(p)}}} empty</span>` : '';
+  });
+}
+function emptyVars(tpl, it){
+  const c = ctx(it), out = [];
+  tpl.replace(VAR_RE, (m,p,fb)=>{ if(!getPath(c,p) && fb==null && !out.includes(p)) out.push(p); return m; });
+  return out;
+}
+function routeOwner(it){ const c = cand(it); return c && (c.confirmed || c.confidence >= cfg.threshold) ? 'yes' : 'no'; }
+function recipient(it){ const c = cand(it); return cfg.recipient==='suggested' && c ? '@'+c.name : cfg.channel; }
+function payload(it){
+  return {
+    event: it.state==='overdue' ? 'owner_request_overdue' : 'owner_request',
+    action_item_id: it.id,
+    to: recipient(it),
+    fallback_channel: cfg.channel,
+    message: renderTpl(cfg.template, it),
+    timeout_sec: cfg.timeoutH*3600,
+    fallback_action: 'escalate_to_manager',
+    tone: cfg.tone
+  };
+}
+/* Items that would reach the Slack node, with empty template variables */
+function templateWarnings(){
+  const slack = nodes.find(n=>n.t==='slack');
+  if (!slack) return [];
+  const reaching = ITEMS.filter(it => walk(it).nodes.includes(slack.id));
+  return reaching.map(it=>({it, vars:emptyVars(cfg.template, it)})).filter(w=>w.vars.length);
+}
+
+/* ---------------- node execution (pure) ---------------- */
+let jiraSeq = {};
+function jiraKey(it){ return it.jira || (MF.resolution && MF.resolution.jiraKeys && MF.resolution.jiraKeys[it.id]) || ('ENG-CORE-' + (411 + ITEMS.indexOf(it) + 1)); }
+function exec(n, it, input){
+  const c = cand(it);
+  const r = {status:'done', port:'out', input: input || {}, output:{}, reason:'', ms: 200};
+  switch(n.t){
+    case 'transcript':
+      r.input = {trigger:'meeting.ended', meeting:MF.meeting.title};
+      r.output = {meeting:MF.meeting.title, when:MF.meeting.when, source:'Zoom VTT', duration:'52 min', speakers:6};
+      r.reason = `Transcript received for ${MF.meeting.title}`; r.ms = 140; break;
+    case 'calendar': case 'manual':
+      r.output = {trigger:n.t}; r.reason = 'Started'; break;
+    case 'extractor':
+      r.output = {extracted:ITEMS.length, items:ITEMS.map(i=>i.id), following:it.id,
+        action_item:{id:it.id, title:it.title, due:it.due, quote:it.quote}};
+      r.reason = `${ITEMS.length} action items extracted · this test follows ${it.id}`; r.ms = 1240; break;
+    case 'matcher':
+      r.input = {action_item:{id:it.id, title:it.title, speaker:it.speaker||null}};
+      r.output = {action_item_id:it.id, owner: c ? {name:c.name, confidence:c.confidence, confirmed:c.confirmed, evidence:c.evidence} : null};
+      r.reason = c ? `${c.name} · ${pct(c.confidence)} match${c.confirmed?' · confirmed':''}` : 'No candidate: nobody was named and no ticket history matches';
+      r.ms = 860; break;
+    case 'ownerFound': {
+      const p = routeOwner(it);
+      r.port = p;
+      r.input = {owner: c ? c.name : null, confidence: c ? c.confidence : 0, confirmed: c ? c.confirmed : false, threshold: cfg.threshold};
+      r.output = {route: p==='yes'?'Yes':'No', owner: c ? c.name : null};
+      r.reason = !c ? 'No · there is no owner candidate'
+        : c.confirmed ? `Yes · ${c.name} is the confirmed owner`
+        : `${p==='yes'?'Yes':'No'} · ${c.name} ${pct(c.confidence)} ${p==='yes'?'≥':'<'} ${pct(cfg.threshold)} threshold`;
+      r.ms = 20; break; }
+    case 'overdue': {
+      const od = it.state==='overdue';
+      r.port = od?'yes':'no'; r.output = {overdue:od, due:it.due}; r.reason = od ? `Overdue · was due ${it.due}` : 'On time'; break; }
+    case 'deadline': {
+      const ds = it.state==='completed' ? 'done' : (it.state==='overdue' || /yesterday/i.test(it.due)) ? 'overdue' : 'on track';
+      r.output = {action_item_id:it.id, due:it.due, due_status:ds};
+      r.reason = ds==='done' ? 'Already completed' : ds==='overdue' ? `Overdue · was due ${it.due}` : `On track · due ${it.due}`; r.ms = 310; break; }
+    case 'jira': {
+      if (it.jira){ r.status='skipped'; r.output = {key:it.jira, created:false}; r.reason = `Already synced as ${it.jira} · no duplicate created`; break; }
+      const overdue = it.state==='overdue' || /yesterday/i.test(it.due);
+      const assignee = (input && input.owner) || (c && c.name) || 'Unassigned';
+      r.output = {key:jiraKey(it), project:cfg.jiraProject, summary:it.title, priority: overdue?'High':'Medium', assignee};
+      r.reason = `Created ${jiraKey(it)} in ${cfg.jiraProject} · ${overdue?'High':'Medium'} · ${assignee}`; r.ms = 540; break; }
+    case 'approval': {
+      if (it.state==='completed'){ r.status='skipped'; r.output={approved:true, by:'(already signed off)'}; r.reason='Already signed off'; break; }
+      r.status = 'waiting';
+      r.reason = it.state==='awaiting-confirmation'
+        ? `Waiting for ${it.owner} to confirm, then Alex Mercer signs off`
+        : 'Waiting for Alex Mercer to sign off before anything is synced';
+      r.choices = [
+        {port:'out', label: it.state==='awaiting-confirmation' ? `${it.owner.split(' ')[0]} confirms · approve` : 'Approve & continue', icon:'check', primary:true,
+          output:{approved:true, by:'Alex Mercer'}, note:'Approved by Alex Mercer'},
+        {port:null, label:'Send back', icon:'reply', output:{approved:false, by:'Alex Mercer'}, note:'Sent back for edits'}
+      ];
+      break; }
+    case 'slack': case 'email': {
+      const ev = emptyVars(cfg.template, it);
+      r.input = {action_item:it.id, owner:c?c.name:null};
+      r.output = n.t==='slack' ? payload(it) : {to: c?c.name:cfg.channel, subject:`Action item needs an owner: ${it.title}`};
+      if (n.t==='slack' && ev.length){ r.status='warn'; r.reason = `Sent with empty ${ev.map(v=>'{{'+v+'}}').join(', ')} to ${recipient(it)}`; }
+      else r.reason = n.t==='slack' ? `DM sent to ${recipient(it)}` : `Email sent to ${r.output.to}`;
+      r.ms = 380; break; }
+    case 'wait': {
+      const who = recipient(it);
+      r.status = 'waiting';
+      r.reason = `Waiting up to ${cfg.timeoutH}h for ${who} to reply`;
+      r.choices = [
+        {port:'timeout', label:`Fast-forward ${cfg.timeoutH}h`, icon:'ff', primary:true,
+          output:{reply:null, waited:cfg.timeoutH+'h', next:'escalate'}, note:`No reply after ${cfg.timeoutH}h → Timeout`},
+        {port:'replied', label: c ? `Simulate ${c.name.split(' ')[0]} accepts` : 'Simulate a reply', icon:'reply',
+          output:{reply:'✅ I’ll take it', owner: c ? c.name : 'Jordan Lee'}, note: `${c?c.name:'Jordan Lee'} replied ✅ → Replied`}
+      ];
+      break; }
+    case 'escalate': {
+      const to = it.speaker || LEAD;
+      r.output = {to, via:['Slack DM','Email'], action_item_id:it.id, reason:`No owner after ${cfg.timeoutH}h`};
+      r.reason = `Escalated to ${to}`; r.ms = 260; break; }
+    case 'followup':
+      r.output = it.state==='completed' ? {closed:true} : {cadence:'Daily 9:00 AM nudge', until:'Task done'};
+      r.reason = it.state==='completed' ? 'Closed · nothing to follow up' : 'Tracking · daily nudge until done'; break;
+    default:
+      r.output = input || {}; r.reason = 'Passed through';
+  }
+  return r;
+}
+/* Walk an item through the graph without human input (stops at waits). */
+function walk(it){
+  const visited = [], used = [];
+  let cur = nodes.find(n=>cat(n).cat==='Triggers' && n.t==='transcript') || nodes.find(n=>!cat(n).ins.length);
+  let input = null, guard = 0;
+  while (cur && guard++ < 40){
+    visited.push(cur.id);
+    const r = exec(cur, it, input);
+    if (r.status==='waiting') break;
+    const e = edges.find(e=>e.f===cur.id && e.fp===r.port);
+    if (!e) break;
+    used.push(e.id); input = r.output; cur = node(e.t);
+  }
+  return {nodes:visited, edges:used};
+}
+function liveCounts(){
+  const cnt = {};
+  ITEMS.forEach(it => walk(it).edges.forEach(id => cnt[id] = (cnt[id]||0)+1));
+  return cnt;
+}
+
+/* ---------------- wiring checks ---------------- */
+function unwired(){
+  const out = [];
+  nodes.forEach(n=>{
+    const c = cat(n);
+    if (c.ins.length && !edges.some(e=>e.t===n.id)) out.push({n, what:'input'});
+    if (c.outs.length > 1) c.outs.forEach(p=>{ if(!edges.some(e=>e.f===n.id && e.fp===p.id)) out.push({n, what:p.label}); });
+  });
+  return out;
+}
+function checks(){
+  const conds = nodes.filter(n=>cat(n).cat==='Conditionals');
+  const need = []; conds.forEach(n=>cat(n).outs.forEach(p=>need.push({k:n.id+':'+p.id, n, p})));
+  const got = need.filter(x=>cov.has(x.k));
+  const missing = need.filter(x=>!cov.has(x.k));
+  const warns = templateWarnings();
+  const uw = unwired();
+  const ranStale = run && run.ver !== cfgVer;
+  return [
+    {ok: passVer===cfgVer, t: passVer===cfgVer ? 'A test run passed on this config'
+      : ranStale ? 'Config changed since the last test · re-run it' : 'Run a test to the end without warnings'},
+    {ok: need.length>0 && missing.length===0, t: `Branches tested: ${got.length}/${need.length}` +
+      (missing.length ? ` · still untested: ${missing.map(x=>title(x.n)+' '+x.p.label).join(', ')}` : '')},
+    {ok: !warns.length, t: warns.length ? `Slack message has empty ${warns[0].vars.map(v=>'{{'+v+'}}').join(', ')} for ${warns.map(w=>w.it.id).join(', ')}` : 'No empty message fields'},
+    {ok: !uw.length, t: uw.length ? `Not wired: ${uw.map(u=>title(u.n)+' · '+u.what).join(', ')}` : 'Every input and branch is wired'}
+  ];
+}
+
+/* ---------------- canvas rendering ---------------- */
+const world = $('#world'), sizer = $('#sizer'), scroller = $('#scroller');
+function worldSize(){
+  const W = Math.max(colX(10)+PADX, ...nodes.map(n=>n.x+NW+PADX+40));
+  const H = Math.max(laneY(3)+20, ...nodes.map(n=>n.y+NH+80));
+  return {W, H};
+}
+function portPos(n, side, idx){
+  const ports = side==='in' ? cat(n).ins : cat(n).outs;
+  const y = ports.length===1 ? NH/2 : 30 + idx*40;
+  return {x: n.x + (side==='in'?0:NW), y: n.y + y};
+}
+function portIdx(n, side, pid){ return (side==='in'?cat(n).ins:cat(n).outs).findIndex(p=>p.id===pid); }
+function edgePath(a, b){
+  const dx = Math.max(56, Math.abs(b.x-a.x)*0.5);
+  return {d:`M${a.x},${a.y} C${a.x+dx},${a.y} ${b.x-dx},${b.y} ${b.x},${b.y}`,
+          mid:{x:(a.x+3*(a.x+dx)+3*(b.x-dx)+b.x)/8, y:(a.y+3*a.y+3*b.y+b.y)/8}};
+}
+function branchClass(fp){ return (fp==='yes'||fp==='replied') ? 'yes' : (fp==='no'||fp==='timeout') ? 'no' : ''; }
+
+function renderCanvas(){
+  const {W, H} = worldSize();
+  world.style.width = W+'px'; world.style.height = H+'px';
+  world.style.transform = `scale(${z})`;
+  sizer.style.width = (W*z)+'px'; sizer.style.height = (H*z)+'px';
+  $('#zl').textContent = Math.round(z*100)+'%';
+
+  const runActive = run && run.steps.length;
+  const counts = runActive ? {} : liveCounts();
+  let html = '';
+
+  // stage band + background
+  STAGES.forEach(s=>{
+    const x0 = colX(s.cols[0]) - 18, x1 = colX(s.cols[1]) + NW + 18;
+    const status = (deployed && s.n===3) ? 'resumed' : s.status;
+    if (s.status==='attention' && !deployed) html += `<div class="stage attn" id="stage3bg" style="left:${x0}px;top:16px;width:${x1-x0}px;height:${H-32}px"></div>`;
+    const flagged = s.status==='attention' ? FLAGGED.length : 0;
+    html += `<div class="stage-h ${status}" data-stage="${s.n}" style="left:${x0}px;top:28px;width:${x1-x0}px" title="Frame this step">
+      <span class="sn">${s.status==='completed'?ic('check'):s.n}</span><span class="st">${esc(s.name)}</span>
+      <span class="ss">${status==='attention' && !deployed ? flagged+' flagged · ' : ''}${STATUS_LABEL[status]}</span></div>`;
+  });
+
+  // edges
+  let svg = `<svg class="edges" width="${W}" height="${H}"><defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#bfb9ad"/></marker>
+    <marker id="ar-yes" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#2F7473"/></marker>
+    <marker id="ar-no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#B9645E"/></marker>
+    <marker id="ar-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#C49A2C"/></marker>
+    <marker id="ar-sel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#22302E"/></marker>
+  </defs>`;
+  let labels = '';
+  edges.forEach(e=>{
+    const a = node(e.f), b = node(e.t); if(!a||!b) return;
+    const pa = portPos(a,'out',portIdx(a,'out',e.fp)), pb = portPos(b,'in',0);
+    const {d, mid} = edgePath(pa, {x:pb.x-4, y:pb.y});
+    const bc = branchClass(e.fp);
+    let cls = 'edge ' + bc, mk = bc ? 'ar-'+bc : 'ar', lcls = bc;
+    if (runActive){
+      if (run.lastEdge===e.id && run.state!=='done'){ cls += ' hot'; mk='ar-hot'; lcls='walked'; }
+      else if (run.edges.includes(e.id)){ cls += ' walked'; mk='ar-hot'; lcls='walked'; }
+      else { cls += ' cold'; lcls += ' cold'; }
+    }
+    if (selEdge===e.id){ cls += ' sel'; mk='ar-sel'; }
+    svg += `<path class="${cls}" d="${d}" marker-end="url(#${mk})"/><path class="hit" data-edge="${e.id}" d="${d}"/>`;
+    const op = cat(a).outs.find(p=>p.id===e.fp);
+    let label;
+    if (runActive) label = run.edges.includes(e.id) ? `${run.itemId}${op&&op.label?' · '+op.label:''}` : (op&&op.label) || '';
+    else {
+      const n = counts[e.id]||0;
+      const cnt = a.t==='transcript' ? 1 : n;
+      label = op && op.label ? `${op.label}${cnt?' · '+cnt:''}` : (cnt ? `×${cnt}` : '');
+    }
+    if (label) labels += `<div class="elabel ${lcls}" style="left:${mid.x}px;top:${mid.y}px" title="${esc(TYPES[op.type].l)}">${esc(label)}</div>`;
+  });
+  svg += `<path id="tempEdge" class="edge temp" d="" style="display:none"/></svg>`;
+  html += svg + labels;
+
+  // nodes
+  const uw = unwired();
+  nodes.forEach(n=>{
+    const c = cat(n), st = runActive && run.byNode[n.id];
+    let cls = `node ${KCLASS[c.cat]||''}`;
+    if (c.outs.length>1) cls += ' multi';
+    if (n.id===sel) cls += ' sel';
+    if (runActive){
+      if (st) cls += ' s-'+st.status;
+      else if (run.cursor===n.id && run.state==='running') cls += ' s-next';
+      else cls += ' dim';
+    }
+    if (n._flag) cls += ' flag';
+    let badge = '';
+    if (st){
+      const map = {done:['done','check','Done'], skipped:['skipped','','Skipped'], warn:['warn','alert','Warning'], waiting:['waiting','hour','Waiting on you']};
+      const [bc, bi, bt] = map[st.status]||map.done;
+      badge = `<span class="nb ${bc}">${bi?ic(bi):''}${bt}${st.status!=='waiting'&&st.ms?` · ${st.ms}ms`:''}</span>`;
+    } else if (uw.some(u=>u.n.id===n.id)){
+      badge = `<span class="nb unwired">${ic('link')}Not wired</span>`;
+    }
+    let ports = '';
+    c.ins.forEach((p,i)=>{ const y = (c.ins.length===1?NH/2:30+i*40)-6.5;
+      ports += `<span class="port in" data-node="${n.id}" data-port="${p.id}" data-type="${p.type}" style="top:${y}px;--pc:${TYPES[p.type].c}" title="in · ${TYPES[p.type].l}"></span>`; });
+    c.outs.forEach((p,i)=>{ const y = (c.outs.length===1?NH/2:30+i*40)-6.5;
+      const lc = branchClass(p.id)==='yes' ? 'var(--teal)' : branchClass(p.id)==='no' ? 'var(--danger)' : 'var(--text-2)';
+      ports += `<span class="port out" data-node="${n.id}" data-port="${p.id}" data-type="${p.type}" style="top:${y}px;--pc:${TYPES[p.type].c}" title="out · ${TYPES[p.type].l} · drag to connect">${p.label?`<span class="pl" style="color:${lc}">${esc(p.label)}</span>`:''}</span>`; });
+    html += `<div class="${cls}" data-node="${n.id}" style="left:${n.x}px;top:${n.y}px">${badge}
+      <div class="nh"><span class="ni">${ic(c.icon)}</span>${c.kind}</div>
+      <div class="nt" title="${esc(title(n))}">${esc(title(n))}</div><div class="ns" title="${esc(sub(n))}">${esc(sub(n))}</div>${ports}</div>`;
+  });
+
+  // waiting actions on canvas
+  if (run && run.state==='waiting'){
+    const wn = node(run.cursor), st = run.byNode[run.cursor];
+    if (wn && st && st.choices){
+      html += `<div class="waitbar" style="left:${wn.x}px;top:${wn.y+NH+12}px"><div class="wl">${esc(st.reason)}</div>` +
+        st.choices.map((ch,i)=>`<button class="btn sm ${ch.primary?'primary':''}" data-choice="${i}">${ic(ch.icon)}${esc(ch.label)}</button>`).join('') + `</div>`;
+    }
+  }
+  world.innerHTML = html;
+}
+
+/* ---------------- banner & legend ---------------- */
+function renderBanner(){
+  const flagged = FLAGGED;
+  const by = s => flagged.filter(i=>i.state===s).length;
+  const b = $('#banner');
+  if (deployed){
+    b.className = 'banner ok';
+    b.innerHTML = `<span class="bi">${ic('check')}</span><span class="bt"><b>v2.5 deployed.</b> Step 3 resumed for ${flagged.length} items · ${esc(MF.goal.title)}</span>
+      <a class="btn sm" href="workflow.html">View workflow</a>`;
+    return;
+  }
+  b.className = 'banner';
+  b.innerHTML = `<span class="bi">${ic('alert')}</span>
+    <span class="bt"><b>Step 3 is stalled on ${flagged.length} items</b> · ${by('unassigned')} unassigned · ${by('awaiting-confirmation')} awaiting confirmation · ${by('overdue')} overdue</span>
+    <button class="btn sm" id="showMe">${ic('target')}Show me</button>`;
+  $('#showMe').onclick = showProblem;
+}
+function renderLegend(){
+  $('#legend').innerHTML = ['Transcript','ActionItems','ActionItem','Message','Task'].map(t=>`<span class="tchip"><i style="background:${TYPES[t].c}"></i>${TYPES[t].l}</span>`).join('');
+}
+function showProblem(){
+  frameCols(2, 6);
+  const bg = document.getElementById('stage3bg');
+  if (bg){ bg.classList.remove('flash'); void bg.offsetWidth; bg.classList.add('flash'); }
+  ['n3','n4','n6'].forEach(id=>{ const n=node(id); if(n) n._flag = true; });
+  renderCanvas();
+  setTimeout(()=>{ nodes.forEach(n=>delete n._flag); renderCanvas(); }, 2600);
+}
+
+/* ---------------- zoom / frame ---------------- */
+function setZoom(nz, cx, cy){
+  nz = Math.min(1.4, Math.max(0.35, nz));
+  const r = scroller.getBoundingClientRect();
+  cx = cx==null ? r.width/2 : cx; cy = cy==null ? r.height/2 : cy;
+  const wx = (scroller.scrollLeft + cx)/z, wy = (scroller.scrollTop + cy - OFFY)/z;
+  z = nz; renderCanvas();
+  scroller.scrollLeft = wx*z - cx; scroller.scrollTop = wy*z + OFFY - cy;
+}
+function frame(x0, y0, x1, y1){
+  const r = scroller.getBoundingClientRect();
+  const padTop = 64, pad = 30;
+  const nz = Math.min(1.1, Math.max(0.35, Math.min((r.width-pad*2)/(x1-x0), (r.height-padTop-pad)/(y1-y0))));
+  z = nz; renderCanvas();
+  scroller.scrollLeft = x0*z - (r.width - (x1-x0)*z)/2;
+  scroller.scrollTop = Math.max(0, y0*z);
+}
+function frameCols(c0, c1){
+  const ys = nodes.map(n=>n.y+NH);
+  frame(colX(c0)-24, 20, colX(c1)+NW+24, Math.max(laneY(2)+NH, ...ys)+20);
+}
+function fitAll(){ const {W,H} = worldSize(); frame(0, 10, W, H-20); }
+
+/* ---------------- library ---------------- */
+const STOP = new Set(['the','a','an','if','to','of','and','or','for','when','is','no','on','in','it','my','me','i']);
+function libItem(key, extra, hl){
+  const c = CAT[key];
+  const name = hl ? hl(c.name) : esc(c.name);
+  return `<button class="libitem ${KCLASS[c.cat]}" draggable="true" data-key="${key}" ${extra||''}>
+    <span class="ni">${ic(c.icon)}</span><span class="lt">${name}<small>${esc(c.ins.map(p=>TYPES[p.type].l).join(', ')||'start')} → ${esc(c.outs.map(p=>TYPES[p.type].l).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||'end')}</small></span>
+    <span class="add">+ Add</span></button>`;
+}
+function renderLib(){
+  const q = $('#q').value.trim().toLowerCase();
+  const list = $('#libList');
+  if (q){
+    const toks = q.split(/[^a-z0-9]+/).filter(t=>t.length>1 && !STOP.has(t));
+    const scored = Object.keys(CAT).map(k=>{
+      const c = CAT[k]; let s = 0; const hit = [];
+      toks.forEach(t=>{
+        if (c.name.toLowerCase().includes(t)){ s+=3; hit.push(t); }
+        else if (c.syn.includes(t)){ s+=2; hit.push(t); }
+        else if (c.desc.toLowerCase().includes(t)){ s+=1; hit.push(t); }
+      });
+      return {k, s, hit};
+    }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+    const hl = toks.length ? new RegExp('('+toks.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','ig') : null;
+    list.innerHTML = `<div class="lib-sec">${scored.length} matches for “${esc(q)}”</div>` +
+      (scored.length ? scored.map(x=>libItem(x.k, `title="Matched: ${esc(x.hit.join(', '))}"`, s=>hl?esc(s).replace(hl,'<mark>$1</mark>'):esc(s))).join('')
+        : `<p class="about">Nothing yet. Try “notify”, “approve” or “overdue”.</p>`);
+  } else {
+    list.innerHTML = CATS.map(cn=>{
+      const keys = Object.keys(CAT).filter(k=>CAT[k].cat===cn);
+      return `<div class="lib-sec">${esc(cn)}</div>` + keys.map(k=>libItem(k)).join('');
+    }).join('');
+  }
+  renderSugg();
+}
+function suggestions(){
+  const n = node(sel); if (!n) return null;
+  const outs = cat(n).outs; if (!outs.length) return null;
+  const port = outs.find(p=>!edges.some(e=>e.f===n.id && e.fp===p.id)) || outs[0];
+  const keys = Object.keys(CAT).filter(k=>CAT[k].ins.length && compat(port.type, CAT[k].ins[0].type) && k!==n.t);
+  const pref = ['slack','wait','approval','jira','escalate','email','ownerFound','overdue','deadline','matcher','followup','extractor'];
+  keys.sort((a,b)=>pref.indexOf(a)-pref.indexOf(b));
+  return {n, port, keys: keys.slice(0,4)};
+}
+function renderSugg(){
+  const s = suggestions(), el = $('#sugg');
+  if (!s || !s.keys.length || $('#q').value.trim()){ el.innerHTML=''; return; }
+  el.innerHTML = `<div class="sugg"><div class="lib-sec">${ic('spark')} Suggested after ${esc(title(s.n))}${s.port.label?' · '+esc(s.port.label):''}</div>${s.keys.map(k=>libItem(k,'data-sugg="1"')).join('')}</div>`;
+}
+function showCard(btn){
+  const c = CAT[btn.dataset.key], r = btn.getBoundingClientRect(), pc = $('#pcard');
+  const tch = ps => ps.map(p=>`<span class="tchip"><i style="background:${TYPES[p.type].c}"></i>${p.label?esc(p.label)+': ':''}${TYPES[p.type].l}</span>`).join('');
+  pc.innerHTML = `<div class="k">${c.kind} · ${esc(c.cat)}</div><h4>${esc(c.name)}</h4><p>${esc(c.desc)}</p>
+    <div class="row">${c.ins.length?tch(c.ins):'<span class="tchip">starts a run</span>'}<span>→</span>${c.outs.length?tch(c.outs):'<span class="tchip">ends</span>'}</div>
+    <div class="row" style="color:var(--text-3);font-size:12px">Example: ${esc(c.ex)}</div>
+    <div class="perm">${ic('shield')}<span>${esc(c.perm)}</span></div>`;
+  pc.style.left = (r.right + 10)+'px';
+  pc.style.top = Math.min(window.innerHeight - 230, r.top - 10)+'px';
+  pc.classList.add('on');
+}
+
+/* ---------------- add / remove ---------------- */
+function overlaps(x, y, skip){ return nodes.some(n=>n.id!==skip && Math.abs(n.x-x)<NW+24 && Math.abs(n.y-y)<NH+24); }
+function addNode(key, x, y, fromId){
+  const c = CAT[key];
+  const f = fromId ? node(fromId) : null;
+  if (x==null){
+    if (f){ x = f.x + COLW; y = f.y; } else { x = colX(1); y = laneY(2); }
+  }
+  let guard = 0; while (overlaps(x, y) && guard++ < 12) y += LANEH;
+  const n = {id:'n'+(++seq), t:key, x:Math.round(x), y:Math.round(y)};
+  nodes.push(n);
+  let wired = null;
+  if (f && c.ins.length){
+    const outs = cat(f).outs.filter(p=>compat(p.type, c.ins[0].type));
+    const port = outs.find(p=>!edges.some(e=>e.f===f.id && e.fp===p.id)) || outs[0];
+    if (port){ edges.push({id:'e'+(++eseq), f:f.id, fp:port.id, t:n.id}); wired = `${title(f)}${port.label?' · '+port.label:''}`; }
+  }
+  sel = n.id; selEdge = null; tab = 'config';
+  configChanged(`Added ${c.name}${wired?' · wired from '+wired:''}`);
+  renderInspector(); renderLib();
+}
+let undoSnap = null;
+function snapshot(){ return JSON.stringify({nodes, edges}); }
+function restore(s){ const o = JSON.parse(s); nodes = o.nodes; edges = o.edges; configChanged('Restored'); renderInspector(); renderLib(); }
+function deleteSelection(){
+  if (selEdge){
+    undoSnap = snapshot();
+    edges = edges.filter(e=>e.id!==selEdge); selEdge = null;
+    configChanged('Connection removed', true);
+  } else if (sel){
+    const n = node(sel); if (!n) return;
+    undoSnap = snapshot();
+    nodes = nodes.filter(x=>x.id!==sel); edges = edges.filter(e=>e.f!==sel && e.t!==sel);
+    sel = null; configChanged(`${title(n)} removed`, true);
+    renderInspector(); renderLib();
+  }
+}
+
+/* ---------------- config versioning (drives the deploy gate) ---------------- */
+function configChanged(msg, undoable){
+  cfgVer++;
+  cov.clear();
+  deployed = false;
+  $('#saveState').textContent = 'Draft saved · just now';
+  renderCanvas(); renderBanner(); renderSim();
+  if (msg) toast(msg, undoable ? {label:'Undo', fn:()=>{ if(undoSnap) restore(undoSnap); }} : null);
+}
+
+/* ---------------- inspector ---------------- */
+const insp = $('#insp');
+function json(o){
+  return esc(JSON.stringify(o, null, 2))
+    .replace(/(&quot;[^&\n]*?&quot;)(\s*:)/g,'<span class="k">$1</span>$2')
+    .replace(/(:\s*|^\s*|\[\s*)(&quot;.*?&quot;)(,?)$/gm,'$1<span class="s">$2</span>$3')
+    .replace(/(:\s*)(-?\d+\.?\d*|true|false|null)(,?)$/gm,'$1<span class="n">$2</span>$3');
+}
+function renderInspector(){
+  const n = node(sel);
+  if (!n){ insp.innerHTML = `<div class="empty">${ic('target')}<p>Select a node to configure it,<br>or run a test from the bar below.</p></div>`; return; }
+  const c = cat(n), st = run && run.byNode[n.id];
+  insp.innerHTML = `<div class="insp-head">
+      <div class="k">Node inspector</div>
+      <h3><span class="ni ${KCLASS[c.cat]}" style="background:none">${ic(c.icon)}</span>${esc(title(n))}</h3>
+      <div class="tabs">
+        <button class="tab ${tab==='config'?'on':''}" data-tab="config">Configure</button>
+        <button class="tab ${tab==='run'?'on':''}" data-tab="run">Test run ${st?'<span class="dot"></span>':''}</button>
+      </div></div>
+    <div class="insp-body" id="ib">${tab==='config' ? configHTML(n) : runHTML(n)}</div>`;
+  insp.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; renderInspector(); });
+  if (tab==='config') bindConfig(n); else bindRun(n);
+}
+function portsHTML(c){
+  const tch = ps => ps.map(p=>`<span class="tchip"><i style="background:${TYPES[p.type].c}"></i>${p.label?esc(p.label)+': ':''}${TYPES[p.type].l}</span>`).join(' ');
+  return `<div class="ports">${c.ins.length?tch(c.ins):'<span class="tchip">starts a run</span>'}<span>→</span>${c.outs.length?tch(c.outs):'<span class="tchip">ends</span>'}</div>
+    ${c.perm!=='None'?`<div class="perm">${ic('shield')}${esc(c.perm)}</div>`:''}`;
+}
+function upstream(id){
+  const seen = new Set(), st = [id];
+  while (st.length){ const cur = st.pop(); edges.filter(e=>e.t===cur).forEach(e=>{ if(!seen.has(e.f)){ seen.add(e.f); st.push(e.f); } }); }
+  return seen;
+}
+const VARS = [
+  {t:'transcript', label:'Meeting', vars:['meeting.title','meeting.ts']},
+  {t:'extractor', label:'Action item', vars:['action_item.title','action_item.due','action_item.quote','action_item.speaker','action_item.state']},
+  {t:'matcher', label:'Owner match', vars:['owner.name','owner.confidence','owner.evidence']}
+];
+function availHTML(n){
+  const up = upstream(n.id), it = item(testItem), cx = ctx(it);
+  const groups = VARS.map(g=>({g, src:nodes.find(x=>x.t===g.t && up.has(x.id))})).filter(x=>x.src);
+  if (!groups.length) return `<div class="avail"><div class="ah">Available data</div><p class="about" style="margin:6px 0 0">Nothing upstream yet. Connect this node’s input to see the fields you can use.</p></div>`;
+  return `<div class="avail" id="avail"><div class="ah">${ic('link')}Available data from upstream <span>sample: ${it.id}</span></div>` +
+    groups.map(({g,src})=>`<div class="ag"><div class="agt">${esc(g.label)} · from <b>${esc(title(src))}</b></div>${g.vars.map(v=>{
+      const val = getPath(cx, v);
+      return `<button class="vchip ${val?'':'empty'}" data-var="${v}" title="Insert {{${v}}}">{{${v}}}<em>${val?esc(val):'empty for '+it.id}</em></button>`;
+    }).join('')}</div>`).join('') + `</div>`;
+}
+function itemSelect(id){
+  return `<select class="inp" id="${id}" style="width:auto;padding:4px 8px;font-size:12px">${ITEMS.map(i=>`<option value="${i.id}" ${i.id===testItem?'selected':''}>${i.id} · ${stateLabel(i.state)}</option>`).join('')}</select>`;
+}
+function configHTML(n){
+  const c = cat(n);
+  let h = `<p class="about">${esc(c.desc)}</p>${portsHTML(c)}`;
+  switch(n.t){
+    case 'slack':
+      h += `<div class="field"><label>Send to</label>
+          <select class="inp" id="f-rec"><option value="suggested" ${cfg.recipient==='suggested'?'selected':''}>Suggested owner (DM), else the fallback channel</option><option value="channel" ${cfg.recipient==='channel'?'selected':''}>Fallback channel only</option></select></div>
+        <div class="field"><div class="flabel">Message template <span class="hint">type {{ or click a field below</span></div>
+          <textarea class="inp" id="f-tpl" rows="5" spellcheck="false">${esc(cfg.template)}</textarea>
+          <div id="d-warn"></div>${availHTML(n)}</div>
+        <div class="field"><div class="flabel">Preview ${itemSelect('f-pitem')}</div><div id="d-prev"></div></div>
+        <div class="field"><label>Fallback channel</label><input class="inp" id="f-ch" value="${esc(cfg.channel)}"></div>
+        <div class="field"><label>Fallback timeout <span class="rangev" id="d-to">${cfg.timeoutH}h</span></label><input type="range" id="f-to" min="1" max="72" value="${cfg.timeoutH}"></div>
+        <div class="field"><label>AI confirmation prompt style</label><select class="inp" id="f-tone">${['Friendly & Casual (Alpine Tone)','Direct & Brief','Formal'].map(t=>`<option ${t===cfg.tone?'selected':''}>${t}</option>`).join('')}</select></div>
+        <div class="field"><div class="flabel">Test payload <span class="tag">JSON · live</span></div><pre class="json" id="d-pay"></pre></div>`;
+      break;
+    case 'ownerFound':
+      h += `<div class="field"><label>Auto-assign when match is at least <span class="rangev" id="d-thr">${pct(cfg.threshold)}</span></label>
+          <input type="range" id="f-thr" min="0.5" max="1" step="0.01" value="${cfg.threshold}">
+          <p class="about" style="margin-top:6px">Below this, MeetFlow asks the suggested owner first instead of assigning on its own.</p></div>
+        <div class="field"><div class="flabel">How the ${ITEMS.length} items route right now</div><div id="d-routes"></div></div>`;
+      break;
+    case 'matcher': {
+      const it = item('ai-1'), so = it.suggestedOwner;
+      h += `<div class="field"><div class="flabel">Signals used</div><p class="about">Who spoke and was addressed · Jira assignee history · sprint capacity · past replies.</p></div>
+        ${so ? `<div class="field"><div class="flabel">Evidence for ${it.id} → ${esc(so.name)} · ${pct(so.confidence)}</div>${so.evidence.map(e=>`<div class="route"><span class="rid">✓</span><span class="rt">${esc(e)}</span></div>`).join('')}</div>`:''}`;
+      break; }
+    case 'jira':
+      h += `<div class="field"><label>Project</label><select class="inp" id="f-proj">${['ENG-CORE','PLATFORM','MOBILE'].map(p=>`<option ${p===cfg.jiraProject?'selected':''}>${p}</option>`).join('')}</select></div>
+        <div class="field"><div class="flabel">Rules</div><p class="about">Priority is High when Deadline Analyzer says overdue. Items that already have an issue are deduped, not created twice.</p></div>`;
+      break;
+    case 'wait':
+      h += `<div class="field"><div class="flabel">Timeout</div><p class="about">${cfg.timeoutH}h, set on <b>Slack DM: ask owner</b>. <b>Replied</b> continues to Jira; <b>Timeout</b> escalates.</p></div>`;
+      break;
+    case 'approval':
+      h += `<div class="field"><div class="flabel">Approver</div><p class="about">Alex Mercer. Every run pauses here; nothing reaches Track & Follow-up without a sign-off.</p></div>`;
+      break;
+    default:
+      h += `<div class="field"><p class="about">No settings for this node in the demo.</p></div>`;
+  }
+  return h;
+}
+function bindConfig(n){
+  const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  on('f-rec','change', e=>{ cfg.recipient = e.target.value; configChanged(); updateDerived(); });
+  on('f-tpl','input', e=>{
+    cfg.template = e.target.value; configChanged(); updateDerived();
+    const ta = e.target, pre = ta.value.slice(0, ta.selectionStart);
+    if (pre.endsWith('{{')){ const a = $('#avail'); if (a){ a.classList.remove('flash'); void a.offsetWidth; a.classList.add('flash'); } }
+  });
+  on('f-ch','input', e=>{ cfg.channel = e.target.value || '#engineering-leads'; configChanged(); updateDerived(); });
+  on('f-to','input', e=>{ cfg.timeoutH = +e.target.value; configChanged(); updateDerived(); });
+  on('f-tone','change', e=>{ cfg.tone = e.target.value; configChanged(); updateDerived(); });
+  on('f-thr','input', e=>{ cfg.threshold = +e.target.value; configChanged(); updateDerived(); });
+  on('f-proj','change', e=>{ cfg.jiraProject = e.target.value; configChanged(); });
+  on('f-pitem','change', e=>{ setTestItem(e.target.value); });
+  insp.querySelectorAll('.vchip').forEach(b=>b.onclick=()=>{
+    const ta = $('#f-tpl'); if (!ta) return;
+    const ins = `{{${b.dataset.var}}}`;
+    let s = ta.selectionStart, en = ta.selectionEnd;
+    const before = ta.value.slice(0, s);
+    if (before.endsWith('{{')) s -= 2;          // replace a half-typed {{
+    ta.value = ta.value.slice(0, s) + ins + ta.value.slice(en);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = s + ins.length;
+    ta.dispatchEvent(new Event('input'));
+  });
+  updateDerived();
+}
+function updateDerived(){
+  const it = item(testItem);
+  const w = $('#d-warn');
+  if (w){
+    const ws = templateWarnings();
+    w.innerHTML = ws.length ? ws.map(x=>`<div class="warn">${ic('alert')}<div><b>${x.vars.map(v=>'{{'+esc(v)+'}}').join(', ')}</b> is empty for ${x.it.id} “${esc(x.it.title)}”: it has no owner and no suggestion, so the DM would read “Hi ,”.
+        <br><button class="btn sm" data-fix="${esc(x.vars[0])}">Use fallback “team”</button></div></div>`).join('')
+      : `<div class="okline">${ic('check')}Every field has a value for all ${ITEMS.length} test items</div>`;
+    w.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>{
+      const v = b.dataset.fix;
+      cfg.template = cfg.template.replace(new RegExp('\\{\\{\\s*'+v.replace('.','\\.')+'\\s*\\}\\}','g'), `{{${v} | "team"}}`);
+      const ta = $('#f-tpl'); if (ta) ta.value = cfg.template;
+      configChanged('Fallback added · re-test before deploy'); updateDerived();
+    });
+  }
+  const p = $('#d-prev');
+  if (p) p.innerHTML = `<div class="bubble"><div class="who"><span>MeetFlow → ${esc(recipient(it))}</span><span>${esc(cfg.tone.split(' (')[0])}</span></div>${renderTpl(esc(cfg.template).replace(/&quot;/g,'"'), it, true)}</div>`;
+  const pay = $('#d-pay'); if (pay) pay.innerHTML = json(payload(it));
+  const to = $('#d-to'); if (to) to.textContent = cfg.timeoutH+'h';
+  const thr = $('#d-thr'); if (thr) thr.textContent = pct(cfg.threshold);
+  const rt = $('#d-routes');
+  if (rt) rt.innerHTML = ITEMS.map(i=>{ const c = cand(i), r = routeOwner(i);
+    return `<div class="route"><span class="rid">${i.id}</span><span class="rt"><b>${esc(i.title)}</b><small>${c?esc(c.name)+' · '+pct(c.confidence)+(c.confirmed?' · confirmed':''):'no candidate'}</small></span><span class="pill ${r}">${r==='yes'?'Yes':'No'}</span></div>`; }).join('');
+  renderSugg();
+}
+function runHTML(n){
+  const st = run && run.byNode[n.id];
+  if (!st) return `<div class="empty">${ic('play')}<p>${run ? `This node wasn’t on ${run.itemId}’s path.` : 'Not run yet.'}<br>Pick a test item below and press <b>Run test</b>.</p></div>`;
+  const colors = {done:'var(--teal)', skipped:'var(--text-3)', warn:'var(--danger)', waiting:'var(--primary-hover)'};
+  const labels = {done:'Done', skipped:'Skipped', warn:'Done with warning', waiting:'Waiting on you'};
+  return `${run.ver!==cfgVer?`<div class="stale">${ic('alert')}Config changed after this run. Re-run to test the new version.</div>`:''}
+    <div class="runhead"><div style="flex:1"><div class="rs" style="color:${colors[st.status]}">${labels[st.status]}</div><p>${esc(st.reason)}</p>
+      ${st.status==='waiting' && st.choices ? `<div class="choices">${st.choices.map((ch,i)=>`<button class="btn sm ${ch.primary?'primary':''}" data-choice="${i}">${ic(ch.icon)}${esc(ch.label)}</button>`).join('')}</div>`:''}
+      ${st.resolved ? `<p style="color:var(--text-2)">→ ${esc(st.resolved)}</p>`:''}</div></div>
+    <div class="field"><div class="flabel">Input</div><pre class="json">${json(st.input)}</pre></div>
+    <div class="field"><div class="flabel">Output ${st.port && cat(n).outs.length>1 ? `<span class="pill ${branchClass(st.port)}">${esc((cat(n).outs.find(p=>p.id===st.port)||{}).label||'')}</span>`:''}</div><pre class="json">${st.status==='waiting'?'// waiting for a person':json(st.output)}</pre></div>
+    <div class="meta"><span>Test item ${run.itemId}</span><span>Config v2.5.${run.ver}</span>${st.ms?`<span>${st.ms}ms simulated</span>`:''}</div>`;
+}
+function bindRun(){ insp.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>resolveWait(+b.dataset.choice)); }
+
+/* ---------------- simulation ---------------- */
+let timer = null;
+function startRun(mode){
+  clearTimeout(timer);
+  const trig = nodes.find(n=>n.t==='transcript') || nodes.find(n=>!cat(n).ins.length);
+  run = {itemId:testItem, ver:cfgVer, steps:[], byNode:{}, edges:[], lastEdge:null, cursor:trig?trig.id:null, input:null, state:'running', mode, warn:false};
+  deployed = false;
+  renderCanvas(); renderSim(); renderBanner();
+  if (mode==='auto') timer = setTimeout(tick, 350); else stepOnce();
+}
+function tick(){ stepOnce(); if (run && run.state==='running' && run.mode==='auto') timer = setTimeout(tick, 700); }
+function stepOnce(){
+  if (!run || run.state!=='running') return;
+  const n = node(run.cursor);
+  if (!n){ finish(); return; }
+  const r = exec(n, item(run.itemId), run.input);
+  run.byNode[n.id] = r; run.steps.push(n.id);
+  if (r.status==='warn') run.warn = true;
+  if (r.status==='waiting'){
+    run.state = 'waiting';
+    sel = n.id; tab = 'run';
+    renderAll(); return;
+  }
+  advance(n, r.port, r.output);
+  renderAll();
+  ensureVisible(run && run.cursor);
+}
+function ensureVisible(id){
+  const n = id && node(id); if (!n) return;
+  const r = scroller.getBoundingClientRect();
+  const x0 = n.x*z, x1 = (n.x+NW)*z, y0 = n.y*z + OFFY, y1 = (n.y+NH+90)*z + OFFY;
+  const L = scroller.scrollLeft, T = scroller.scrollTop;
+  let nl = L, nt = T;
+  if (x1 > L + r.width - 40) nl = x1 - r.width + 80; else if (x0 < L + 20) nl = x0 - 40;
+  if (y1 > T + r.height - 20) nt = y1 - r.height + 40; else if (y0 < T + OFFY) nt = y0 - OFFY - 10;
+  if (nl!==L || nt!==T) scroller.scrollTo({left:nl, top:nt, behavior:'smooth'});
+}
+function advance(n, port, output){
+  if (port && cat(n).outs.length>1) cov.add(n.id+':'+port);
+  const e = port ? edges.find(e=>e.f===n.id && e.fp===port) : null;
+  if (!e){
+    if (port && cat(n).outs.length && cat(n).outs.some(p=>p.id===port) && cat(n).outs.length>1){
+      run.byNode[n.id].status = 'warn'; run.byNode[n.id].reason += ` · but the ${port} branch isn’t wired, so the run stops here`; run.warn = true;
+    }
+    finish(); return;
+  }
+  run.edges.push(e.id); run.lastEdge = e.id;
+  run.cursor = e.t; run.input = output;
+}
+function resolveWait(i){
+  if (!run || run.state!=='waiting') return;
+  const n = node(run.cursor), st = run.byNode[n.id], ch = st.choices[i];
+  st.status = 'done'; st.port = ch.port; st.output = ch.output; st.resolved = ch.note; st.reason = st.reason.replace(/^Waiting/, 'Waited');
+  run.state = 'running';
+  advance(n, ch.port, ch.output);
+  renderAll();
+  if (run.state==='running' && run.mode==='auto') timer = setTimeout(tick, 600);
+}
+function finish(){
+  run.state = 'done'; run.lastEdge = null;
+  if (!run.warn && run.ver===cfgVer) passVer = cfgVer;
+  const it = item(run.itemId);
+  toast(run.warn ? `Test ${it.id} finished with a warning. Check the highlighted node.` : `Test ${it.id} passed · ${run.steps.length} nodes`, null, run.warn);
+}
+function resetRun(){ clearTimeout(timer); run = null; renderAll(); }
+function setTestItem(id){
+  testItem = id;
+  if (run && run.state!=='done'){ clearTimeout(timer); run = null; }
+  renderAll();
+}
+function renderAll(){ renderCanvas(); renderSim(); renderInspector(); }
+
+/* ---------------- simulator bar ---------------- */
+function renderSim(){
+  // timeline
+  const tl = $('#timeline');
+  if (run && run.steps.length){
+    tl.className = 'timeline';
+    tl.innerHTML = `<span class="tlh">Test ${run.itemId}${run.ver!==cfgVer?' · <b style="color:var(--danger)">stale</b>':''}</span>` + run.steps.map((id,i)=>{
+      const n = node(id), st = run.byNode[id]; if(!n||!st) return '';
+      return `${i?`<span class="tlarrow">→</span>`:''}<button class="tl s-${st.status}" data-node="${id}"><span class="d"></span><b>${esc(title(n))}</b><span>${esc(st.resolved||st.reason)}</span></button>`;
+    }).join('');
+    tl.querySelectorAll('.tl').forEach(b=>b.onclick=()=>{ sel=b.dataset.node; tab='run'; selEdge=null; renderAll(); renderSugg(); });
+    const last = tl.lastElementChild; if (last) last.scrollIntoView({block:'nearest', inline:'end'});
+  } else { tl.className=''; tl.innerHTML=''; }
+
+  // controls
+  const cks = checks(), okN = cks.filter(c=>c.ok).length, allOk = okN===cks.length;
+  let status = ['','Simulator ready'];
+  if (run){
+    if (run.state==='running') status = ['running', `Running ${run.itemId} · step ${run.steps.length+1}`];
+    else if (run.state==='waiting') status = ['waiting', `Paused on ${title(node(run.cursor))}`];
+    else status = run.warn ? ['warn', `${run.itemId} finished with a warning`] : ['', `${run.itemId} passed`];
+  }
+  const busy = run && run.state==='running' && run.mode==='auto';
+  $('#simrow').innerHTML = `
+    <span class="status ${status[0]}"><span class="d"></span>${esc(status[1])}</span>
+    <div class="seg" role="radiogroup" aria-label="Test item">${ITEMS.map(i=>`<button class="st-${i.state} ${i.id===testItem?'on':''}" data-item="${i.id}" title="${esc(i.title)}"><span class="sid">${i.id}</span><small>${stateLabel(i.state)}</small></button>`).join('')}</div>
+    <button class="btn dark" id="runBtn" ${busy?'disabled':''}>${ic('play2')}Run test</button>
+    <button class="btn" id="stepBtn" ${run&&run.state==='waiting'?'disabled':''}>${ic('step')}Step</button>
+    ${run?`<button class="btn ghost" id="resetBtn">${ic('reset')}Reset</button>`:''}
+    <span class="spacer"></span>
+    <button class="checksbtn" id="checksBtn" aria-expanded="false"><span class="meter">${cks.map(c=>`<i class="${c.ok?'ok':''}"></i>`).join('')}</span>Deploy checks ${okN}/${cks.length}</button>
+    <button class="btn primary deploy" id="deployBtn" ${allOk && !deployed?'':'aria-disabled="true" style="opacity:.5"'}>${ic('rocket')}${deployed?'Deployed':'Deploy v2.5'}</button>`;
+  $('#simrow').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>setTestItem(b.dataset.item));
+  $('#runBtn').onclick = ()=>startRun('auto');
+  $('#stepBtn').onclick = ()=>{ if (!run || run.state==='done' || run.itemId!==testItem || run.mode!=='step'){ startRun('step'); } else stepOnce(); };
+  if ($('#resetBtn')) $('#resetBtn').onclick = resetRun;
+  $('#checksBtn').onclick = e=>{ e.stopPropagation(); togglePop(); };
+  $('#deployBtn').onclick = e=>{ e.stopPropagation(); if (allOk && !deployed) doDeploy(); else togglePop(true); };
+  renderPop();
+}
+function renderPop(){
+  const cks = checks();
+  $('#pop').innerHTML = `<h4>Before this goes live</h4><p>Deploy unlocks when the current config has passed a test and every branch has been tried.</p>` +
+    cks.map(c=>`<div class="check ${c.ok?'ok':''}"><span class="cb">${c.ok?ic('check'):''}</span><span>${esc(c.t)}</span></div>`).join('');
+}
+function togglePop(force){ const p = $('#pop'); p.classList.toggle('on', force===true ? true : !p.classList.contains('on')); }
+function doDeploy(){
+  deployed = true;
+  const flagged = FLAGGED;
+  const desc = it => walk(it).nodes.map(id=>node(id)).filter(n=>!['transcript','extractor','matcher'].includes(n.t)).map(n=>{
+    if (n.t==='ownerFound') return routeOwner(it)==='yes' ? 'owner found' : 'no owner';
+    if (n.t==='slack') return 'DM '+recipient(it);
+    if (n.t==='wait') return `waits ${cfg.timeoutH}h`;
+    if (n.t==='approval') return it.state==='awaiting-confirmation' ? `waits for ${it.owner}` : 'your sign-off';
+    return title(n);
+  }).join(' → ');
+  $('#modalBody').innerHTML = `<h3><span class="ok">${ic('check')}</span>Action Item Tracking v2.5 is live</h3>
+    <p>Step 3 resumed. Here is what happens next to the ${flagged.length} items that were stuck:</p>
+    ${flagged.map(it=>`<div class="route"><span class="rid">${it.id}</span><span class="rt"><b>${esc(it.title)}</b><small>${esc(desc(it))}</small></span><span class="pill ${routeOwner(it)}">${stateLabel(it.state)}</span></div>`).join('')}
+    <div class="acts"><button class="btn" id="mClose">Stay on canvas</button><a class="btn primary" href="workflow.html">Back to Action Item Tracking</a></div>`;
+  $('#modal').classList.add('on');
+  $('#mClose').onclick = ()=>$('#modal').classList.remove('on');
+  renderAll(); renderBanner();
+}
+
+/* ---------------- toast ---------------- */
+let toastT = null;
+function toast(msg, action, bad){
+  const t = $('#toast');
+  t.className = 'toast on' + (bad?' bad':'');
+  t.innerHTML = `<span>${esc(msg)}</span>${action?`<button id="tAct">${esc(action.label)}</button>`:''}`;
+  if (action) $('#tAct').onclick = ()=>{ action.fn(); t.classList.remove('on'); };
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('on'), action?5000:2800);
+}
+
+/* ---------------- canvas interactions ---------------- */
+function wpt(e){ const r = world.getBoundingClientRect(); return {x:(e.clientX-r.left)/z, y:(e.clientY-r.top)/z}; }
+let drag = null;
+scroller.addEventListener('mousedown', e=>{
+  if (e.button!==0) return;
+  const t = e.target;
+  if (t.closest('.waitbar')) return;
+  const outPort = t.closest('.port.out');
+  if (outPort){ e.preventDefault(); startConnect(outPort, e); return; }
+  const nd = t.closest('.node');
+  if (nd){
+    e.preventDefault();
+    const n = node(nd.dataset.node), p = wpt(e);
+    drag = {kind:'node', n, el:nd, dx:p.x-n.x, dy:p.y-n.y, moved:false, sx:e.clientX, sy:e.clientY};
+    return;
+  }
+  const hit = t.closest('.hit');
+  if (hit){ selEdge = hit.dataset.edge; renderCanvas(); toast('Connection selected · press Delete to remove'); return; }
+  const sh = t.closest('.stage-h');
+  if (sh){ const s = STAGES[+sh.dataset.stage-1]; frameCols(s.cols[0], s.cols[1]); return; }
+  if (selEdge){ selEdge = null; renderCanvas(); }
+  drag = {kind:'pan', sx:e.clientX, sy:e.clientY, sl:scroller.scrollLeft, st:scroller.scrollTop};
+  scroller.classList.add('panning');
+});
+scroller.addEventListener('click', e=>{
+  const b = e.target.closest('.waitbar [data-choice]');
+  if (b) resolveWait(+b.dataset.choice);
+});
+window.addEventListener('mousemove', e=>{
+  if (!drag) return;
+  if (drag.kind==='pan'){ scroller.scrollLeft = drag.sl-(e.clientX-drag.sx); scroller.scrollTop = drag.st-(e.clientY-drag.sy); return; }
+  if (drag.kind==='node'){
+    if (!drag.moved && Math.hypot(e.clientX-drag.sx, e.clientY-drag.sy) < 4) return;
+    if (!drag.moved){ drag.moved = true; drag.el.classList.add('dragging'); }
+    const p = wpt(e);
+    drag.n.x = Math.round((p.x-drag.dx)/4)*4; drag.n.y = Math.max(76, Math.round((p.y-drag.dy)/4)*4);
+    renderCanvas();
+    const el = world.querySelector(`.node[data-node="${drag.n.id}"]`); if (el) el.classList.add('dragging');
+    return;
+  }
+  if (drag.kind==='connect') moveConnect(e);
+});
+window.addEventListener('mouseup', e=>{
+  if (!drag) return;
+  const d = drag; drag = null;
+  scroller.classList.remove('panning');
+  if (d.kind==='node'){
+    if (!d.moved){ sel = d.n.id; selEdge = null; tab = (run && run.byNode[d.n.id]) ? tab : 'config'; renderAll(); renderSugg(); }
+    else { $('#saveState').textContent = 'Draft saved · just now'; renderCanvas(); }
+  }
+  if (d.kind==='connect') endConnect(e, d);
+});
+
+/* drag-to-connect with live type validation */
+function startConnect(portEl, e){
+  const n = node(portEl.dataset.node), pid = portEl.dataset.port, type = portEl.dataset.type;
+  drag = {kind:'connect', n, pid, type, from: portPos(n,'out',portIdx(n,'out',pid))};
+  world.classList.add('connecting');
+  world.querySelectorAll('.port.in').forEach(p=>{
+    const ok = compat(type, p.dataset.type) && p.dataset.node!==n.id;
+    p.classList.add(ok?'ok':'no');
+    if (!ok) p.closest('.node').classList.add('tgt-no');
+  });
+  moveConnect(e);
+}
+function moveConnect(e){
+  const p = wpt(e), te = document.getElementById('tempEdge');
+  if (!te) return;
+  te.style.display = '';
+  te.setAttribute('d', edgePath(drag.from, p).d);
+  const over = document.elementFromPoint(e.clientX, e.clientY);
+  const inp = over && over.closest('.port.in');
+  te.classList.toggle('bad', !!(inp && inp.classList.contains('no')));
+}
+function bridge(outT, inT){
+  return Object.keys(CAT).find(k=>CAT[k].ins.length && compat(outT, CAT[k].ins[0].type) && CAT[k].outs.some(p=>compat(p.type, inT)));
+}
+function endConnect(e, d){
+  world.classList.remove('connecting');
+  const over = document.elementFromPoint(e.clientX, e.clientY);
+  const inp = over && over.closest('.port.in');
+  if (!inp){ renderCanvas(); return; }
+  const tn = node(inp.dataset.node), inT = inp.dataset.type;
+  if (tn.id===d.n.id){ toast('A node can’t connect to itself', null, true); renderCanvas(); return; }
+  if (!compat(d.type, inT)){
+    const b = bridge(d.type, inT);
+    toast(`${title(tn)} expects ${TYPES[inT].l}, but ${title(d.n)} sends ${TYPES[d.type].l}.${b?` Try putting ${CAT[b].name} between them.`:''}`, null, true);
+    renderCanvas(); return;
+  }
+  if (edges.some(x=>x.f===d.n.id && x.fp===d.pid && x.t===tn.id)){ toast('Already connected'); renderCanvas(); return; }
+  // one edge per output port: rewire if the port was already used
+  const prev = edges.find(x=>x.f===d.n.id && x.fp===d.pid);
+  undoSnap = snapshot();
+  if (prev) edges = edges.filter(x=>x!==prev);
+  edges.push({id:'e'+(++eseq), f:d.n.id, fp:d.pid, t:tn.id});
+  const lbl = (cat(d.n).outs.find(p=>p.id===d.pid)||{}).label;
+  configChanged(`${prev?'Rewired':'Connected'} ${title(d.n)}${lbl?' · '+lbl:''} → ${title(tn)}`, true);
+  renderInspector();
+}
+
+/* library drag & click */
+const lib = document.querySelector('.lib');
+lib.addEventListener('click', e=>{
+  const b = e.target.closest('.libitem'); if (!b) return;
+  $('#pcard').classList.remove('on');
+  addNode(b.dataset.key, null, null, CAT[b.dataset.key].ins.length ? sel : null);
+});
+lib.addEventListener('mouseover', e=>{ const b = e.target.closest('.libitem'); if (b) showCard(b); });
+lib.addEventListener('mouseout', e=>{ const b = e.target.closest('.libitem'); if (b && !b.contains(e.relatedTarget)) $('#pcard').classList.remove('on'); });
+lib.addEventListener('focusin', e=>{ const b = e.target.closest('.libitem'); if (b) showCard(b); });
+lib.addEventListener('focusout', ()=>$('#pcard').classList.remove('on'));
+lib.addEventListener('dragstart', e=>{
+  const b = e.target.closest('.libitem'); if (!b) return;
+  e.dataTransfer.setData('text/plain', b.dataset.key); e.dataTransfer.effectAllowed = 'copy';
+  $('#pcard').classList.remove('on');
+});
+scroller.addEventListener('dragover', e=>{ e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+scroller.addEventListener('drop', e=>{
+  e.preventDefault();
+  const key = e.dataTransfer.getData('text/plain'); if (!CAT[key]) return;
+  const p = wpt(e);
+  addNode(key, p.x-NW/2, p.y-NH/2, null);
+});
+$('#q').addEventListener('input', renderLib);
+
+/* toolbar etc. */
+$('#zIn').onclick = ()=>setZoom(z*1.15);
+$('#zOut').onclick = ()=>setZoom(z/1.15);
+$('#zFit').onclick = fitAll;
+$('#zFocus').onclick = showProblem;
+$('#tidy').onclick = ()=>{
+  const d = defaultGraph(), extra = [];
+  nodes.forEach(n=>{ const dn = d.nodes.find(x=>x.id===n.id); if (dn){ n.x = dn.x; n.y = dn.y; } else extra.push(n); });
+  extra.forEach((n,i)=>{ n.x = colX(1 + (i%6)); n.y = laneY(3) + Math.floor(i/6)*LANEH; });
+  fitAll(); toast('Laid out left to right by pipeline step');
+};
+scroller.addEventListener('wheel', e=>{
+  if (!e.ctrlKey && !e.metaKey) return;
+  e.preventDefault();
+  const r = scroller.getBoundingClientRect();
+  setZoom(z * (e.deltaY<0 ? 1.08 : 1/1.08), e.clientX-r.left, e.clientY-r.top);
+}, {passive:false});
+document.addEventListener('keydown', e=>{
+  const tag = (e.target.tagName||'').toLowerCase();
+  if (['input','textarea','select'].includes(tag)) return;
+  if (e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); deleteSelection(); }
+  if (e.key==='Escape'){ $('#pop').classList.remove('on'); $('#modal').classList.remove('on'); if (selEdge){ selEdge=null; renderCanvas(); } }
+});
+document.addEventListener('click', e=>{ if (!e.target.closest('#pop') && !e.target.closest('#checksBtn') && !e.target.closest('#deployBtn')) $('#pop').classList.remove('on'); });
+$('#navToggle').onclick = ()=>$('#nav').classList.toggle('collapsed');
+$('#modal').addEventListener('click', e=>{ if (e.target.id==='modal') $('#modal').classList.remove('on'); });
+
+/* ---------------- boot ---------------- */
+$('#uname').textContent = MF.user.name; $('#utier').textContent = MF.user.tier;
+$('#avatar').textContent = MF.user.name.split(' ').map(s=>s[0]).join('');
+$('#crumbGoal').textContent = MF.goal.title;
+renderLegend(); renderBanner(); renderLib(); renderInspector(); renderSim();
+renderCanvas();
+requestAnimationFrame(()=>frameCols(2, 5));
+window.addEventListener('resize', ()=>renderCanvas());
+})();
+</script>
+</body>
+</html>
