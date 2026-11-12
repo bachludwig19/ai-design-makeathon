@@ -178,7 +178,7 @@ body[data-page="home"] .intro{margin:44px 0 6px}
 .brand-mark{background:url(img/logo-mark.svg) center/contain no-repeat;color:transparent;font-size:0;width:36px;height:36px;border-radius:0}
 
 /* ---------- not wired in the demo: greyed out, not clickable (matches canvas .off) ---------- */
-.off{opacity:.35;cursor:not-allowed}
+.off{opacity:.35!important;filter:grayscale(1);cursor:not-allowed}
 .off:hover{transform:none;background:var(--frame-bg,transparent)}
 .nav-link.off:hover{background:transparent}
 .wf.off:hover{box-shadow:var(--frame-sh)}
