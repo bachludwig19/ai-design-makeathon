@@ -1,14 +1,17 @@
-/* MeetFlow Alpine shared design tokens — "Maison · Vitrine" brand (chosen by the user in the brand picker, 2026-11-11).
-   Gallery-white, black lacquer, brass hairlines, verdure-teal agent; colour comes from imagery. All screens use these. */
+/* MeetFlow Alpine shared design tokens — "Aurora glass" (chosen by the user, 2026-11-12; replaces Maison · Vitrine).
+   Light aurora mesh behind frosted-glass panels; violet primary, teal success, coral at-risk. All screens use these. */
 :root{
-  --bg:#FFFFFF; --surface:#F7F7F6; --card:#FFFFFF; --sidebar:#FFFFFF;
-  --line:#E6E6E4; --text:#111111; --text-2:#55534F; --text-3:#8E8C88;
-  --primary:#111111; --primary-hover:#2B2B2B; --primary-soft:#F3F1EC;
-  --teal:#1F5E5A; --teal-soft:#E3EEEC; --risk:#C99400; --risk-soft:#FAF1DA;
-  --danger:#C41E3A; --dark:#111111;
-  --gold:#A07B3A; --gold-rgb:160,123,58;
-  --radius:4px; --radius-sm:3px; --shadow:0 1px 2px rgba(17,17,17,.03),0 30px 56px -34px rgba(40,25,10,.32);
-  --font:'Manrope',system-ui,-apple-system,sans-serif; --display:'Archivo',system-ui,sans-serif;
+  --bg:#EEF0FF; --surface:rgba(255,255,255,.55); --card:#FFFFFF; --sidebar:rgba(255,255,255,.55);
+  --line:rgba(109,93,252,.14); --text:#1B1838; --text-2:#56536F; --text-3:#8B88A3;
+  --primary:#5B3DF5; --primary-hover:#4A2CE0; --primary-soft:#EEEBFF;
+  --violet:#5B3DF5; --violet-2:#7B5CFF; --peach:#FF7A45; --magenta:#D63CF0;
+  --teal:#00B3A4; --teal-ink:#007A70; --teal-soft:#DDF7F3; --risk:#FF7A45; --risk-ink:#C2410C; --risk-soft:#FFE9E2;
+  --danger:#E5484D; --dark:#1E1B3A;
+  --gold:#5B3DF5; --gold-rgb:91,61,245; /* legacy names: accents that used brass now use violet */
+  --glass:rgba(255,255,255,.6); --glass-line:rgba(255,255,255,.8);
+  --radius:16px; --radius-sm:12px;
+  --shadow:inset 0 1px 0 rgba(255,255,255,.9),0 18px 40px -18px rgba(76,60,200,.28);
+  --font:'Manrope',system-ui,-apple-system,sans-serif; --display:'Manrope',system-ui,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);}
